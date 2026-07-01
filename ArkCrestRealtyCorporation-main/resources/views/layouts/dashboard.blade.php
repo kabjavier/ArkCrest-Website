@@ -1527,6 +1527,62 @@
     <form id="_autoLogoutForm" method="POST" action="{{ route('logout') }}" style="display:none;">
         @csrf
     </form>
+    <script>
+(function() {
+    function forceLogoutForStaleSession(message) {
+        if (window.__forcingLogout) return;
+        window.__forcingLogout = true;
+        alert(message || 'For your security, this session is no longer active. You will be logged out.');
+        var form = document.getElementById('_autoLogoutForm');
+        if (form) {
+            form.submit();
+        } else {
+            window.location.href = '{{ route('login') }}';
+        }
+    }
+
+    // Fires when a page is restored from bfcache (e.g. pressing Back)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            checkSessionStillValid();
+        }
+    });
+
+    // Also re-check when the tab regains focus (covers logout-in-another-tab)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            checkSessionStillValid();
+        }
+    });
+
+    function checkSessionStillValid() {
+        fetch('{{ route('session.check') }}', {
+            method: 'GET',
+            credentials: 'same-origin',
+            cache: 'no-store',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.authenticated) {
+                forceLogoutForStaleSession('You have been logged out. Please log in again to continue.');
+            }
+        })
+        .catch(function() { /* ignore network hiccups, don't false-positive logout */ });
+    }
+})();
+</script>
+@if(request()->routeIs('dashboard'))
+<script>
+(function() {
+    history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', function() {
+        history.pushState(null, '', window.location.href);
+        alert('Please log out first before leaving this page.');
+    });
+})();
+</script>
+@endif
 
 <script>
 // Auto-add tbl-scroll class to all overflow-x divs for scrollbar styling

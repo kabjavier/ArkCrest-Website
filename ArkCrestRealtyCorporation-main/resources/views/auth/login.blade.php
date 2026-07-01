@@ -814,5 +814,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script>
+(function() {
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            fetch('{{ route('session.check') }}', {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.authenticated) {
+                    window.location.replace('{{ route('dashboard') }}');
+                }
+            })
+            .catch(function() { /* ignore network hiccups */ });
+        }
+    });
+})();
+</script>
 </body>
 </html>
