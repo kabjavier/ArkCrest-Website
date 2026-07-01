@@ -1,0 +1,207 @@
+/* Optimized Global Styles - Consolidated for Performance */
+
+/* SVG Icons */
+.icon-sm { width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.icon-md { width: 24px; height: 24px; }
+.icon-lg { width: 28px; height: 28px; }
+
+/* Department Icons */
+.dept-icon svg { width: 24px; height: 24px; }
+
+/* Animations - Use CSS transforms for better performance */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translate3d(0, 20px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
+    will-change: transform, opacity;
+}
+
+/* Staggered animations */
+.dept-item-modern:nth-child(1) { animation-delay: 0s; }
+.dept-item-modern:nth-child(2) { animation-delay: 0.1s; }
+.dept-item-modern:nth-child(3) { animation-delay: 0.2s; }
+.dept-item-modern:nth-child(4) { animation-delay: 0.3s; }
+.dept-item-modern:nth-child(5) { animation-delay: 0.4s; }
+.dept-item-modern:nth-child(6) { animation-delay: 0.5s; }
+
+/* Smooth transitions */
+.smooth-transition {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hardware acceleration */
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Reduce repaints */
+* {
+    box-sizing: border-box;
+}
+
+/* Optimize hover effects */
+.hover-lift:hover {
+    transform: translateY(-2px) translateZ(0);
+}
+
+/* Budget display spacing */
+.budget-display-spacing { margin-top: 8px; }
+.budget-value-success { color: #27ae60; }
+
+/* Dropdown styles */
+.combobox-dropdown { display: none; }
+.combobox-dropdown.show { display: block; }
+
+/* Table header flex */
+.table-header-flex {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.table-title-section {
+    margin-bottom: 15px;
+}
+
+.table-title-lg {
+    margin: 0;
+    font-size: 24px;
+}
+
+.table-filters-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.filter-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #1e4575;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* Form readonly */
+.form-readonly {
+    background-color: #f4f6f8;
+}
+
+/* ── Horizontal Table Scroll ── */
+/* All table wrappers: always show horizontal scrollbar so users can scroll on PC */
+[style*="overflow-x:auto"],
+[style*="overflow-x: auto"],
+.tbl-wrap,
+.table-wrapper,
+.table-container,
+.arc-table-wrap,
+.st-card-body[style*="overflow-x"] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Make the scrollbar always visible and styled nicely */
+[style*="overflow-x:auto"]::-webkit-scrollbar,
+[style*="overflow-x: auto"]::-webkit-scrollbar,
+.tbl-wrap::-webkit-scrollbar,
+.table-wrapper::-webkit-scrollbar,
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+[style*="overflow-x:auto"]::-webkit-scrollbar-track,
+[style*="overflow-x: auto"]::-webkit-scrollbar-track,
+.tbl-wrap::-webkit-scrollbar-track,
+.table-wrapper::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+[style*="overflow-x:auto"]::-webkit-scrollbar-thumb,
+[style*="overflow-x: auto"]::-webkit-scrollbar-thumb,
+.tbl-wrap::-webkit-scrollbar-thumb,
+.table-wrapper::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+[style*="overflow-x:auto"]::-webkit-scrollbar-thumb:hover,
+[style*="overflow-x: auto"]::-webkit-scrollbar-thumb:hover,
+.tbl-wrap::-webkit-scrollbar-thumb:hover,
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ===== Universal scroll safety net ===== */
+/* Catches ANY table on ANY page, even if a developer forgot to wrap it,
+   so data is always reachable via scroll instead of getting clipped. */
+.auto-scroll-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 75vh;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .auto-scroll-wrap {
+        max-height: 65vh;
+    }
+}
+
+/* Recognized wrapper classes get BOTH directions + a capped height,
+   so tall tables/sections scroll instead of pushing the page layout apart */
+.tbl-wrap, .table-wrapper, .table-container, .tbl-scroll,
+.requests-table-container, .content-section {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 75vh;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar so it's visible and consistent everywhere (not just expenses page) */
+.tbl-wrap::-webkit-scrollbar, .table-wrapper::-webkit-scrollbar,
+.table-container::-webkit-scrollbar, .tbl-scroll::-webkit-scrollbar,
+table::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.tbl-wrap::-webkit-scrollbar-track, .table-wrapper::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track, .tbl-scroll::-webkit-scrollbar-track,
+table::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.tbl-wrap::-webkit-scrollbar-thumb, .table-wrapper::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb, .tbl-scroll::-webkit-scrollbar-thumb,
+table::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #A37929, #d4a03a);
+    border-radius: 10px;
+}
+
+/* On mobile, cap height a bit more aggressively so a tall table never eats the whole screen */
+@media (max-width: 768px) {
+    .tbl-wrap, .table-wrapper, .table-container, .tbl-scroll,
+    .requests-table-container, .content-section {
+        max-height: 65vh;
+    }
+}
