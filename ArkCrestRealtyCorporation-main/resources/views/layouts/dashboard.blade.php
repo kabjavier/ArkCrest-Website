@@ -87,7 +87,7 @@
                             <span class="hdr-badge hdr-badge-gold">{{ $userNotes->count() > 9 ? '9+' : $userNotes->count() }}</span>
                             @endif
                         </button>
-                        <div id="notesPanel" style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;background:white;border-radius:10px;box-shadow:0 4px 20px rgba(30,69,117,.15);border:1.5px solid #e2e8f0;z-index:9999;overflow:hidden;">
+                        <div id="notesPanel" class="notes-panel" style="display:none;">
                             <div style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:15px;height:15px;flex-shrink:0;">
@@ -809,6 +809,9 @@
         }
     </script>
     <script src="{{ asset('js/sidebar-toggle.js') }}?v={{ time() }}"></script>
+    <!-- Mobile hamburger drawer logic lives in one place only: js/sidebar-toggle.js
+         (a second, duplicate handler used to live here — it canceled the one in
+         sidebar-toggle.js on every click, which is why the menu sometimes wouldn't open.) -->
     <script src="{{ asset('js/sidebar-active.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/global-search.js') }}?v={{ time() }}"></script>
 
