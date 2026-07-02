@@ -17,12 +17,26 @@ class FormsController extends Controller
             ->orderBy('requestor_name')
             ->pluck('requestor_name')
             ->toArray();
-        return view('forms', compact('departments', 'requestorNames'));
+
+        // Data needed for the Site Visit Form tab
+        try {
+            $teams = \App\Models\SalesTeam::orderBy('team_name')->pluck('team_name');
+        } catch (\Exception $e) {
+            $teams = collect();
+        }
+        try {
+            $properties = \Schema::hasTable('properties') ? \App\Models\Property::orderBy('name')->get() : collect();
+        } catch (\Exception $e) {
+            $properties = collect();
+        }
+
+        return view('forms', compact('departments', 'requestorNames', 'teams', 'properties'));
     }
 
     public function siteVisit()
     {
-        return view('forms-site-visit');
+        // Site Visit Form now lives as a tab inside the main Forms page
+        return redirect()->route('forms', ['tab' => 'site-visit']);
     }
 
     public function nextControlNumber(Request $request)

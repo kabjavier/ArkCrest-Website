@@ -135,67 +135,6 @@ body{display:flex;align-items:center;justify-content:center;background:linear-gr
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes btnShimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.08);opacity:.25}}
-
-/* ============================================================
-   RESPONSIVE — below 700px the two side-by-side columns
-   (branding overlay + form) get too narrow to use, so they
-   stack vertically instead and the page becomes scrollable.
-   ============================================================ */
-@media (max-width: 700px) {
-    html,body{height:auto;min-height:100%;overflow-y:auto;overflow-x:hidden}
-    body{align-items:flex-start;justify-content:flex-start;padding:20px 12px}
-    .card{
-        width:100%;
-        max-width:440px;
-        height:auto;
-        min-height:auto;
-        flex-direction:column;
-        margin:0 auto;
-        box-shadow:0 20px 60px rgba(0,0,0,.4);
-    }
-    .overlay{
-        position:static;
-        width:100%;
-        height:auto;
-        padding:26px 22px;
-        transform:none!important;
-        gap:16px;
-    }
-    .overlay::before{display:none}
-    .brand-logo{width:52px;height:52px}
-    .brand-name{font-size:18px}
-    .ov-eyebrow{font-size:15px;margin-bottom:4px}
-    .ov-body h2{font-size:13px;white-space:normal}
-    .ov-body p{font-size:12px;margin-bottom:16px}
-    .ov-footer{font-size:9px}
-    .forms-area{
-        position:static;
-        width:100%;
-        height:auto;
-        transform:none!important;
-        border-left:none;
-        border-top:1px solid rgba(30,69,117,.08);
-    }
-    .form-panel{
-        position:static;
-        width:100%;
-        height:auto;
-        padding:26px 22px;
-        transform:none!important;
-    }
-    /* Both panels used to be stacked via position:absolute + opacity;
-       now that they're static, only one may render at a time. */
-    .form-panel{display:none!important;opacity:1!important;pointer-events:auto!important}
-    .card:not(.reg) .form-signin{display:flex!important}
-    .card.reg .form-register{display:flex!important}
-
-    #loginToast{left:12px!important;right:12px!important;min-width:auto!important;max-width:calc(100vw - 24px)!important}
-}
-@media (max-width: 380px) {
-    .overlay{padding:20px 16px}
-    .form-panel{padding:20px 16px}
-    .brand-name{font-size:16px}
-}
 </style>
 </head>
 <body>
@@ -874,27 +813,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 });
-</script>
-<script>
-(function() {
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            fetch('{{ route('session.check') }}', {
-                method: 'GET',
-                credentials: 'same-origin',
-                cache: 'no-store',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.authenticated) {
-                    window.location.replace('{{ route('dashboard') }}');
-                }
-            })
-            .catch(function() { /* ignore network hiccups */ });
-        }
-    });
-})();
 </script>
 </body>
 </html>

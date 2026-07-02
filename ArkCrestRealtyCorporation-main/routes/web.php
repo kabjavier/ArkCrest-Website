@@ -6,7 +6,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AuthController;
 
 // Auth routes (guests only)
-Route::middleware(['guest', 'no.cache'])->group(function () {
+Route::middleware('guest')->group(function () {
     Route::get('/login',     [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login',    [AuthController::class, 'login'])->name('login.post')->middleware('throttle:5,2');
     Route::get('/register/success', function () {
@@ -47,11 +47,9 @@ Route::post('/', function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/logout', function() { return redirect()->route('login'); });
-Route::get('/api/session-check', [AuthController::class, 'sessionCheck'])->name('session.check');
 
 // Protected routes
-// after
-Route::middleware(['auth', 'no.cache'])->group(function () {
+Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('page.visible');
 

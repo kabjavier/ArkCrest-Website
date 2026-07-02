@@ -76,26 +76,20 @@
     setTimeout(initSidebarToggle, 100);
     setTimeout(initSidebarToggle, 500);
     
-    // Mobile drawer behavior — the ONE and ONLY handler for #mobileMenuToggle.
-    // (Do not add another listener for this button elsewhere — a duplicate
-    // handler here previously canceled this one out on every click.)
+    // Mobile drawer behavior
     function initMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
         const backdrop = document.getElementById('sidebarBackdrop');
         const menuBtn = document.getElementById('mobileMenuToggle');
         if (!sidebar || !backdrop || !menuBtn) return;
-        if (menuBtn.dataset.drawerBound === '1') return; // guard against double-init
-        menuBtn.dataset.drawerBound = '1';
 
         function openDrawer() {
             sidebar.classList.add('mobile-open');
-            backdrop.classList.add('active');
-            document.body.classList.add('drawer-open');
+            backdrop.classList.add('show');
         }
         function closeDrawer() {
             sidebar.classList.remove('mobile-open');
-            backdrop.classList.remove('active');
-            document.body.classList.remove('drawer-open');
+            backdrop.classList.remove('show');
         }
 
         menuBtn.addEventListener('click', function(e) {
@@ -109,13 +103,8 @@
         // Close drawer after tapping a nav link (mobile only)
         sidebar.querySelectorAll('a').forEach(function(link) {
             link.addEventListener('click', function() {
-                if (window.innerWidth <= 1024) closeDrawer();
+                if (window.innerWidth <= 768) closeDrawer();
             });
-        });
-
-        // Close drawer automatically if the window is resized back to desktop width
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 1024) closeDrawer();
         });
     }
 
@@ -124,7 +113,6 @@
     } else {
         initMobileSidebar();
     }
-    setTimeout(initMobileSidebar, 100);
 
     // Auto-wrap any table that doesn't already have a scroll container,
     // so it always gets horizontal/vertical scrollbars instead of being clipped.

@@ -1,4 +1,4 @@
-* {
+{
 margin: 0;
 padding: 0;
 box-sizing: border-box;
@@ -844,18 +844,6 @@ transform: translateY(0);
 .notification-container {
 position: relative;
 }
-.notes-panel {
-position: absolute;
-top: calc(100% + 10px);
-right: 0;
-width: 320px;
-background: white;
-border-radius: 10px;
-box-shadow: 0 4px 20px rgba(30,69,117,.15);
-border: 1.5px solid #e2e8f0;
-z-index: 9999;
-overflow: hidden;
-}
 .notification-btn {
 position: relative;
 }
@@ -922,7 +910,6 @@ border-radius: 20px;
 font-weight: 600;
 color: white;
 }
-.notification-header {
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -1020,7 +1007,6 @@ margin-bottom: 3px;
 line-height: 1.4;
 display: -webkit-box;
 -webkit-line-clamp: 2;
-line-clamp: 2;
 -webkit-box-orient: vertical;
 overflow: hidden;
 }
@@ -1218,16 +1204,82 @@ display: none;
 }
 /* Responsive */
 @media (max-width: 1024px) {
+.sidebar-expanded {
+width: 220px;
+}
     .stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
 }
-/* NOTE: sidebar width/position for phones & tablets is now handled entirely
-   by the single unified mobile-drawer block further down this file — see
-   "RESPONSIVE NAVIGATION — SINGLE SOURCE OF TRUTH". Do not redefine
-   .sidebar / .sidebar-expanded / .sidebar-collapsed positioning in any other
-   @media block; having several breakpoints fight over the same properties
-   was exactly what made the layout differ from device to device. */
+@media (max-width: 768px) {
+.sidebar-expanded {
+width: 200px;
+}
+    .sidebar-collapsed {
+        width: 60px;
+    }
+    
+    .company-name {
+        font-size: 14px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-content {
+        padding: 12px 16px;
+    }
+    
+    .page-content {
+        padding: 20px;
+    }
+    
+    .notification-panel {
+        width: 280px;
+        right: -20px;
+    }
+    
+    .search-input {
+        width: 280px;
+    }
+}
+@media (max-width: 480px) {
+.sidebar-expanded {
+position: fixed;
+z-index: 100;
+height: 100vh;
+}
+    .logo {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .logo span {
+        font-size: 16px;
+    }
+    
+    .company-name {
+        font-size: 14px;
+    }
+    
+    .stat-card {
+        padding: 16px;
+    }
+    
+    .stat-info p:last-child {
+        font-size: 24px;
+    }
+    
+    .notification-panel {
+        width: 260px;
+        right: -40px;
+    }
+    
+    .search-input {
+        width: 260px;
+    }
+}
 
 /* ===============================DASHBOARD CONTENT STYLES================================ */
 /* Grid Layouts */
@@ -3183,8 +3235,10 @@ box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 @keyframes toastSlideOut {
 from { opacity: 1; transform: translateX(0); }
 to   { opacity: 0; transform: translateX(60px); }
+opacity: 0;
+transform: translate(-50%, -50%) scale(0.8);
 }
-
+}
 .custom-toast.hiding {
 animation: toastSlideOut 0.3s ease;
 }
@@ -3530,164 +3584,138 @@ padding-right: 12px !important;
 .sidebar-collapsed .nav-submenu {
 display: none;
 }
-/* ============================================================
-   RESPONSIVE NAVIGATION — SINGLE SOURCE OF TRUTH
-   One breakpoint (1024px) drives the off-canvas sidebar drawer,
-   so behavior is identical on every phone/tablet instead of
-   depending on several breakpoints fighting each other.
-   ============================================================ */
+/* ===== Mobile menu button (hidden on desktop) ===== */
 .mobile-menu-btn {
 display: none;
 background: transparent;
 border: none;
 color: #fff;
 cursor: pointer;
-padding: 6px;
+padding: 4px;
 margin-right: 4px;
-border-radius: 6px;
--webkit-tap-highlight-color: transparent;
-}
-.mobile-menu-btn:active {
-background: rgba(255,255,255,.12);
 }
 .sidebar-backdrop {
 display: none;
 position: fixed;
 inset: 0;
-background: rgba(0,0,0,.5);
-z-index: 499;
-opacity: 0;
-transition: opacity .25s ease;
+background: rgba(0,0,0,.45);
+z-index: 150;
 }
-.sidebar-backdrop.active {
-display: block;
-opacity: 1;
+/* ===== True mobile layout fix ===== */
+@media (max-width: 768px) {
+.mobile-menu-btn {
+display: flex;
+align-items: center;
+justify-content: center;
 }
-body.drawer-open {
-overflow: hidden;
-}
-
-@media (max-width: 1024px) {
-    /* Hamburger visible; desktop collapse-arrow hidden (drawer replaces it) */
-    .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
-    .sidebar-toggle { display: none !important; }
-
-    /* Fixed, consistent header height on every phone/tablet */
-    .header-content { height: 58px; padding: 0 12px; }
-    .content-wrapper { margin-top: 58px; height: calc(100vh - 58px); }
-
-    /* header-left shrinks (via the company name) so header-right — the
-       icon buttons — always has the room it needs and is never clipped,
-       regardless of how narrow the phone is. */
-    .header-content { flex-wrap: nowrap; }
-    .header-left { gap: 8px; min-width: 0; flex: 1 1 auto; overflow: hidden; }
-    .header-right { flex: 0 0 auto; gap: 2px; }
-    .mobile-menu-btn { width: 32px; height: 32px; flex-shrink: 0; }
-    .mobile-menu-btn svg { width: 20px; height: 20px; }
-
-    /* Sidebar becomes a full off-canvas drawer — one mechanism, every device */
-    .sidebar {
-        position: fixed;
-        top: 58px;
-        left: 0;
-        bottom: 0;
-        width: min(280px, 82vw) !important;
-        height: calc(100vh - 58px);
-        transform: translateX(-100%);
-        transition: transform .3s ease;
-        z-index: 500;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    .sidebar.mobile-open {
-        transform: translateX(0);
-        box-shadow: 6px 0 30px rgba(0,0,0,.35);
-    }
-
-    /* Drawer always shows full labels — icon-only "collapsed" state is desktop-only */
-    .sidebar-text,
-    .profile-info,
-    .nav-item span,
-    .logout-btn span {
-        display: inline !important;
-        opacity: 1 !important;
-    }
-    .profile-info { display: flex !important; }
-    .nav-item { justify-content: flex-start !important; padding: 12px 14px !important; }
-    .logout-btn { justify-content: flex-start !important; padding: 12px 14px !important; }
-    .logout-section {
-        padding: 10px !important;
-        border-top: 1px solid rgba(255,255,255,.1);
-    }
-
-    /* Content always takes full width — sidebar no longer pushes it */
+    /* Content always takes full width — this was the bug */
     .sidebar-expanded ~ .main-content,
     .sidebar-collapsed ~ .main-content {
         margin-left: 0 !important;
-        width: 100%;
     }
 
-    .page-content { padding: clamp(14px, 4vw, 22px); }
+    .page-content {
+        padding: 14px;
+    }
+
+    /* Sidebar becomes an off-canvas drawer */
+    .sidebar {
+        width: 260px !important;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 200;
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop.show {
+        display: block;
+    }
+
+    /* Hide the desktop collapse toggle on mobile, drawer handles it */
+    .sidebar-toggle {
+        display: none;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-title {
+        font-size: 20px;
+    }
+
+    /* ===== Fluid scaling fixes — covers all phone sizes, not just one breakpoint ===== */
+
+/* Universal safety net: nothing should ever exceed the screen width */
+@media (max-width: 768px) {
+img, svg, table, .modal, .content-section, .stat-card {
+max-width: 100%;
+}
+    body, html {
+        overflow-x: hidden;
+    }
+
+    /* Search & notification dropdowns: cap width relative to viewport, not fixed px */
+    .search-bar,
+    .notification-panel {
+        width: min(320px, 92vw) !important;
+        right: -10px;
+    }
+
+    /* Fluid type scaling instead of fixed breakpoints jumping around */
+    .company-name { font-size: clamp(12px, 3.8vw, 16px); }
     .section-title { font-size: clamp(18px, 5vw, 24px); }
     .section-subtitle { font-size: clamp(12px, 3vw, 14px); }
-    .content-section { padding: clamp(12px, 4vw, 20px); }
-    .stat-card { padding: clamp(12px, 4vw, 18px); }
-    .stats-grid { grid-template-columns: 1fr; gap: 14px; }
-    .dashboard-grid-3, .dashboard-grid-2 { grid-template-columns: 1fr; }
-    .big-number { font-size: 28px; }
 
-    /* Company name flexes and truncates to whatever space is left AFTER
-       the icon buttons take their fixed space — this is what guarantees
-       the notification bell is never pushed off-screen on small phones. */
-    .company-name {
-        font-size: 13px;
-        flex: 1 1 auto;
-        min-width: 0;
-        max-width: none;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .content-section {
+        padding: clamp(12px, 4vw, 20px);
     }
-    .logo, .logo-img { width: 28px; height: 28px; flex-shrink: 0; }
 
-    /* Icon buttons keep a consistent, tappable, non-shrinking size on
-       every phone — they are reserved space, never squeezed or clipped */
-    .hdr-btn { width: 34px; height: 34px; flex-shrink: 0; }
-    .hdr-btn svg { width: 19px; height: 19px; }
-
-    /* Search / notification / notes dropdowns never overflow the viewport */
-    .search-bar, .notification-panel, .notes-panel {
-        position: fixed !important;
-        top: 58px !important;
-        right: 8px !important;
-        left: auto !important;
-        width: min(320px, 92vw) !important;
+    .stat-card {
+        padding: clamp(12px, 4vw, 18px);
     }
-    .search-input { width: 100% !important; }
 
-    img, svg, table, .modal, .content-section, .stat-card { max-width: 100%; }
-    body, html { overflow-x: hidden; }
+    /* Header shrinks gracefully instead of overflowing */
+    .header-content {
+        padding: 0 clamp(10px, 3vw, 20px);
+        height: 56px;
+    }
+
+    .content-wrapper {
+        margin-top: 56px;
+        height: calc(100vh - 56px);
+    }
+
+    .sidebar {
+        top: 56px;
+    }
+
+    .logo, .logo-img {
+        width: clamp(28px, 8vw, 38px);
+        height: clamp(28px, 8vw, 38px);
+    }
 }
-
-/* Extra-small phones (older iPhones, small Androids ~380px and under) —
-   spacing only, navigation logic above is unchanged */
+/* Extra-small phones (older iPhones, small Androids ~360px and under) */
 @media (max-width: 380px) {
 .page-content { padding: 10px; }
 .section-title { font-size: 17px; }
 .stat-card { padding: 10px; }
-.stats-grid { gap: 10px; }
-.search-bar, .notification-panel, .notes-panel { width: calc(100vw - 16px) !important; right: 6px !important; }
+.stats-grid { gap: 12px; }
+.search-bar, .notification-panel { width: 90vw !important; right: -16px; }
 }
-/* Landscape phones — short viewport height, prevent vertical squashing */
+/* Landscape phones — short viewport height, prevent vertical squashing /
 @media (max-width: 900px) and (max-height: 450px) and (orientation: landscape) {
 .header-content { height: 48px; }
 .content-wrapper { margin-top: 48px; height: calc(100vh - 48px); }
 .sidebar { top: 48px; }
 }
-/* Force scrollbars to always be visible, not just on hover/scroll */
+/ Force scrollbars to always be visible, not just on hover/scroll /
 .auto-scroll-wrap, .tbl-wrap, .table-wrapper, .table-container, .tbl-scroll {
-scrollbar-width: auto;       /* Firefox: show scrollbar always */
-scrollbar-color: #A37929 #f1f1f1; /* Firefox: thumb color / track color */
+scrollbar-width: auto;       / Firefox: show scrollbar always /
+scrollbar-color: #A37929 #f1f1f1; / Firefox: thumb color / track color */
 }
 .auto-scroll-wrap::-webkit-scrollbar,
 .tbl-wrap::-webkit-scrollbar,

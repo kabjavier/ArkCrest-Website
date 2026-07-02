@@ -176,43 +176,7 @@
                     <option value="cancelled">Cancelled</option>
                     <option value="none">No Status</option>
                 </select>
-                <div style="display:flex;align-items:center;gap:6px;">
-                    <label style="font-size:11px;font-weight:700;color:#1e4575;white-space:nowrap;">Reservation Month:</label>
-                    <select id="cdReservationMonthFilter" onchange="cdFilter()" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;">
-                        <option value="">All</option>
-                        <option value="jan">January</option>
-                        <option value="feb">February</option>
-                        <option value="mar">March</option>
-                        <option value="apr">April</option>
-                        <option value="may">May</option>
-                        <option value="jun">June</option>
-                        <option value="jul">July</option>
-                        <option value="aug">August</option>
-                        <option value="sep">September</option>
-                        <option value="oct">October</option>
-                        <option value="nov">November</option>
-                        <option value="dec">December</option>
-                    </select>
-                </div>
-                <div style="display:flex;align-items:center;gap:6px;">
-                    <label style="font-size:11px;font-weight:700;color:#1e4575;white-space:nowrap;">Downpayment Month:</label>
-                    <select id="cdDownpaymentMonthFilter" onchange="cdFilter()" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;">
-                        <option value="">All</option>
-                        <option value="jan">January</option>
-                        <option value="feb">February</option>
-                        <option value="mar">March</option>
-                        <option value="apr">April</option>
-                        <option value="may">May</option>
-                        <option value="jun">June</option>
-                        <option value="jul">July</option>
-                        <option value="aug">August</option>
-                        <option value="sep">September</option>
-                        <option value="oct">October</option>
-                        <option value="nov">November</option>
-                        <option value="dec">December</option>
-                    </select>
-                </div>
-                <button onclick="document.getElementById('cdSearch').value='';document.getElementById('cdStatusFilter').value='';document.getElementById('cdReservationMonthFilter').value='';document.getElementById('cdDownpaymentMonthFilter').value='';cdFilter();" style="padding:9px 14px;background:#f1f5f9;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#64748b;cursor:pointer;">Clear</button>
+                <button onclick="document.getElementById('cdSearch').value='';document.getElementById('cdStatusFilter').value='';cdFilter();" style="padding:9px 14px;background:#f1f5f9;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#64748b;cursor:pointer;">Clear</button>
                 <span id="cdCount" style="font-size:12px;color:#94a3b8;white-space:nowrap;"></span>
             </div>
         </div>
@@ -810,59 +774,34 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 });
 
-const MONTH_ALIASES = {
-    'january':'jan','february':'feb','march':'mar','april':'apr',
-    'may':'may','june':'jun','july':'jul','august':'aug',
-    'september':'sep','october':'oct','november':'nov','december':'dec',
-    'jan':'jan','feb':'feb','mar':'mar','apr':'apr',
-    'jun':'jun','jul':'jul','aug':'aug','sep':'sep',
-    'oct':'oct','nov':'nov','dec':'dec'
-};
-
 function cdFilter() {
     var raw = (document.getElementById('cdSearch')?.value || '').toLowerCase().trim();
-    var statusFilter       = (document.getElementById('cdStatusFilter')?.value || '').toLowerCase();
-    var reservationMonth   = (document.getElementById('cdReservationMonthFilter')?.value || '').toLowerCase();
-    var downpaymentMonth   = (document.getElementById('cdDownpaymentMonthFilter')?.value || '').toLowerCase();
-
-    var keywords = raw ? raw.split(/\s+/).filter(k => k.length > 0).map(k => MONTH_ALIASES[k] || k) : [];
+    var statusFilter = (document.getElementById('cdStatusFilter')?.value || '').toLowerCase();
+    // Split by spaces — each word must match somewhere in the row (AND logic)
+    var keywords = raw ? raw.split(/\s+/).filter(k => k.length > 0) : [];
 
     var rows = document.querySelectorAll('#cdTableBody tr');
     var visible = 0;
     rows.forEach(function(r) {
         var text = r.textContent.toLowerCase();
-        var cells = r.querySelectorAll('td');
-
-        // Keyword search
+        // Check all keywords match
         var keyMatch = keywords.every(k => text.includes(k));
-
-        // Status filter
+        // Check status filter
         var statusCell = r.querySelector('[data-client-status]');
-        var rowStatus  = statusCell ? statusCell.getAttribute('data-client-status').toLowerCase() : '';
+        var rowStatus = statusCell ? statusCell.getAttribute('data-client-status').toLowerCase() : '';
         var statusMatch = true;
-        if (statusFilter === 'done')           statusMatch = rowStatus === 'done';
+        if (statusFilter === 'done') statusMatch = rowStatus === 'done';
         else if (statusFilter === 'cancelled') statusMatch = rowStatus === 'cancelled';
-        else if (statusFilter === 'none')      statusMatch = rowStatus === '';
+        else if (statusFilter === 'none') statusMatch = rowStatus === '';
 
-        // Reservation date month filter — column index 11
-        var reservationMatch = true;
-        if (reservationMonth && cells[11]) {
-            reservationMatch = cells[11].textContent.toLowerCase().includes(reservationMonth);
-        }
-
-        // Downpayment date month filter — column index 13
-        var downpaymentMatch = true;
-        if (downpaymentMonth && cells[13]) {
-            downpaymentMatch = cells[13].textContent.toLowerCase().includes(downpaymentMonth);
-        }
-
-        var show = keyMatch && statusMatch && reservationMatch && downpaymentMatch;
+        var show = keyMatch && statusMatch;
         r.style.display = show ? '' : 'none';
         if (show) visible++;
     });
     var countEl = document.getElementById('cdCount');
     if (countEl) countEl.textContent = visible + ' record(s) shown';
 }
+
 // ── Prefill from site visit Reserve button ──
 (function() {
     const p = new URLSearchParams(window.location.search);

@@ -29,7 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'page.visible' => \App\Http\Middleware\CheckPageVisibility::class,
             'sales.only'   => \App\Http\Middleware\RestrictSalesPersons::class,
-            'no.cache'     => \App\Http\Middleware\PreventBackHistoryCache::class,
         ]);
         $middleware->appendToGroup('web', \App\Http\Middleware\RestrictSalesPersons::class);
     })
