@@ -108,6 +108,17 @@
 .svd-tab-active{background:white;color:#1e4575;border-color:white;}
 .svd-tab-badge{background:rgba(255,255,255,.25);color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;}
 .svd-tab-active .svd-tab-badge{background:#1e4575;color:white;}
+/* Responsive — this page's stat grid had no mobile rule at all,
+   so 3 fixed equal columns forced the 3rd card off-screen. */
+@media (max-width: 900px) {
+    .svd-stats{grid-template-columns:repeat(2,1fr);gap:14px;}
+}
+@media (max-width: 560px) {
+    .svd-stats{grid-template-columns:1fr;gap:12px;}
+    .stat-card{padding:16px;gap:14px;}
+    .stat-icon{width:46px;height:46px;font-size:20px;}
+    .stat-val{font-size:22px;}
+}
 </style>
 
 <div class="svd-header">

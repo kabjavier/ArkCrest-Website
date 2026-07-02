@@ -1005,9 +1005,9 @@
 
       <div class="st-card"><div class="st-card-hdr"><div class="st-card-hdr-text"><h3>Active Users</h3><p>Manage roles and access</p></div></div>
 
-      <div class="st-card-body" style="padding:0;">
+      <div class="st-card-body" style="padding:0;overflow-x:auto;">
 
-        <table class="st-user-table">
+        <table class="st-user-table" style="min-width:560px;">
 
           <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last Login</th><th></th></tr></thead>
 

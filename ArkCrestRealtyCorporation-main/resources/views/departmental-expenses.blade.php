@@ -282,29 +282,29 @@
             </div>
             
             <!-- Filters and Search below title -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
-                <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <label for="monthFilter" style="font-weight: 600; color: #1e4575; font-size: 13px; white-space: nowrap;">Month:</label>
-                        <select id="monthFilter" class="filter-select" style="min-width: 110px; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                        <select id="monthFilter" class="filter-select" style="min-width: 110px; max-width: 100%; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
                             <option value="all">All</option>
                         </select>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <label for="yearFilter" style="font-weight: 600; color: #1e4575; font-size: 13px; white-space: nowrap;">Year:</label>
-                        <select id="yearFilter" class="filter-select" style="min-width: 90px; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                        <select id="yearFilter" class="filter-select" style="min-width: 90px; max-width: 100%; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
                             <option value="all">All</option>
                         </select>
                     </div>
                 </div>
                 
-                <div style="display: flex; align-items: center; margin-left: auto;">
-                    <div class="search-box">
+                <div style="display: flex; align-items: center; width: 100%; max-width: 320px; margin-left: auto;">
+                    <div class="search-box" style="width: 100%;">
                         <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <input type="text" id="tableSearch" class="search-input-table" placeholder="Search requests...">
+                        <input type="text" id="tableSearch" class="search-input-table" placeholder="Search requests..." style="width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
                     </div>
                 </div>
             </div>
