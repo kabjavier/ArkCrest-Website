@@ -455,16 +455,40 @@
                     </li>
                     @endif
 
-                    <!-- Site Visit Form & Forms -->
-                    
+                    <!-- Forms (Budget Request Form + Site Visit Form) -->
                     @if($canSee('forms'))
-                    <li>
-                        <a href="{{ route('forms') }}" class="nav-item" data-page="forms">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <span class="sidebar-text">Forms</span>
-                        </a>
+                    <li class="nav-item-wrapper">
+                        <div class="nav-item-container">
+                            <a href="{{ route('forms') }}" class="nav-item nav-item-with-dropdown" data-page="forms" onclick="event.stopPropagation();">
+                                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span class="sidebar-text">Forms</span>
+                            </a>
+                            <button class="dropdown-toggle-btn" id="formsDropdownToggle" type="button" onclick="toggleFormsDropdown(event)">
+                                <svg class="dropdown-arrow" id="formsArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <ul class="nav-submenu" id="formsSubmenu">
+                            <li>
+                                <a href="{{ route('forms') }}?tab=budget" class="nav-subitem" data-page="forms-budget">
+                                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <span class="sidebar-text">Budget Request Form</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('forms') }}?tab=site-visit" class="nav-subitem" data-page="forms-site-visit">
+                                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                    </svg>
+                                    <span class="sidebar-text">Site Visit Form</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     @endif
                     
@@ -696,6 +720,26 @@
             }
         }
 
+        // Forms Dropdown Toggle
+        function toggleFormsDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const submenu = document.getElementById('formsSubmenu');
+            const arrow = document.getElementById('formsArrow');
+            if (submenu && arrow) {
+                const isOpen = submenu.classList.contains('open');
+                if (isOpen) {
+                    submenu.classList.remove('open');
+                    arrow.classList.remove('open');
+                    localStorage.setItem('formsDropdownOpen', 'false');
+                } else {
+                    submenu.classList.add('open');
+                    arrow.classList.add('open');
+                    localStorage.setItem('formsDropdownOpen', 'true');
+                }
+            }
+        }
+
         // Restore dropdown state on page load
         document.addEventListener('DOMContentLoaded', function() {
             const submenu = document.getElementById('financeSubmenu');
@@ -724,6 +768,16 @@
             if (salesShouldBeOpen && salesSubmenu && salesArrow) {
                 salesSubmenu.classList.add('open');
                 salesArrow.classList.add('open');
+            }
+
+            // Restore Forms dropdown
+            const formsSubmenu = document.getElementById('formsSubmenu');
+            const formsArrow = document.getElementById('formsArrow');
+            const isFormsPage = currentPage.includes('/forms');
+            const formsShouldBeOpen = localStorage.getItem('formsDropdownOpen') === 'true' || isFormsPage;
+            if (formsShouldBeOpen && formsSubmenu && formsArrow) {
+                formsSubmenu.classList.add('open');
+                formsArrow.classList.add('open');
             }
         });
         

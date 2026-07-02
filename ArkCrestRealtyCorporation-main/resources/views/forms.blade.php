@@ -39,13 +39,27 @@
 .frm-alert-error{background:#fef2f2;border-color:#ef4444;color:#dc2626}
 .frm-alert-warn{background:#fff7ed;border-color:#f97316;color:#9a3412}
 
-/* Tab toggle (matches summary report view-toggle pattern used site-wide) */
-.forms-tabs{display:flex;justify-content:center;margin-bottom:20px}
-.forms-tabs .view-toggle{display:flex;gap:6px;background:#f0f2f5;padding:4px;border-radius:10px}
-.forms-tabs .view-btn{display:flex;align-items:center;gap:7px;padding:9px 20px;border:none;background:transparent;color:#6b7280;font-weight:600;font-size:13px;border-radius:7px;cursor:pointer;transition:all .2s;font-family:Arial,sans-serif}
-.forms-tabs .view-btn:hover{background:#e5e7eb}
-.forms-tabs .view-btn.active{background:white;color:#1e4575;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.forms-tabs .view-btn svg{width:15px;height:15px}
+/* Wrapper used to auto-scale the fixed-width (816px) printable card
+   down to fit small screens, without changing its internal layout
+   or affecting the print/PDF output quality. See fitCardToWidth() JS. */
+.frm-scale-wrap{width:100%;overflow-x:auto;}
+
+/* ============================================================
+   MOBILE RESPONSIVE (tablet & phone)
+   ============================================================ */
+@media (max-width:860px){
+  .frm-wrap{padding:16px 10px}
+  .frm-btns{flex-wrap:wrap}
+  .frm-btns button{flex:1 1 auto;justify-content:center;min-height:46px;font-size:14px}
+  .modal-bar{flex-wrap:wrap;gap:10px;padding:14px 16px!important}
+  .modal-bar > div:last-child{flex-wrap:wrap;width:100%;justify-content:flex-end}
+  .modal-bar > div:last-child button{min-height:40px}
+  .modal-body-pad{padding:12px!important}
+  .frm-preview-modal{padding:14px 6px!important}
+}
+@media (max-width:480px){
+  .frm-wrap{padding:12px 6px}
+}
 
 @media print{
   body *{visibility:hidden}
@@ -61,6 +75,7 @@
     box-shadow:none;
     font-size:11px;
     margin:0 auto;
+    transform:none!important;
   }
   .dept-sel,.frm-btns{display:none!important}
   @page{size:8.5in 11in;margin:0}
@@ -69,24 +84,11 @@
 
 <div class="frm-wrap">
 
-  {{-- Tab Toggle --}}
-  <div class="forms-tabs">
-    <div class="view-toggle" id="formsTabToggle">
-      <button type="button" class="view-btn active" data-tab="budget" onclick="switchFormsTab('budget')">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Budget Request Form
-      </button>
-      <button type="button" class="view-btn" data-tab="sitevisit" onclick="switchFormsTab('sitevisit')">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        Site Visit Form
-      </button>
-    </div>
-  </div>
-
   {{-- ============================= --}}
   {{-- Budget Request Form Tab       --}}
   {{-- ============================= --}}
   <div id="tab-budget">
+  <div class="frm-scale-wrap" id="frmCardWrap">
   <div class="frm-card" id="frmCard">
 
     <!-- Header -->
@@ -206,12 +208,14 @@
     </div>
 
   </div>
+  </div>{{-- #frmCardWrap --}}
   </div>{{-- #tab-budget --}}
 
   {{-- ============================= --}}
   {{-- Site Visit Form Tab           --}}
   {{-- ============================= --}}
   <div id="tab-sitevisit" style="display:none">
+  <div class="frm-scale-wrap" id="frmCardSVWrap">
   <div class="frm-card" id="frmCardSV">
 
     <!-- Header -->
@@ -350,12 +354,13 @@
     </div>
 
   </div>
+  </div>{{-- #frmCardSVWrap --}}
   </div>{{-- #tab-sitevisit --}}
 
   {{-- ============================= --}}
   {{-- Shared Preview / Print Modal  --}}
   {{-- ============================= --}}
-  <div id="frmPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
+  <div id="frmPreviewModal" class="frm-preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
     <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
       {{-- Modal Header --}}
       <div class="modal-bar" style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
@@ -373,23 +378,63 @@
         </div>
       </div>
       {{-- Modal Body: cloned form --}}
-      <div style="padding:20px;display:flex;justify-content:center;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:816px;"></div></div>
+      <div class="modal-body-pad" style="padding:20px;display:flex;justify-content:center;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:100%;max-width:816px;"></div></div>
     </div>
   </div>
 
 <script>
+/* ============================================================
+   MOBILE AUTO-SCALE
+   Shrinks the fixed 816px-wide printable card to fit narrow
+   screens using a CSS transform (visual-only), so the on-screen
+   layout, print output, and generated PDF stay pixel-identical
+   to desktop. See generatePDF() for the temporary reset used
+   while capturing, so PDFs are never rendered at reduced scale.
+   ============================================================ */
+function fitCardToWidth(card){
+  if(!card) return;
+  var wrap = card.parentElement;
+  if(!wrap) return;
+  var prevTransform = card.style.transform;
+  card.style.transform = 'none';
+  var natural = card.offsetWidth;
+  var avail = wrap.clientWidth;
+  if(!natural || !avail){ card.style.transform = prevTransform; return; }
+  var scale = Math.min(1, avail / natural);
+  if(scale < 0.999){
+    card.style.transformOrigin = 'top left';
+    card.style.transform = 'scale(' + scale + ')';
+    wrap.style.height = Math.ceil(card.offsetHeight * scale) + 'px';
+  } else {
+    card.style.transform = 'none';
+    wrap.style.height = 'auto';
+  }
+}
+function fitAllFormCards(){
+  fitCardToWidth(document.getElementById('frmCard'));
+  fitCardToWidth(document.getElementById('frmCardSV'));
+  var previewCard = document.querySelector('#frmPreviewBody .frm-card');
+  if(previewCard) fitCardToWidth(previewCard);
+}
+var _fitResizeTimer;
+window.addEventListener('resize', function(){
+  clearTimeout(_fitResizeTimer);
+  _fitResizeTimer = setTimeout(fitAllFormCards, 120);
+});
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(fitAllFormCards, 0);
+});
+
 /* ============================================================
    TAB SWITCHING
    ============================================================ */
 function switchFormsTab(tab){
   document.getElementById('tab-budget').style.display = tab==='budget' ? '' : 'none';
   document.getElementById('tab-sitevisit').style.display = tab==='sitevisit' ? '' : 'none';
-  document.querySelectorAll('#formsTabToggle .view-btn').forEach(function(b){
-    b.classList.toggle('active', b.dataset.tab===tab);
-  });
   var url = new URL(window.location.href);
   url.searchParams.set('tab', tab === 'sitevisit' ? 'site-visit' : 'budget');
   history.replaceState(null, '', url);
+  setTimeout(fitAllFormCards, 0);
 }
 document.addEventListener('DOMContentLoaded', function(){
   var params = new URLSearchParams(window.location.search);
@@ -662,12 +707,15 @@ function submitSiteVisit(){
 function openPreview(cardId, label){
   var clone = document.getElementById(cardId).cloneNode(true);
   clone.querySelectorAll('.frm-btns,.dept-sel').forEach(function(el){ el.remove(); });
+  clone.style.transform = 'none';
+  clone.removeAttribute('id');
   document.getElementById('frmPreviewBody').innerHTML = '';
   document.getElementById('frmPreviewBody').appendChild(clone);
   document.getElementById('frmPreviewLabel').textContent = label + ' — Preview';
   var modal = document.getElementById('frmPreviewModal');
   modal.dataset.source = cardId;
   modal.style.display = 'flex';
+  setTimeout(fitAllFormCards, 0);
 }
 function closePreview(){
   document.getElementById('frmPreviewModal').style.display = 'none';
@@ -692,6 +740,10 @@ function generatePDF(cardId, filename, incrementCtrl){
   var dlBtn=document.getElementById('frmDownloadBtn');
   if(dlBtn) dlBtn.disabled=true;
   var el=document.getElementById(cardId);
+  var wrap=el.parentElement;
+  // Capture at full, unscaled size so mobile viewing scale never affects PDF quality
+  el.style.transform='none';
+  if(wrap) wrap.style.height='auto';
   el.querySelectorAll('.frm-btns,.dept-sel').forEach(e=>e.style.display='none');
   var replacements=[];
   el.querySelectorAll('input,textarea,select').forEach(function(field){
@@ -714,6 +766,8 @@ function generatePDF(cardId, filename, incrementCtrl){
     replacements.forEach(r=>{r.span.remove();r.field.style.display='';});
     el.querySelectorAll('.frm-btns,.dept-sel').forEach(e=>e.style.display='');
     if(dlBtn) dlBtn.disabled=false;
+    // Re-apply mobile auto-fit scaling now that the full-size capture is done
+    fitCardToWidth(el);
   }
   function render(){
     html2canvas(el,{scale:3,useCORS:true,backgroundColor:'#fff'}).then(function(canvas){
