@@ -166,9 +166,9 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #e5e7eb;flex-wrap:wrap;gap:12px;">
             <h3 style="font-size:20px;font-weight:700;color:#1e4575;margin:0;text-transform:uppercase">Client Database Records</h3>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <div style="position:relative;">
+                <div class="cd-search-wrap" style="position:relative;">
                     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#6b7280" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="cdSearch" placeholder="Search by name, agent, project... (space = AND)" style="width:320px;padding:9px 12px 9px 36px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;box-sizing:border-box;outline:none;" oninput="cdFilter()">
+                    <input type="text" id="cdSearch" placeholder="Search by name, agent, project... (space = AND)" style="width:320px;max-width:100%;padding:9px 12px 9px 36px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;box-sizing:border-box;outline:none;" oninput="cdFilter()">
                 </div>
                 <select id="cdStatusFilter" onchange="cdFilter()" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;">
                     <option value="">All Status</option>

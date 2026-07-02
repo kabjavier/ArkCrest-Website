@@ -208,6 +208,24 @@
     </div>
 
   </div>
+</div>
+
+{{-- Preview Modal --}}
+<div id="frmPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
+  <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+    {{-- Modal Header --}}
+    <div style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="color:white;font-weight:700;font-size:16px;">Budget Request Form   Preview</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button onclick="incrementAndPrint()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          Print
+        </button>
+        <button onclick="closePreview()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">&times;</button>
+      </div>
+    </div>
+    {{-- Modal Body: cloned form --}}
+    <div class="frm-preview-scroll" style="padding:20px;display:flex;justify-content:center;overflow-x:auto;-webkit-overflow-scrolling:touch;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:816px;flex-shrink:0;"></div></div>
   </div>{{-- #frmCardWrap --}}
   </div>{{-- #tab-budget --}}
 

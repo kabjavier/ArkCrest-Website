@@ -73,6 +73,36 @@ body{display:flex;align-items:center;justify-content:center;background:linear-gr
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes btnShimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.08);opacity:.25}}
+
+/* ============================================================
+   RESPONSIVE — below 700px the side-by-side overlay + form
+   panel get too narrow to use, so they stack vertically and
+   the page becomes scrollable instead of clipped.
+   ============================================================ */
+@media (max-width: 700px) {
+    html,body{height:auto;min-height:100%;overflow-y:auto;overflow-x:hidden}
+    body{align-items:flex-start;justify-content:flex-start;padding:20px 12px}
+    .card{
+        width:100%;
+        max-width:460px;
+        height:auto;
+        flex-direction:column;
+        margin:0 auto;
+        box-shadow:0 20px 60px rgba(0,0,0,.4);
+    }
+    .overlay{width:100%;padding:22px 20px;flex-shrink:0}
+    .overlay::before{display:none}
+    .brand-logo{width:52px;height:52px}
+    .brand-name{font-size:18px}
+    .form-panel{padding:20px 18px;max-height:none;overflow-y:visible}
+    .row2{grid-template-columns:1fr}
+    .country-drop{width:100%;max-width:calc(100vw - 40px)}
+}
+@media (max-width: 380px) {
+    .overlay{padding:16px}
+    .form-panel{padding:16px}
+    .brand-name{font-size:16px}
+}
 </style>
 </head>
 <body>
