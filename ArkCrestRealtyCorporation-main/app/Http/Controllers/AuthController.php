@@ -15,6 +15,12 @@ class AuthController extends Controller
         if (Auth::check()) return redirect()->route('dashboard');
         return view('auth.login');
     }
+    public function sessionCheck()
+    {
+    return response()->json(['authenticated' => auth()->check()])
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, private')
+        ->header('Pragma', 'no-cache');
+    }
 
     public function login(Request $request)
     {
