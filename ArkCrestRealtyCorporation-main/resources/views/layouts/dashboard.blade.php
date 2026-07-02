@@ -88,7 +88,7 @@
                             <span class="hdr-badge hdr-badge-gold">{{ $userNotes->count() > 9 ? '9+' : $userNotes->count() }}</span>
                             @endif
                         </button>
-                        <div id="notesPanel" class="notes-panel" style="display:none;">
+                        <div id="notesPanel" style="display:none;position:absolute;top:calc(100% + 10px);right:0;width:320px;background:white;border-radius:10px;box-shadow:0 4px 20px rgba(30,69,117,.15);border:1.5px solid #e2e8f0;z-index:9999;overflow:hidden;">
                             <div style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:15px;height:15px;flex-shrink:0;">
@@ -456,23 +456,40 @@
                     </li>
                     @endif
 
-                    <!-- Site Visit Form & Forms -->
-                    <li>
-                        <a href="{{ route('tripping') }}" class="nav-item" data-page="forms-site-visit" target="_self">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
-                            <span class="sidebar-text">Site Visit Form</span>
-                        </a>
-                    </li>
+                    <!-- Forms (Budget Request Form + Site Visit Form) -->
                     @if($canSee('forms'))
-                    <li>
-                        <a href="{{ route('forms') }}" class="nav-item" data-page="forms">
-                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <span class="sidebar-text">Forms</span>
-                        </a>
+                    <li class="nav-item-wrapper">
+                        <div class="nav-item-container">
+                            <a href="{{ route('forms') }}" class="nav-item nav-item-with-dropdown" data-page="forms" onclick="event.stopPropagation();">
+                                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span class="sidebar-text">Forms</span>
+                            </a>
+                            <button class="dropdown-toggle-btn" id="formsDropdownToggle" type="button" onclick="toggleFormsDropdown(event)">
+                                <svg class="dropdown-arrow" id="formsArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <ul class="nav-submenu" id="formsSubmenu">
+                            <li>
+                                <a href="{{ route('forms') }}?tab=budget" class="nav-subitem" data-page="forms-budget">
+                                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <span class="sidebar-text">Budget Request Form</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('forms') }}?tab=site-visit" class="nav-subitem" data-page="forms-site-visit">
+                                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                    </svg>
+                                    <span class="sidebar-text">Site Visit Form</span>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     @endif
                     
@@ -704,6 +721,26 @@
             }
         }
 
+        // Forms Dropdown Toggle
+        function toggleFormsDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const submenu = document.getElementById('formsSubmenu');
+            const arrow = document.getElementById('formsArrow');
+            if (submenu && arrow) {
+                const isOpen = submenu.classList.contains('open');
+                if (isOpen) {
+                    submenu.classList.remove('open');
+                    arrow.classList.remove('open');
+                    localStorage.setItem('formsDropdownOpen', 'false');
+                } else {
+                    submenu.classList.add('open');
+                    arrow.classList.add('open');
+                    localStorage.setItem('formsDropdownOpen', 'true');
+                }
+            }
+        }
+
         // Restore dropdown state on page load
         document.addEventListener('DOMContentLoaded', function() {
             const submenu = document.getElementById('financeSubmenu');
@@ -732,6 +769,16 @@
             if (salesShouldBeOpen && salesSubmenu && salesArrow) {
                 salesSubmenu.classList.add('open');
                 salesArrow.classList.add('open');
+            }
+
+            // Restore Forms dropdown
+            const formsSubmenu = document.getElementById('formsSubmenu');
+            const formsArrow = document.getElementById('formsArrow');
+            const isFormsPage = currentPage.includes('/forms');
+            const formsShouldBeOpen = localStorage.getItem('formsDropdownOpen') === 'true' || isFormsPage;
+            if (formsShouldBeOpen && formsSubmenu && formsArrow) {
+                formsSubmenu.classList.add('open');
+                formsArrow.classList.add('open');
             }
         });
         
@@ -810,9 +857,6 @@
         }
     </script>
     <script src="{{ asset('js/sidebar-toggle.js') }}?v={{ time() }}"></script>
-    <!-- Mobile hamburger drawer logic lives in one place only: js/sidebar-toggle.js
-         (a second, duplicate handler used to live here — it canceled the one in
-         sidebar-toggle.js on every click, which is why the menu sometimes wouldn't open.) -->
     <script src="{{ asset('js/sidebar-active.js') }}?v={{ time() }}"></script>
     <script src="{{ asset('js/global-search.js') }}?v={{ time() }}"></script>
 
@@ -1531,129 +1575,7 @@
     <form id="_autoLogoutForm" method="POST" action="{{ route('logout') }}" style="display:none;">
         @csrf
     </form>
-    <script>
-(function() {
-    function forceLogoutForStaleSession(message) {
-        if (window.__forcingLogout) return;
-        window.__forcingLogout = true;
-        alert(message || 'For your security, this session is no longer active. You will be logged out.');
-        var form = document.getElementById('_autoLogoutForm');
-        if (form) {
-            form.submit();
-        } else {
-            window.location.href = '{{ route('login') }}';
-        }
-    }
 
-    // Fires when a page is restored from bfcache (e.g. pressing Back)
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            checkSessionStillValid();
-        }
-    });
-
-    // Also re-check when the tab regains focus (covers logout-in-another-tab)
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') {
-            checkSessionStillValid();
-        }
-    });
-
-    function checkSessionStillValid() {
-        fetch('{{ route('session.check') }}', {
-            method: 'GET',
-            credentials: 'same-origin',
-            cache: 'no-store',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (!data.authenticated) {
-                forceLogoutForStaleSession('You have been logged out. Please log in again to continue.');
-            }
-        })
-        .catch(function() { /* ignore network hiccups, don't false-positive logout */ });
-    }
-})();
-</script>
-@if(request()->routeIs('dashboard'))
-<script>
-(function() {
-    var FLAG = 'dashboardTrapArmed';
-
-    function armTrap() {
-        history.pushState({ dashboardTrap: true }, '', window.location.href);
-    }
-
-    function getNavType() {
-        try {
-            var nav = performance.getEntriesByType('navigation')[0];
-            if (nav) return nav.type;
-        } catch (err) {}
-        return null;
-    }
-
-    function checkAndArm() {
-        var wasArmed = sessionStorage.getItem(FLAG) === '1';
-        var navType = getNavType();
-        if (navType === 'back_forward' && wasArmed) {
-            showBackTrapModal();
-        }
-        sessionStorage.setItem(FLAG, '1');
-        armTrap();
-    }
-
-    checkAndArm();
-
-    window.addEventListener('pageshow', function(e) {
-        if (e.persisted) {
-            var wasArmed = sessionStorage.getItem(FLAG) === '1';
-            if (wasArmed) showBackTrapModal();
-            sessionStorage.setItem(FLAG, '1');
-            armTrap();
-        }
-    });
-
-    window.addEventListener('popstate', function() {
-        armTrap();
-        showBackTrapModal();
-    });
-
-    // Leaving the dashboard on purpose (clicking a link, submitting a form
-    // like logout) disarms the trap so a fresh visit later stays silent.
-    document.addEventListener('click', function(e) {
-        var link = e.target.closest && e.target.closest('a[href]');
-        if (link && link.href && link.origin === window.location.origin) {
-            sessionStorage.removeItem(FLAG);
-        }
-    }, true);
-
-    document.addEventListener('submit', function() {
-        sessionStorage.removeItem(FLAG);
-    }, true);
-
-    function showBackTrapModal() {
-        var modal = document.getElementById('backTrapModal');
-        if (modal) {
-            modal.style.display = 'flex';
-            return;
-        }
-        modal = document.createElement('div');
-        modal.id = 'backTrapModal';
-        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999999;display:flex;align-items:center;justify-content:center;';
-        modal.innerHTML =
-            '<div style="background:white;border-radius:16px;padding:28px 32px;max-width:380px;width:90vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);">' +
-                '<div style="font-size:15px;font-weight:600;color:#0f172a;margin-bottom:16px;">Please log out first before leaving this page.</div>' +
-                '<button id="backTrapOk" style="padding:10px 24px;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">OK</button>' +
-            '</div>';
-        document.body.appendChild(modal);
-        document.getElementById('backTrapOk').addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-})();
-</script>
-@endif
 <script>
 // Auto-add tbl-scroll class to all overflow-x divs for scrollbar styling
 document.addEventListener('DOMContentLoaded', function() {
