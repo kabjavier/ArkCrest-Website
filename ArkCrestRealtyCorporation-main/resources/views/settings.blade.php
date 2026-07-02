@@ -162,6 +162,150 @@
 
 .st-content::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
 
+/* Mobile sidebar toggle button (hidden on desktop) */
+
+.st-mobile-toggle {
+
+    display: none;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 14px;
+
+    background: #1e4575;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    margin: 12px 16px 0;
+
+}
+
+/* Mobile layout: sidebar becomes a centered horizontal bar on top, content centered below */
+
+@media (max-width: 768px) {
+
+    .st-page-wrap { flex-direction: column; align-items: center; position: relative; overflow-y: auto; overflow-x: hidden; height: 100%; -webkit-overflow-scrolling: touch; }
+
+    /* No longer needed on mobile — sidebar is always visible now, not a slide-in panel */
+    .st-mobile-toggle { display: none !important; }
+    .st-sidebar-backdrop { display: none !important; }
+
+    .st-sidebar {
+        position: static;
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        margin: 0 auto;
+        box-shadow: none;
+        border-radius: 0 0 14px 14px;
+        overflow: visible;
+    }
+
+    .st-sidebar-hdr { justify-content: center; height: auto; padding: 14px 18px; }
+
+    .st-nav-scroll {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px;
+        overflow: visible;
+    }
+
+    /* Section dividers (ACCOUNT / ADMIN) span the full row so buttons wrap under their own group */
+    .st-nav-label { flex-basis: 100%; width: 100%; text-align: center; padding: 10px 0 4px; }
+
+    /* All sidebar buttons the same fixed size, centered text */
+    .st-nav-btn {
+        flex: 0 0 auto;
+        width: 140px;
+        margin: 0;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        padding: 10px 8px;
+    }
+
+    .st-content { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 14px 24px; flex: none; height: auto; overflow-y: visible; }
+
+    .st-page-header { padding: 16px 0 0 0; text-align: center; }
+
+    /* Stack every 2 or 3-column grid into one column so nothing gets cut off */
+    .st-form-grid,
+    .st-stat-grid,
+    .vis-grid,
+    [style*="grid-template-columns:repeat(2,1fr)"],
+    [style*="grid-template-columns: repeat(2,1fr)"],
+    [style*="grid-template-columns:repeat(2, 1fr)"],
+    [style*="grid-template-columns:1fr 1fr"],
+    [style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    .st-form-group.full { grid-column: 1/-1; }
+
+    .avatar-wrap { flex-wrap: wrap; justify-content: center; text-align: center; }
+
+    /* Let wide tables scroll horizontally inside their own box instead of clipping */
+    .st-user-table { display: block; overflow-x: auto; white-space: nowrap; }
+
+}
+
+/* Very small phones: tighten spacing further */
+@media (max-width: 420px) {
+    .st-card-body { padding: 12px 14px; }
+    .st-stat-box { padding: 10px 12px; }
+    .avatar-img, .avatar-initials { width: 52px; height: 52px; }
+    .st-nav-btn { width: 120px; font-size: 11px; padding: 8px 6px; }
+}
+
+/* Floating scroll-to-top button — mobile only, since the page can get long */
+.st-scroll-top-btn {
+    display: none;
+    position: fixed;
+    right: 18px;
+    bottom: 22px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #1e4575;
+    color: white;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,.3);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.st-scroll-top-btn.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+    .st-scroll-top-btn { display: flex; }
+}
+
+
+
+
+
 /* Panel animation */
 
 .st-panel { display: none !important; }
@@ -351,9 +495,21 @@
 </style>
 
 <div class="st-page-wrap">
+  {{-- Mobile-only: button to open the settings sidebar, and backdrop to close it --}}
+  <button type="button" class="st-mobile-toggle" id="stMobileToggle" onclick="toggleSettingsSidebar()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    Settings Menu
+  </button>
+  <div class="st-sidebar-backdrop" id="stSidebarBackdrop" onclick="closeSettingsSidebar()"></div>
+
+  {{-- Floating button to jump back to the top of the settings page on mobile --}}
+  <button type="button" class="st-scroll-top-btn" id="stScrollTopBtn" onclick="scrollSettingsToTop()" aria-label="Scroll to top">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+  </button>
+
   {{-- Settings Sidebar --}}
 
-  <div class="st-sidebar">
+  <div class="st-sidebar" id="stSidebar">
 
     <div class="st-sidebar-hdr">
 
@@ -1867,7 +2023,36 @@ function showPanel(name) {
     const btn   = document.getElementById('nav-' + name);
     if (panel) panel.classList.add('active');
     if (btn)   btn.classList.add('active');
+    closeSettingsSidebar(); // auto-close the slide-in menu on mobile after picking a section
 }
+
+function toggleSettingsSidebar() {
+    document.getElementById('stSidebar').classList.toggle('st-sidebar-open');
+    document.getElementById('stSidebarBackdrop').classList.toggle('show');
+}
+
+function closeSettingsSidebar() {
+    document.getElementById('stSidebar').classList.remove('st-sidebar-open');
+    document.getElementById('stSidebarBackdrop').classList.remove('show');
+}
+
+function scrollSettingsToTop() {
+    var wrap = document.querySelector('.st-page-wrap');
+    if (wrap) wrap.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+(function() {
+    var wrap = document.querySelector('.st-page-wrap');
+    var btn = document.getElementById('stScrollTopBtn');
+    if (!wrap || !btn) return;
+    wrap.addEventListener('scroll', function() {
+        if (wrap.scrollTop > 200) {
+            btn.classList.add('show');
+        } else {
+            btn.classList.remove('show');
+        }
+    });
+})();
 
 function selectAllGroup(groupId, checked) {
     document.querySelectorAll('#' + groupId + ' input[type=checkbox]').forEach(cb => cb.checked = checked);

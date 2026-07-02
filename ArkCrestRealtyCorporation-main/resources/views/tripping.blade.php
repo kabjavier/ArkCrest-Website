@@ -73,6 +73,36 @@ body{display:flex;align-items:center;justify-content:center;background:linear-gr
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes btnShimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.08);opacity:.25}}
+
+/* Mobile: stack the branding panel above the form instead of side-by-side */
+@media (max-width: 640px) {
+  html,body{height:auto;overflow-y:auto}
+  body{display:block;padding:16px 0}
+  .card{
+    flex-direction:column;
+    width:94vw;
+    max-width:94vw;
+    height:auto;
+    max-height:none;
+    border-radius:18px;
+    margin:0 auto;
+  }
+  .overlay{
+    width:100%;
+    flex-shrink:0;
+    padding:24px 20px;
+    gap:14px;
+  }
+  .brand-logo{width:56px;height:56px}
+  .brand-name{font-size:18px}
+  .ov-title{font-size:16px}
+  .ov-body p{font-size:11px}
+  .form-panel{
+    padding:20px 20px 24px;
+    overflow-y:visible;
+  }
+  .row2{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>

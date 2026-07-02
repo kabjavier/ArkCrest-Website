@@ -172,11 +172,11 @@
 </div>
 
 {{-- Preview Modal --}}
-<div id="frmPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
-  <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
-    {{-- Modal Header --}}
-    <div style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="color:white;font-weight:700;font-size:16px;">Budget Request Form � Preview</div>
+<div id="frmPreviewModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:16px;width:100%;max-width:900px;max-height:90vh;box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden;display:flex;flex-direction:column;">
+    {{-- Modal Header (stays fixed while body scrolls) --}}
+    <div style="flex-shrink:0;background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="color:white;font-weight:700;font-size:16px;">Budget Request Form — Preview</div>
       <div style="display:flex;gap:10px;align-items:center;">
         <button onclick="incrementAndPrint()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -185,11 +185,25 @@
         <button onclick="closePreview()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">&times;</button>
       </div>
     </div>
-    {{-- Modal Body: cloned form --}}
-    <div style="padding:20px;display:flex;justify-content:center;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:816px;"></div></div>
+    {{-- Modal Body: cloned form, scrolls internally, header stays put --}}
+    <div style="flex:1;overflow-y:auto;padding:20px;display:flex;justify-content:center;">
+      <div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.15);width:816px;max-width:100%;flex-shrink:0;"></div>
+    </div>
   </div>
 </div>
 
+<style>
+@media (max-width: 900px) {
+  #frmPreviewModal > div { max-width:96vw; }
+  #frmPreviewBody { transform:scale(0.9); transform-origin:top center; }
+}
+@media (max-width: 700px) {
+  #frmPreviewBody { transform:scale(0.7); transform-origin:top center; }
+}
+@media (max-width: 480px) {
+  #frmPreviewBody { transform:scale(0.5); transform-origin:top center; }
+}
+</style>
 <script>
 // Dynamic categories from DB
 var _deptCategories = {};
@@ -252,10 +266,17 @@ function openPreview(){
   document.getElementById('frmPreviewBody').innerHTML='';
   document.getElementById('frmPreviewBody').appendChild(clone);
   var modal=document.getElementById('frmPreviewModal');
+  // Move modal to be a direct child of <body> so no parent wrapper
+  // (sidebar layout, scroll containers, etc.) can ever clip or offset it.
+  if (modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
   modal.style.display='flex';
+  document.body.style.overflow='hidden'; // lock background from scrolling behind the modal
 }
 function closePreview(){
   document.getElementById('frmPreviewModal').style.display='none';
+  document.body.style.overflow=''; // restore background scrolling
 }
 // Load control number on page load
 var _ctrlNum = '';
