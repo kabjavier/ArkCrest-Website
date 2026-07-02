@@ -1045,10 +1045,68 @@ function calculateEditAmountReturned() {
 document.getElementById('edit_requested_amount').addEventListener('input', calculateEditAmountReturned);
 document.getElementById('edit_total_expenses').addEventListener('input', calculateEditAmountReturned);
 
+// Validate that an amount field contains a valid, non-negative number.
+// Returns true if valid. Shows a toast and focuses the field if invalid.
+// Empty string is allowed only when `required` is false.
+function validateAmountField(inputId, label, required) {
+    const el = document.getElementById(inputId);
+    if (!el) return true;
+    const raw = el.value.replace(/,/g, '').trim();
+
+    if (raw === '') {
+        if (required) {
+            showToast('error', 'Invalid Amount', label + ' is required and must be a number.');
+            el.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (isNaN(raw) || isNaN(parseFloat(raw))) {
+        showToast('error', 'Invalid Amount', label + ' must be a number, not letters or symbols.');
+        el.focus();
+        return false;
+    }
+
+    if (parseFloat(raw) < 0) {
+        showToast('error', 'Invalid Amount', label + ' cannot be negative.');
+        el.focus();
+        return false;
+    }
+
+    return true;
+}
+// Validate that a name field contains only letters (spaces, periods, hyphens, apostrophes allowed).
+// Blocks numbers and other symbols. Returns true if valid.
+function validateNameField(inputId, label) {
+    const el = document.getElementById(inputId);
+    if (!el) return true;
+    const value = el.value.trim();
+
+    if (value === '') {
+        showToast('error', 'Invalid Name', label + ' is required.');
+        el.focus();
+        return false;
+    }
+
+    const nameRegex = /^[A-Za-z.\-'\s]+$/;
+    if (!nameRegex.test(value)) {
+        showToast('error', 'Invalid Name', label + ' must contain letters only, no numbers or symbols.');
+        el.focus();
+        return false;
+    }
+
+    return true;
+}
+
 // Add request
 document.getElementById('addRequestForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
+    if (!validateNameField('requestor_name', 'Requestor Name')) return;
+    if (!validateAmountField('requested_amount', 'Requested Amount', true)) return;
+    if (!validateAmountField('total_expenses', 'Total Expenses', false)) return;
+
     const formData = {
         requestor_name: document.getElementById('requestor_name').value.trim(),
         department: document.getElementById('department').value.trim(),
@@ -1308,10 +1366,13 @@ document.getElementById('budgetUpdateForm').addEventListener('submit', function(
     });
 });
 
-// Update request
-document.getElementById('editRequestForm').addEventListener('submit', function(e) {
+    document.getElementById('editRequestForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
+    if (!validateNameField('edit_requestor_name', 'Requestor Name')) return;
+    if (!validateAmountField('edit_requested_amount', 'Requested Amount', true)) return;
+    if (!validateAmountField('edit_total_expenses', 'Total Expenses', false)) return;
+
     const id = document.getElementById('edit_id').value;
     const formData = {
         control_number: document.getElementById('edit_control_number').value.trim(),
