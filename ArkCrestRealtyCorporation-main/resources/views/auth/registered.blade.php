@@ -46,6 +46,34 @@ hr{border:none;border-top:1.5px solid #e2e8f0;margin:0 0 20px}
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes btnShimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.08);opacity:.25}}
+
+/* ============================================================
+   RESPONSIVE — below 700px the two side-by-side columns
+   (form + branding overlay) get too narrow to use, so they
+   stack vertically instead and the page becomes scrollable.
+   ============================================================ */
+@media (max-width: 700px) {
+    html,body{height:auto;min-height:100%;overflow-y:auto;overflow-x:hidden}
+    body{align-items:flex-start;justify-content:flex-start;padding:20px 12px}
+    .card{
+        width:100%;
+        max-width:440px;
+        height:auto;
+        flex-direction:column-reverse;
+        margin:0 auto;
+        box-shadow:0 20px 60px rgba(0,0,0,.4);
+    }
+    .form-area{width:100%;height:auto;padding:26px 22px}
+    .overlay{position:static;width:100%;height:auto;padding:26px 22px}
+    .overlay::before{display:none}
+    .brand-logo{width:52px;height:52px}
+    .brand-name{font-size:18px}
+}
+@media (max-width: 380px) {
+    .overlay{padding:20px 16px}
+    .form-area{padding:20px 16px}
+    .brand-name{font-size:16px}
+}
 </style>
 </head>
 <body>

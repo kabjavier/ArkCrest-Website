@@ -4,6 +4,7 @@
     
     function setActiveSidebar() {
         const currentPath = window.location.pathname;
+        const currentTab = new URLSearchParams(window.location.search).get('tab');
         
         const navItems = document.querySelectorAll('.nav-item[data-page], .nav-subitem[data-page]');
         
@@ -39,7 +40,9 @@
                 isActive = true;
             } else if (page === 'crm' && currentPath.includes('/crm')) {
                 isActive = true;
-            } else if (page === 'forms-site-visit' && currentPath.includes('/forms/site-visit')) {
+            } else if (page === 'forms-budget' && currentPath === '/forms' && currentTab !== 'site-visit') {
+                isActive = true;
+            } else if (page === 'forms-site-visit' && ((currentPath === '/forms' && currentTab === 'site-visit') || currentPath.includes('/forms/site-visit'))) {
                 isActive = true;
             } else if (page === 'arkcrest-sales' && currentPath.includes('/arkcrest-sales')) {
                 isActive = true;
@@ -77,6 +80,10 @@
                         } else if (submenu.id === 'hrSubmenu') {
                             const arrow = document.getElementById('hrArrow');
                             if (arrow) arrow.classList.add('open');
+                        } else if (submenu.id === 'formsSubmenu') {
+                            const arrow = document.getElementById('formsArrow');
+                            if (arrow) arrow.classList.add('open');
+                            localStorage.setItem('formsDropdownOpen', 'true');
                         } else {
                             const arrow = document.getElementById('financeArrow');
                             if (arrow) arrow.classList.add('open');

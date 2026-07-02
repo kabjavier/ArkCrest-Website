@@ -282,29 +282,29 @@
             </div>
             
             <!-- Filters and Search below title -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
-                <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <label for="monthFilter" style="font-weight: 600; color: #1e4575; font-size: 13px; white-space: nowrap;">Month:</label>
-                        <select id="monthFilter" class="filter-select" style="min-width: 110px; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                        <select id="monthFilter" class="filter-select" style="min-width: 110px; max-width: 100%; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
                             <option value="all">All</option>
                         </select>
                     </div>
                     
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <label for="yearFilter" style="font-weight: 600; color: #1e4575; font-size: 13px; white-space: nowrap;">Year:</label>
-                        <select id="yearFilter" class="filter-select" style="min-width: 90px; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                        <select id="yearFilter" class="filter-select" style="min-width: 90px; max-width: 100%; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
                             <option value="all">All</option>
                         </select>
                     </div>
                 </div>
                 
-                <div style="display: flex; align-items: center; margin-left: auto;">
-                    <div class="search-box">
+                <div style="display: flex; align-items: center; width: 100%; max-width: 320px; margin-left: auto;">
+                    <div class="search-box" style="width: 100%;">
                         <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
-                        <input type="text" id="tableSearch" class="search-input-table" placeholder="Search requests...">
+                        <input type="text" id="tableSearch" class="search-input-table" placeholder="Search requests..." style="width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
                     </div>
                 </div>
             </div>
@@ -1045,10 +1045,68 @@ function calculateEditAmountReturned() {
 document.getElementById('edit_requested_amount').addEventListener('input', calculateEditAmountReturned);
 document.getElementById('edit_total_expenses').addEventListener('input', calculateEditAmountReturned);
 
+// Validate that an amount field contains a valid, non-negative number.
+// Returns true if valid. Shows a toast and focuses the field if invalid.
+// Empty string is allowed only when `required` is false.
+function validateAmountField(inputId, label, required) {
+    const el = document.getElementById(inputId);
+    if (!el) return true;
+    const raw = el.value.replace(/,/g, '').trim();
+
+    if (raw === '') {
+        if (required) {
+            showToast('error', 'Invalid Amount', label + ' is required and must be a number.');
+            el.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (isNaN(raw) || isNaN(parseFloat(raw))) {
+        showToast('error', 'Invalid Amount', label + ' must be a number, not letters or symbols.');
+        el.focus();
+        return false;
+    }
+
+    if (parseFloat(raw) < 0) {
+        showToast('error', 'Invalid Amount', label + ' cannot be negative.');
+        el.focus();
+        return false;
+    }
+
+    return true;
+}
+// Validate that a name field contains only letters (spaces, periods, hyphens, apostrophes allowed).
+// Blocks numbers and other symbols. Returns true if valid.
+function validateNameField(inputId, label) {
+    const el = document.getElementById(inputId);
+    if (!el) return true;
+    const value = el.value.trim();
+
+    if (value === '') {
+        showToast('error', 'Invalid Name', label + ' is required.');
+        el.focus();
+        return false;
+    }
+
+    const nameRegex = /^[A-Za-z.\-'\s]+$/;
+    if (!nameRegex.test(value)) {
+        showToast('error', 'Invalid Name', label + ' must contain letters only, no numbers or symbols.');
+        el.focus();
+        return false;
+    }
+
+    return true;
+}
+
 // Add request
 document.getElementById('addRequestForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
+    if (!validateNameField('requestor_name', 'Requestor Name')) return;
+    if (!validateAmountField('requested_amount', 'Requested Amount', true)) return;
+    if (!validateAmountField('total_expenses', 'Total Expenses', false)) return;
+
     const formData = {
         requestor_name: document.getElementById('requestor_name').value.trim(),
         department: document.getElementById('department').value.trim(),
@@ -1308,10 +1366,13 @@ document.getElementById('budgetUpdateForm').addEventListener('submit', function(
     });
 });
 
-// Update request
-document.getElementById('editRequestForm').addEventListener('submit', function(e) {
+    document.getElementById('editRequestForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
+    if (!validateNameField('edit_requestor_name', 'Requestor Name')) return;
+    if (!validateAmountField('edit_requested_amount', 'Requested Amount', true)) return;
+    if (!validateAmountField('edit_total_expenses', 'Total Expenses', false)) return;
+
     const id = document.getElementById('edit_id').value;
     const formData = {
         control_number: document.getElementById('edit_control_number').value.trim(),
