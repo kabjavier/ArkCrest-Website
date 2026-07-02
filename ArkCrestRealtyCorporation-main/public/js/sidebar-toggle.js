@@ -76,16 +76,12 @@
     setTimeout(initSidebarToggle, 100);
     setTimeout(initSidebarToggle, 500);
     
-    // Mobile drawer behavior — the ONE and ONLY handler for #mobileMenuToggle.
-    // (Do not add another listener for this button elsewhere — a duplicate
-    // handler here previously canceled this one out on every click.)
+    // Mobile drawer behavior — matches the single 1024px breakpoint in dashboard.css
     function initMobileSidebar() {
         const sidebar = document.getElementById('sidebar');
         const backdrop = document.getElementById('sidebarBackdrop');
         const menuBtn = document.getElementById('mobileMenuToggle');
         if (!sidebar || !backdrop || !menuBtn) return;
-        if (menuBtn.dataset.drawerBound === '1') return; // guard against double-init
-        menuBtn.dataset.drawerBound = '1';
 
         function openDrawer() {
             sidebar.classList.add('mobile-open');
@@ -106,16 +102,18 @@
 
         backdrop.addEventListener('click', closeDrawer);
 
-        // Close drawer after tapping a nav link (mobile only)
+        // Close drawer after tapping a nav link (mobile/tablet only)
         sidebar.querySelectorAll('a').forEach(function(link) {
             link.addEventListener('click', function() {
                 if (window.innerWidth <= 1024) closeDrawer();
             });
         });
 
-        // Close drawer automatically if the window is resized back to desktop width
+        // If the window is resized past the drawer breakpoint while open, reset state
         window.addEventListener('resize', function() {
-            if (window.innerWidth > 1024) closeDrawer();
+            if (window.innerWidth > 1024 && sidebar.classList.contains('mobile-open')) {
+                closeDrawer();
+            }
         });
     }
 
@@ -124,7 +122,6 @@
     } else {
         initMobileSidebar();
     }
-    setTimeout(initMobileSidebar, 100);
 
     // Auto-wrap any table that doesn't already have a scroll container,
     // so it always gets horizontal/vertical scrollbars instead of being clipped.

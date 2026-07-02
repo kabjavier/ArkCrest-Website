@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verify Email � ARCKREST REALTY CORPORATION</title>
+<title>Verify Email — ARCKREST REALTY CORPORATION</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;font-family:"Segoe UI",system-ui,sans-serif}
@@ -46,6 +46,38 @@ body{display:flex;align-items:center;justify-content:center;background:linear-gr
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes btnShimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.08);opacity:.25}}
+
+/* ============================================================
+   RESPONSIVE â€” below 700px the two side-by-side columns
+   (form + branding overlay) get too narrow to use, so they
+   stack vertically instead and the page becomes scrollable.
+   ============================================================ */
+@media (max-width: 700px) {
+    html,body{height:auto;min-height:100%;overflow-y:auto;overflow-x:hidden}
+    body{align-items:flex-start;justify-content:flex-start;padding:20px 12px}
+    .card{
+        width:100%;
+        max-width:440px;
+        height:auto;
+        flex-direction:column-reverse;
+        margin:0 auto;
+        box-shadow:0 20px 60px rgba(0,0,0,.4);
+    }
+    .form-area{width:100%;height:auto;padding:26px 22px}
+    .overlay{position:static;width:100%;height:auto;padding:26px 22px}
+    .overlay::before{display:none}
+    .brand-logo{width:52px;height:52px}
+    .brand-name{font-size:18px}
+    .otp-wrap{gap:8px;justify-content:center}
+    .otp-wrap input{width:42px;height:48px;font-size:18px}
+}
+@media (max-width: 380px) {
+    .overlay{padding:20px 16px}
+    .form-area{padding:20px 16px}
+    .brand-name{font-size:16px}
+    .otp-wrap{gap:6px}
+    .otp-wrap input{width:36px;height:44px;font-size:16px}
+}
 </style>
 </head>
 <body>

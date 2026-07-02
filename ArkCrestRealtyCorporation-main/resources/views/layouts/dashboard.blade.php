@@ -8,6 +8,7 @@
     <title>{{ config('app.name', 'ARCKREST REALTY CORPORATION') }} - @yield('title', 'Dashboard')</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ time() }}{{ rand(1000, 9999) }}">
     <link rel="stylesheet" href="{{ asset('css/optimized-global.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/mobile-responsive.css') }}?v={{ time() }}">
     <style>
     /* Global horizontal scrollbar for all table wrappers */
     .tbl-wrap, .table-wrapper, .table-container, .tbl-scroll {

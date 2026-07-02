@@ -713,8 +713,8 @@ width: 25px !important;
 height: 25px !important;
 color: #FFFFFE;
 }
-/* ===== UNIFIED HEADER PANEL SYSTEM ===== /
-/ All three header dropdowns (search, notes, notifications) share same base style */
+/* ===== UNIFIED HEADER PANEL SYSTEM ===== */
+/* All three header dropdowns (search, notes, notifications) share same base style */
 .search-bar {
 position: absolute;
 right: 0;
@@ -1535,6 +1535,7 @@ box-shadow: 0 4px 12px rgba(30, 69, 117, 0.1);
 .budget-section {
 display: flex;
 align-items: center;
+flex-wrap: wrap;
 gap: 12px;
 }
 .date-section label,
@@ -1552,6 +1553,8 @@ font-size: 14px;
 color: #565651;
 font-weight: 500;
 transition: all 0.3s ease;
+box-sizing: border-box;
+max-width: 100%;
 }
 .date-input:focus,
 .budget-input:focus {
@@ -1581,12 +1584,15 @@ box-shadow: 0 6px 16px rgba(163, 121, 41, 0.4);
 .budget-display {
 display: flex;
 align-items: center;
+flex-wrap: wrap;
 gap: 12px;
 background: linear-gradient(135deg, rgba(163, 121, 41, 0.1), rgba(163, 121, 41, 0.05));
 padding: 14px 24px;
 border-radius: 10px;
 border-left: 5px solid #A37929;
 box-shadow: 0 2px 8px rgba(163, 121, 41, 0.15);
+box-sizing: border-box;
+max-width: 100%;
 }
 .budget-display.remaining-budget {
 background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(39, 174, 96, 0.05));
@@ -2110,9 +2116,36 @@ margin: -20px -20px 20px -20px;
 }
     .dept-controls {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
     }
-    
+
+    .date-section,
+    .budget-section,
+    .budget-display {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .budget-section {
+        flex-wrap: wrap;
+    }
+
+    .budget-input {
+        flex: 1 1 120px;
+        min-width: 0;
+        width: auto;
+    }
+
+    .date-input {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .btn-update-budget {
+        flex: 1 1 auto;
+        white-space: nowrap;
+    }
+
     .category-inputs {
         flex-direction: column;
     }
@@ -3305,14 +3338,18 @@ background: linear-gradient(135deg, rgba(163, 121, 41, 0.05), rgba(163, 121, 41,
 @media (max-width: 768px) {
 .filter-controls {
 flex-direction: column;
-align-items: flex-start;
+align-items: stretch;
 }
     .filter-group {
         width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
     
     .filter-select {
         width: 100%;
+        box-sizing: border-box;
     }
 }
 /* Dropdown Navigation */
