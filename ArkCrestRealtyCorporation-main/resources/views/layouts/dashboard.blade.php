@@ -1668,5 +1668,84 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 })();
 </script>
+
+@if(request()->routeIs('dashboard'))
+<script>
+(function() {
+    var FLAG = 'dashboardTrapArmed';
+
+    function armTrap() {
+        history.pushState({ dashboardTrap: true }, '', window.location.href);
+    }
+
+    function getNavType() {
+        try {
+            var nav = performance.getEntriesByType('navigation')[0];
+            if (nav) return nav.type;
+        } catch (err) {}
+        return null;
+    }
+
+    function checkAndArm() {
+        var wasArmed = sessionStorage.getItem(FLAG) === '1';
+        var navType = getNavType();
+        if (navType === 'back_forward' && wasArmed) {
+            showBackTrapModal();
+        }
+        sessionStorage.setItem(FLAG, '1');
+        armTrap();
+    }
+
+    checkAndArm();
+
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            var wasArmed = sessionStorage.getItem(FLAG) === '1';
+            if (wasArmed) showBackTrapModal();
+            sessionStorage.setItem(FLAG, '1');
+            armTrap();
+        }
+    });
+
+    window.addEventListener('popstate', function() {
+        armTrap();
+        showBackTrapModal();
+    });
+
+    // Leaving the dashboard on purpose (clicking a link, submitting a form
+    // like logout) disarms the trap so a fresh visit later stays silent.
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest && e.target.closest('a[href]');
+        if (link && link.href && link.origin === window.location.origin) {
+            sessionStorage.removeItem(FLAG);
+        }
+    }, true);
+
+    document.addEventListener('submit', function() {
+        sessionStorage.removeItem(FLAG);
+    }, true);
+
+    function showBackTrapModal() {
+        var modal = document.getElementById('backTrapModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            return;
+        }
+        modal = document.createElement('div');
+        modal.id = 'backTrapModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999999;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML =
+            '<div style="background:white;border-radius:16px;padding:28px 32px;max-width:380px;width:90vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);">' +
+                '<div style="font-size:15px;font-weight:600;color:#0f172a;margin-bottom:16px;">Please log out first before leaving this page.</div>' +
+                '<button id="backTrapOk" style="padding:10px 24px;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">OK</button>' +
+            '</div>';
+        document.body.appendChild(modal);
+        document.getElementById('backTrapOk').addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+})();
+</script>
+@endif
 </body>
 </html>
