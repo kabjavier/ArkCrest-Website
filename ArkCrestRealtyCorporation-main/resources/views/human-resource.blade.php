@@ -18,7 +18,7 @@
 </div>
 
 {{-- Stats Cards --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:32px;"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,380px));gap:20px;margin-bottom:32px;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,380px));gap:20px;margin-bottom:32px;">
     <div style="background:white;border-radius:12px;padding:28px 24px;display:flex;align-items:center;gap:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:5px solid #1e4575;">
         <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#1e4575,#2563eb);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <svg width="24" height="24" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -97,9 +97,9 @@
 </div>
 
 {{-- Form Modal --}}
-<div id="hrFormModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 20px;" onclick="if(event.target===this)closeHrForm()">
-    <div style="background:white;border-radius:14px;width:680px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
-        <div id="hrFormHeader" style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+<div id="hrFormModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeHrForm()">
+    <div style="background:white;border-radius:14px;width:95vw;max-width:1100px;max-height:90vh;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;">
+        <div id="hrFormHeader" style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
             <span id="hrFormTitle" style="font-size:14px;font-weight:700;color:white;"></span>
             <div style="display:flex;gap:8px;">
                 <button onclick="saveHrForm()" style="padding:6px 14px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save</button>
@@ -107,7 +107,7 @@
                 <button onclick="closeHrForm()" style="padding:6px 12px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">&times;</button>
             </div>
         </div>
-        <div id="hrFormContent" style="padding:32px 40px;font-family:'Times New Roman',serif;font-size:13px;color:#111;"></div>
+        <div id="hrFormContent" style="padding:32px 40px;font-family:'Times New Roman',serif;font-size:13px;color:#111;flex:1;overflow-y:auto;"></div>
     </div>
 </div>
 
@@ -153,7 +153,17 @@ function saveHrForm() {
 function printHrForm() {
     var content = document.getElementById('hrFormContent').innerHTML;
     var win = window.open('','_blank');
-    win.document.write('<html><head><title>HR Form</title><style>@page{size:letter;margin:.75in}body{font-family:"Times New Roman",serif;font-size:13px;color:#111;margin:0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #111;padding:4px 8px}.nb td,.nb th{border:none}input,textarea{font-family:"Times New Roman",serif;font-size:13px;color:#111;}@media print{body{margin:0}input,textarea{border:none!important;outline:none!important;}}</style></head><body>'+content+'</body></html>');
+    var printHtml = '<html><head><title>HR Form</title><style>@page{size:letter;margin:.75in}body{font-family:"Times New Roman",serif;font-size:13px;color:#111;margin:0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #111;padding:4px 8px}.nb td,.nb th{border:none}input,textarea{font-family:"Times New Roman",serif;font-size:13px;color:#111;}@media print{body{margin:0}input,textarea{border:none!important;outline:none!important;}}</style>'
+        // NOTE: the closing head tag below is split on purpose. Dev-only HTML injector tools
+        // (e.g. Laravel Boost's browser logger) scan raw response bodies for that literal
+        // closing tag text to insert a script tag. Since this string is inside a JS
+        // document.write() call (not a real closing head tag in the page itself), having it
+        // intact here gets matched and injected into, corrupting this script block.
+        // Splitting it keeps the printed document correct while avoiding an accidental match.
+        + '<' + '/head><body>'
+        + content
+        + '</body></html>';
+    win.document.write(printHtml);
     win.document.close(); win.focus(); setTimeout(function(){win.print();},400);
 }
 function _ul(w){return '<span style="display:inline-block;min-width:'+(w||160)+'px;border-bottom:1px solid #111;margin-left:4px;">&nbsp;</span>';}
