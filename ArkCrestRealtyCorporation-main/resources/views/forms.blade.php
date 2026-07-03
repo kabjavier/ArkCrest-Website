@@ -42,7 +42,7 @@
 /* Wrapper used to auto-scale the fixed-width (816px) printable card
    down to fit small screens, without changing its internal layout
    or affecting the print/PDF output quality. See fitCardToWidth() JS. */
-.frm-scale-wrap{width:100%;overflow-x:auto;}
+.frm-scale-wrap{width:100%;overflow:visible;}
 
 /* ============================================================
    MOBILE RESPONSIVE (tablet & phone)
@@ -55,7 +55,7 @@
   .modal-bar > div:last-child{flex-wrap:wrap;width:100%;justify-content:flex-end}
   .modal-bar > div:last-child button{min-height:40px}
   .modal-body-pad{padding:12px!important}
-  .frm-preview-modal{padding:14px 6px!important}
+  .frm-preview-modal{padding:0!important}
 }
 @media (max-width:480px){
   .frm-wrap{padding:12px 6px}
@@ -66,7 +66,7 @@
   #frmPreviewModal, #frmPreviewModal *{visibility:visible}
   #frmPreviewModal{position:fixed;inset:0;background:#fff;padding:0;margin:0;display:flex!important;align-items:flex-start;justify-content:center;overflow:visible;}
   #frmPreviewModal .modal-bar{display:none!important}
-  #frmPreviewBody{box-shadow:none!important;width:auto!important;background:transparent!important;padding:0!important}
+  #frmPreviewBody{box-shadow:none!important;width:auto!important;height:auto!important;background:transparent!important;padding:0!important}
   #frmPreviewBody .frm-card{
     position:static;
     width:100%;max-width:8.5in;
@@ -202,31 +202,14 @@
     <div class="frm-btns dept-sel">
       <button class="btn-clear-f" onclick="clearForm()">Clear</button>
       <button class="btn-print-f" onclick="openPreview('frmCard','Budget Request Form')">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-        View
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Print Budget Request Form
       </button>
     </div>
 
   </div>
 </div>
 
-{{-- Preview Modal --}}
-<div id="frmPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
-  <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
-    {{-- Modal Header --}}
-    <div style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="color:white;font-weight:700;font-size:16px;">Budget Request Form   Preview</div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="incrementAndPrint()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-          Print
-        </button>
-        <button onclick="closePreview()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">&times;</button>
-      </div>
-    </div>
-    {{-- Modal Body: cloned form --}}
-    <div class="frm-preview-scroll" style="padding:20px;display:flex;justify-content:center;overflow-x:auto;-webkit-overflow-scrolling:touch;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:816px;flex-shrink:0;"></div></div>
-  </div>{{-- #frmCardWrap --}}
   </div>{{-- #tab-budget --}}
 
   {{-- ============================= --}}
@@ -378,8 +361,8 @@
   {{-- ============================= --}}
   {{-- Shared Preview / Print Modal  --}}
   {{-- ============================= --}}
-  <div id="frmPreviewModal" class="frm-preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
-    <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+  <div id="frmPreviewModal" class="frm-preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;overflow:hidden;padding:0;">
+    <div style="background:white;width:100vw;height:100vh;display:flex;flex-direction:column;box-shadow:none;overflow:hidden;">
       {{-- Modal Header --}}
       <div class="modal-bar" style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
         <div style="color:white;font-weight:700;font-size:16px;" id="frmPreviewLabel">Preview</div>
@@ -396,7 +379,7 @@
         </div>
       </div>
       {{-- Modal Body: cloned form --}}
-      <div class="modal-body-pad" style="padding:20px;display:flex;justify-content:center;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:100%;max-width:816px;"></div></div>
+      <div class="modal-body-pad" style="padding:20px;display:flex;justify-content:center;align-items:center;flex:1;min-height:0;overflow:hidden;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:100%;max-width:816px;"></div></div>
     </div>
   </div>
 
@@ -417,7 +400,11 @@ function fitCardToWidth(card){
   card.style.transform = 'none';
   var natural = card.offsetWidth;
   var avail = wrap.clientWidth;
-  if(!natural || !avail){ card.style.transform = prevTransform; return; }
+  // Guard against transient 0/near-0 width readings (e.g. mobile layout
+  // not fully settled yet at DOMContentLoaded — sidebar/backdrop still
+  // transitioning). Without this, a stray tiny measurement bakes in
+  // scale(~0) and a 0px wrapper height that never self-corrects.
+  if(!natural || avail < 40){ card.style.transform = prevTransform; return; }
   var scale = Math.min(1, avail / natural);
   if(scale < 0.999){
     card.style.transformOrigin = 'top left';
@@ -428,6 +415,27 @@ function fitCardToWidth(card){
     wrap.style.height = 'auto';
   }
 }
+function fitPreviewCard(){
+  var card = document.querySelector('#frmPreviewBody .frm-card');
+  var wrapper = document.getElementById('frmPreviewBody');
+  var bodyPad = document.querySelector('#frmPreviewModal .modal-body-pad');
+  if(!card || !bodyPad || !wrapper) return;
+  card.style.transform = 'none';
+  wrapper.style.width = '';
+  wrapper.style.height = '';
+  var natW = card.offsetWidth, natH = card.offsetHeight;
+  var availW = bodyPad.clientWidth - 40;
+  var availH = bodyPad.clientHeight - 40;
+  if(!natW || !natH || availW < 40 || availH < 40) return;
+  var scale = Math.min(1, availW / natW, availH / natH);
+  card.style.transformOrigin = 'top left';
+  card.style.transform = scale < 0.999 ? 'scale(' + scale + ')' : 'none';
+  // Shrink the wrapper box to the scaled visual size so flex centering
+  // (align-items/justify-content: center) positions the form correctly
+  // instead of centering around its old, unscaled layout box.
+  wrapper.style.width = (natW * scale) + 'px';
+  wrapper.style.height = (natH * scale) + 'px';
+}
 function fitAllFormCards(){
   fitCardToWidth(document.getElementById('frmCard'));
   fitCardToWidth(document.getElementById('frmCardSV'));
@@ -437,10 +445,26 @@ function fitAllFormCards(){
 var _fitResizeTimer;
 window.addEventListener('resize', function(){
   clearTimeout(_fitResizeTimer);
-  _fitResizeTimer = setTimeout(fitAllFormCards, 120);
+  _fitResizeTimer = setTimeout(function(){
+    fitAllFormCards();
+    if(document.getElementById('frmPreviewModal').style.display === 'flex') fitPreviewCard();
+  }, 120);
 });
 document.addEventListener('DOMContentLoaded', function(){
-  setTimeout(fitAllFormCards, 0);
+  // A single setTimeout(fn, 0) right after DOMContentLoaded can still
+  // land mid-layout on mobile (sidebar drawer/backdrop transitions,
+  // late webfont metrics). Retry across a few animation frames so we
+  // don't lock in a bad measurement, then double-check after window
+  // 'load' once images/fonts are fully in.
+  var attempts = 0;
+  (function attempt(){
+    fitAllFormCards();
+    attempts++;
+    if(attempts < 8) requestAnimationFrame(attempt);
+  })();
+});
+window.addEventListener('load', function(){
+  requestAnimationFrame(fitAllFormCards);
 });
 
 /* ============================================================
@@ -452,7 +476,18 @@ function switchFormsTab(tab){
   var url = new URL(window.location.href);
   url.searchParams.set('tab', tab === 'sitevisit' ? 'site-visit' : 'budget');
   history.replaceState(null, '', url);
-  setTimeout(fitAllFormCards, 0);
+  // The tab that just became visible needs its width re-measured, but a
+  // single setTimeout(fn, 0) can still land before mobile layout has
+  // settled (this is exactly what caused the Site Visit form to load
+  // blank on mobile even though Budget worked — Budget only needed the
+  // page-load retry loop below, but Site Visit only becomes visible
+  // through this function). Retry across a few frames here too.
+  var attempts = 0;
+  (function attempt(){
+    fitAllFormCards();
+    attempts++;
+    if(attempts < 8) requestAnimationFrame(attempt);
+  })();
 }
 document.addEventListener('DOMContentLoaded', function(){
   var params = new URLSearchParams(window.location.search);
@@ -723,6 +758,7 @@ function submitSiteVisit(){
    SHARED PREVIEW / PRINT / PDF MODAL
    ============================================================ */
 function openPreview(cardId, label){
+  document.body.appendChild(document.getElementById('frmPreviewModal'));
   var clone = document.getElementById(cardId).cloneNode(true);
   clone.querySelectorAll('.frm-btns,.dept-sel').forEach(function(el){ el.remove(); });
   clone.style.transform = 'none';
@@ -733,10 +769,12 @@ function openPreview(cardId, label){
   var modal = document.getElementById('frmPreviewModal');
   modal.dataset.source = cardId;
   modal.style.display = 'flex';
-  setTimeout(fitAllFormCards, 0);
+  document.body.style.overflow = 'hidden';
+  setTimeout(fitPreviewCard, 0);
 }
 function closePreview(){
   document.getElementById('frmPreviewModal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 function previewPrint(){
   var src = document.getElementById('frmPreviewModal').dataset.source;
