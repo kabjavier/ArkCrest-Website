@@ -579,7 +579,7 @@
 
       <div class="st-card-body">
 
-        <form method="POST" action="{{ route('settings.profile') }}">
+        <form method="POST" action="{{ route('settings.password') }}">
 
           @csrf
 
@@ -590,7 +590,9 @@
               <label class="st-label">Current Password</label>
 
               <input class="st-input" type="password" name="current_password">
-
+              @error('current_password')
+              <div style="color:#dc2626;font-size:12px;margin-top:4px;">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="st-form-group">
@@ -600,6 +602,9 @@
               <input class="st-input" type="password" name="password" id="settings_new_password" placeholder="Min. 8 chars, upper, lower, number, symbol" oninput="checkSettingsPwd(this.value)">
               <div id="settings-pwd-bar" style="height:3px;border-radius:2px;margin-top:5px;background:#e2e8f0;overflow:hidden;"><div id="settings-pwd-fill" style="height:100%;width:0;transition:width .3s,background .3s;"></div></div>
               <div id="settings-pwd-text" style="font-size:10px;color:#94a3b8;margin-top:2px;"></div>
+              @error('password')
+              <div style="color:#dc2626;font-size:12px;margin-top:4px;">{{ $message }}</div>
+              @enderror
 
             </div>
 
