@@ -299,7 +299,7 @@ function loadSavedForms(type) {
                     '<td style="padding:10px 12px;color:#64748b;">'+f.created_by+'</td>'+
                     '<td style="padding:10px 12px;color:#94a3b8;font-size:12px;">'+f.created_at+'</td>'+
                     '<td style="padding:10px 12px;text-align:right;white-space:nowrap;">'+
-                    '<button onclick="openSavedForm(\''+f.type+'\','+JSON.stringify(f.data).replace(/'/g,"\\'")+',\''+f.title+'\')" style="padding:4px 10px;background:#eff6ff;color:#1e4575;border:1px solid #bfdbfe;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">Open</button>'+
+                        
                     '@if(auth()->user()->isAdmin())<button onclick="deleteSavedForm('+f.id+',\''+type+'\')" style="padding:4px 10px;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Delete</button>@endif'+
                     '</td></tr>';
             }).join('')+'</tbody></table>';
