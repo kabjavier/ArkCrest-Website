@@ -26,6 +26,11 @@
 .liq-tbl th,.liq-tbl td{border:1px solid #000;padding:1px 4px;text-align:center;height:20px;}
 .liq-tbl th{background:#f0f0f0;font-weight:700;font-size:11px}
 .liq-tbl td.amt{text-align:left;padding-left:5px}
+.liq-tbl input{width:100%;border:none;outline:none;font-size:11px;font-family:Arial,sans-serif;background:transparent;padding:0;text-align:center;}
+.liq-tbl td.amt input{text-align:left;padding-left:2px;width:85%;}
+.totals-tbl input{border:none;outline:none;background:transparent;font-size:11px;font-weight:700;font-family:Arial,sans-serif;padding:0 0 1px 4px;width:150px;border-bottom:1px solid #000;}
+.sig-name-input{border:none;outline:none;font-size:11px;font-weight:700;font-family:Arial,sans-serif;background:transparent;width:100%;padding:0;text-align:center;text-transform:uppercase;}
+.sig-date-input{border:none;outline:none;font-size:11px;font-family:Arial,sans-serif;background:transparent;padding:0;width:120px;}
 .cert{font-size:11px;margin:8px 0 10px;line-height:1.4}
 .sigs{width:100%;border-collapse:collapse;font-size:11px;margin-top:0}
 .sigs td{border:1px solid #000;padding:4px 8px;vertical-align:top;width:33.33%}
@@ -42,7 +47,7 @@
 /* Wrapper used to auto-scale the fixed-width (816px) printable card
    down to fit small screens, without changing its internal layout
    or affecting the print/PDF output quality. See fitCardToWidth() JS. */
-.frm-scale-wrap{width:100%;overflow-x:auto;}
+.frm-scale-wrap{width:100%;overflow:visible;}
 
 /* ============================================================
    MOBILE RESPONSIVE (tablet & phone)
@@ -55,7 +60,7 @@
   .modal-bar > div:last-child{flex-wrap:wrap;width:100%;justify-content:flex-end}
   .modal-bar > div:last-child button{min-height:40px}
   .modal-body-pad{padding:12px!important}
-  .frm-preview-modal{padding:14px 6px!important}
+  .frm-preview-modal{padding:0!important}
 }
 @media (max-width:480px){
   .frm-wrap{padding:12px 6px}
@@ -66,7 +71,7 @@
   #frmPreviewModal, #frmPreviewModal *{visibility:visible}
   #frmPreviewModal{position:fixed;inset:0;background:#fff;padding:0;margin:0;display:flex!important;align-items:flex-start;justify-content:center;overflow:visible;}
   #frmPreviewModal .modal-bar{display:none!important}
-  #frmPreviewBody{box-shadow:none!important;width:auto!important;background:transparent!important;padding:0!important}
+  #frmPreviewBody{box-shadow:none!important;width:auto!important;height:auto!important;background:transparent!important;padding:0!important}
   #frmPreviewBody .frm-card{
     position:static;
     width:100%;max-width:8.5in;
@@ -156,21 +161,21 @@
       <tbody>
         @for($i=0;$i<25;$i++)
         <tr>
-          <td>&nbsp;</td>
-          <td></td>
-          <td><input type="text" style="width:100%;border:none;outline:none;font-size:11px;font-family:Arial,sans-serif;background:transparent;padding:0;"></td>
-          <td class="amt">&#8369;</td>
+          <td><input type="date" class="liq-date-input"></td>
+          <td><input type="text" class="liq-receipt-input" autocomplete="off"></td>
+          <td><input type="text" class="liq-particulars-input" style="width:100%;border:none;outline:none;font-size:11px;font-family:Arial,sans-serif;background:transparent;padding:0;"></td>
+          <td class="amt">&#8369; <input type="text" class="liq-amount-input" inputmode="decimal" placeholder="0.00" oninput="formatAmountInput(this)"></td>
         </tr>
         @endfor
       </tbody>
     </table>
-    <table style="width:100%;border-collapse:collapse;font-size:11px;font-weight:700;margin-top:10px;">
+    <table class="totals-tbl" style="width:100%;border-collapse:collapse;font-size:11px;font-weight:700;margin-top:10px;">
       <tr>
-        <td style="border:1px solid #000;padding:5px 7px;width:50%;">TOTAL EXPENSES: &#8369; _______________</td>
-        <td style="border:1px solid #000;padding:5px 7px;width:50%;">LESS CASH ADVANCE: &#8369; _______________</td>
+        <td style="border:1px solid #000;padding:5px 7px;width:50%;">TOTAL EXPENSES: &#8369; <input type="text" id="f_total_expenses" inputmode="decimal" placeholder="0.00" oninput="formatAmountInput(this)"></td>
+        <td style="border:1px solid #000;padding:5px 7px;width:50%;">LESS CASH ADVANCE: &#8369; <input type="text" id="f_less_cash_advance" inputmode="decimal" placeholder="0.00" oninput="formatAmountInput(this)"></td>
       </tr>
       <tr>
-        <td colspan="2" style="border:1px solid #000;padding:5px 7px;">AMOUNT TO BE RETURNED: &#8369; _______________</td>
+        <td colspan="2" style="border:1px solid #000;padding:5px 7px;">AMOUNT TO BE RETURNED: &#8369; <input type="text" id="f_amount_returned" inputmode="decimal" placeholder="0.00" oninput="formatAmountInput(this)"></td>
       </tr>
     </table>
 
@@ -186,15 +191,19 @@
       </tr>
       <tr>
         <td style="padding:4px 8px;height:50px;vertical-align:bottom;font-size:11px;font-weight:700;">
-          <input type="text" id="f_approved_by" style="border:none;outline:none;font-size:11px;font-weight:700;font-family:Arial,sans-serif;background:transparent;width:100%;padding:0;text-align:center;text-transform:uppercase;" placeholder="NAME">
+          <input type="text" id="f_approved_by" class="sig-name-input" placeholder="NAME">
         </td>
-        <td style="padding:4px 8px;height:50px;vertical-align:bottom;font-size:11px;"></td>
-        <td style="padding:4px 8px;height:50px;vertical-align:bottom;font-size:11px;"></td>
+        <td style="padding:4px 8px;height:50px;vertical-align:bottom;font-size:11px;font-weight:700;">
+          <input type="text" id="f_released_by" class="sig-name-input" placeholder="NAME">
+        </td>
+        <td style="padding:4px 8px;height:50px;vertical-align:bottom;font-size:11px;font-weight:700;">
+          <input type="text" id="f_received_by" class="sig-name-input" placeholder="NAME">
+        </td>
       </tr>
       <tr>
-        <td style="padding:4px 8px;font-size:11px;">Date: _______________</td>
-        <td style="padding:4px 8px;font-size:11px;">Date: _______________</td>
-        <td style="padding:4px 8px;font-size:11px;">Date: _______________</td>
+        <td style="padding:4px 8px;font-size:11px;">Date: <input type="date" id="f_date_checked" class="sig-date-input"></td>
+        <td style="padding:4px 8px;font-size:11px;">Date: <input type="date" id="f_date_released" class="sig-date-input"></td>
+        <td style="padding:4px 8px;font-size:11px;">Date: <input type="date" id="f_date_received" class="sig-date-input"></td>
       </tr>
     </table>
 
@@ -202,31 +211,14 @@
     <div class="frm-btns dept-sel">
       <button class="btn-clear-f" onclick="clearForm()">Clear</button>
       <button class="btn-print-f" onclick="openPreview('frmCard','Budget Request Form')">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-        View
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Print Budget Request Form
       </button>
     </div>
 
   </div>
 </div>
 
-{{-- Preview Modal --}}
-<div id="frmPreviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
-  <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
-    {{-- Modal Header --}}
-    <div style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="color:white;font-weight:700;font-size:16px;">Budget Request Form   Preview</div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="incrementAndPrint()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-          Print
-        </button>
-        <button onclick="closePreview()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">&times;</button>
-      </div>
-    </div>
-    {{-- Modal Body: cloned form --}}
-    <div class="frm-preview-scroll" style="padding:20px;display:flex;justify-content:center;overflow-x:auto;-webkit-overflow-scrolling:touch;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:816px;flex-shrink:0;"></div></div>
-  </div>{{-- #frmCardWrap --}}
   </div>{{-- #tab-budget --}}
 
   {{-- ============================= --}}
@@ -378,8 +370,8 @@
   {{-- ============================= --}}
   {{-- Shared Preview / Print Modal  --}}
   {{-- ============================= --}}
-  <div id="frmPreviewModal" class="frm-preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;">
-    <div style="background:white;border-radius:16px;width:100%;max-width:820px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+  <div id="frmPreviewModal" class="frm-preview-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;overflow:hidden;padding:0;">
+    <div style="background:white;width:100vw;height:100vh;display:flex;flex-direction:column;box-shadow:none;overflow:hidden;">
       {{-- Modal Header --}}
       <div class="modal-bar" style="background:linear-gradient(135deg,#1e4575,#2563eb);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
         <div style="color:white;font-weight:700;font-size:16px;" id="frmPreviewLabel">Preview</div>
@@ -396,7 +388,7 @@
         </div>
       </div>
       {{-- Modal Body: cloned form --}}
-      <div class="modal-body-pad" style="padding:20px;display:flex;justify-content:center;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:100%;max-width:816px;"></div></div>
+      <div class="modal-body-pad" style="padding:20px;display:flex;justify-content:center;align-items:center;flex:1;min-height:0;overflow:hidden;"><div id="frmPreviewBody" style="background:white;box-shadow:0 4px 24px rgba(0,0,0,.3);width:100%;max-width:816px;"></div></div>
     </div>
   </div>
 
@@ -417,7 +409,11 @@ function fitCardToWidth(card){
   card.style.transform = 'none';
   var natural = card.offsetWidth;
   var avail = wrap.clientWidth;
-  if(!natural || !avail){ card.style.transform = prevTransform; return; }
+  // Guard against transient 0/near-0 width readings (e.g. mobile layout
+  // not fully settled yet at DOMContentLoaded — sidebar/backdrop still
+  // transitioning). Without this, a stray tiny measurement bakes in
+  // scale(~0) and a 0px wrapper height that never self-corrects.
+  if(!natural || avail < 40){ card.style.transform = prevTransform; return; }
   var scale = Math.min(1, avail / natural);
   if(scale < 0.999){
     card.style.transformOrigin = 'top left';
@@ -428,6 +424,27 @@ function fitCardToWidth(card){
     wrap.style.height = 'auto';
   }
 }
+function fitPreviewCard(){
+  var card = document.querySelector('#frmPreviewBody .frm-card');
+  var wrapper = document.getElementById('frmPreviewBody');
+  var bodyPad = document.querySelector('#frmPreviewModal .modal-body-pad');
+  if(!card || !bodyPad || !wrapper) return;
+  card.style.transform = 'none';
+  wrapper.style.width = '';
+  wrapper.style.height = '';
+  var natW = card.offsetWidth, natH = card.offsetHeight;
+  var availW = bodyPad.clientWidth - 40;
+  var availH = bodyPad.clientHeight - 40;
+  if(!natW || !natH || availW < 40 || availH < 40) return;
+  var scale = Math.min(1, availW / natW, availH / natH);
+  card.style.transformOrigin = 'top left';
+  card.style.transform = scale < 0.999 ? 'scale(' + scale + ')' : 'none';
+  // Shrink the wrapper box to the scaled visual size so flex centering
+  // (align-items/justify-content: center) positions the form correctly
+  // instead of centering around its old, unscaled layout box.
+  wrapper.style.width = (natW * scale) + 'px';
+  wrapper.style.height = (natH * scale) + 'px';
+}
 function fitAllFormCards(){
   fitCardToWidth(document.getElementById('frmCard'));
   fitCardToWidth(document.getElementById('frmCardSV'));
@@ -437,10 +454,26 @@ function fitAllFormCards(){
 var _fitResizeTimer;
 window.addEventListener('resize', function(){
   clearTimeout(_fitResizeTimer);
-  _fitResizeTimer = setTimeout(fitAllFormCards, 120);
+  _fitResizeTimer = setTimeout(function(){
+    fitAllFormCards();
+    if(document.getElementById('frmPreviewModal').style.display === 'flex') fitPreviewCard();
+  }, 120);
 });
 document.addEventListener('DOMContentLoaded', function(){
-  setTimeout(fitAllFormCards, 0);
+  // A single setTimeout(fn, 0) right after DOMContentLoaded can still
+  // land mid-layout on mobile (sidebar drawer/backdrop transitions,
+  // late webfont metrics). Retry across a few animation frames so we
+  // don't lock in a bad measurement, then double-check after window
+  // 'load' once images/fonts are fully in.
+  var attempts = 0;
+  (function attempt(){
+    fitAllFormCards();
+    attempts++;
+    if(attempts < 8) requestAnimationFrame(attempt);
+  })();
+});
+window.addEventListener('load', function(){
+  requestAnimationFrame(fitAllFormCards);
 });
 
 /* ============================================================
@@ -452,7 +485,18 @@ function switchFormsTab(tab){
   var url = new URL(window.location.href);
   url.searchParams.set('tab', tab === 'sitevisit' ? 'site-visit' : 'budget');
   history.replaceState(null, '', url);
-  setTimeout(fitAllFormCards, 0);
+  // The tab that just became visible needs its width re-measured, but a
+  // single setTimeout(fn, 0) can still land before mobile layout has
+  // settled (this is exactly what caused the Site Visit form to load
+  // blank on mobile even though Budget worked — Budget only needed the
+  // page-load retry loop below, but Site Visit only becomes visible
+  // through this function). Retry across a few frames here too.
+  var attempts = 0;
+  (function attempt(){
+    fitAllFormCards();
+    attempts++;
+    if(attempts < 8) requestAnimationFrame(attempt);
+  })();
 }
 document.addEventListener('DOMContentLoaded', function(){
   var params = new URLSearchParams(window.location.search);
@@ -509,9 +553,34 @@ document.addEventListener('click',function(e){
   if(e.target.id!=='f_name') document.getElementById('nameSuggestBox').style.display='none';
 });
 function clearForm(){
-  ['f_name','f_date_req','f_target','f_amount','f_remarks','f_cat'].forEach(function(id){document.getElementById(id).value='';});
+  ['f_name','f_date_req','f_target','f_amount','f_remarks','f_cat',
+   'f_total_expenses','f_less_cash_advance','f_amount_returned',
+   'f_approved_by','f_released_by','f_received_by',
+   'f_date_checked','f_date_released','f_date_received'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  document.querySelectorAll('.liq-date-input,.liq-receipt-input,.liq-particulars-input,.liq-amount-input').forEach(function(el){el.value='';});
   document.getElementById('f_dept').value='HUMAN RESOURCES';
   updDept();
+}
+// Live comma formatting for peso amount fields (e.g. 10000 -> 10,000)
+// Keeps the cursor in place relative to the end of the value so typing
+// feels natural even as separators are inserted/removed.
+function formatAmountInput(el){
+  var distFromEnd = el.value.length - (el.selectionEnd === null ? el.value.length : el.selectionEnd);
+  var raw = el.value.replace(/[^0-9.]/g,'');
+  var firstDot = raw.indexOf('.');
+  if(firstDot !== -1){
+    raw = raw.slice(0,firstDot+1) + raw.slice(firstDot+1).replace(/\./g,'');
+  }
+  var parts = raw.split('.');
+  var intPart = parts[0].replace(/^0+(?=\d)/,'');
+  var decPart = parts.length>1 ? '.'+parts[1].slice(0,2) : '';
+  var formattedInt = intPart ? parseInt(intPart,10).toLocaleString('en-US') : '';
+  el.value = formattedInt + decPart;
+  var newPos = Math.max(0, el.value.length - distFromEnd);
+  if(el.setSelectionRange) el.setSelectionRange(newPos,newPos);
 }
 // Load control number on page load
 var _ctrlNum = '';
@@ -723,6 +792,7 @@ function submitSiteVisit(){
    SHARED PREVIEW / PRINT / PDF MODAL
    ============================================================ */
 function openPreview(cardId, label){
+  document.body.appendChild(document.getElementById('frmPreviewModal'));
   var clone = document.getElementById(cardId).cloneNode(true);
   clone.querySelectorAll('.frm-btns,.dept-sel').forEach(function(el){ el.remove(); });
   clone.style.transform = 'none';
@@ -733,10 +803,12 @@ function openPreview(cardId, label){
   var modal = document.getElementById('frmPreviewModal');
   modal.dataset.source = cardId;
   modal.style.display = 'flex';
-  setTimeout(fitAllFormCards, 0);
+  document.body.style.overflow = 'hidden';
+  setTimeout(fitPreviewCard, 0);
 }
 function closePreview(){
   document.getElementById('frmPreviewModal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 function previewPrint(){
   var src = document.getElementById('frmPreviewModal').dataset.source;
