@@ -4,11 +4,22 @@
 
 <style>
 
-/* Remove page-content padding for settings full-bleed layout */
+/* Remove page-content padding for settings full-bleed layout (desktop only —
+   on mobile the sidebar stacks above the content and the page itself needs
+   to scroll, so we must not clip it with overflow:hidden there) */
 
-.page-content { padding: 0 !important; overflow: hidden !important; height: 100% !important; }
+@media (min-width: 769px) {   
+    .page-content { padding: 0 !important; overflow: hidden !important; height: 100% !important; }
+    .main-content { overflow: hidden !important; }
+}
 
-.main-content { overflow: hidden !important; }
+@media (max-width: 768px) {
+    /* Restore the site's normal scroll pattern: .page-content is the one
+       bounded, scrollable box (there's no scrollable ancestor above it —
+       .content-wrapper/.main-content are overflow:hidden by design). */
+    .page-content { padding: 0 !important; overflow-y: auto !important; height: 100% !important; flex: 1; }
+    .main-content { overflow: hidden !important; }
+}
 
 /* ===== SETTINGS PAGE ===== */
 
@@ -68,7 +79,7 @@
 
     padding: 0 18px;
 
-    height: 100px;
+    height: 64px;
 
     display: flex;
 
@@ -83,7 +94,6 @@
     flex-shrink: 0;
 
 }
-
 .st-sidebar-hdr h2 { font-size: 15px; font-weight: 700; color: white; margin: 0; letter-spacing: .3px; }
 
 .st-sidebar-hdr svg { color: #d4a03a; flex-shrink: 0; }
@@ -92,7 +102,7 @@
 
     font-size: 9px; font-weight: 700; color: rgba(255,255,255,.5);
 
-    letter-spacing: 1.5px; padding: 18px 18px 6px; text-transform: uppercase;
+    letter-spacing: 1.5px; padding: 12px 18px 4px; text-transform: uppercase;
 
 }
 
@@ -100,7 +110,7 @@
 
     display: flex; align-items: center; gap: 10px;
 
-    width: calc(100% - 16px); margin: 1px 8px; padding: 10px 12px;
+    width: calc(100% - 16px); margin: 1px 8px; padding: 8px 12px;
 
     background: none; border: none; font-size: 13px; color: rgba(255,255,255,.75);
 
