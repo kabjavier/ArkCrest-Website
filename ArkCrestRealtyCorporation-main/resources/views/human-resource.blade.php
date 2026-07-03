@@ -97,9 +97,9 @@
 </div>
 
 {{-- Form Modal --}}
-<div id="hrFormModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:30px 20px;" onclick="if(event.target===this)closeHrForm()">
-    <div style="background:white;border-radius:14px;width:680px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
-        <div id="hrFormHeader" style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+<div id="hrFormModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeHrForm()">
+    <div style="background:white;border-radius:14px;width:95vw;max-width:1100px;max-height:90vh;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;">
+        <div id="hrFormHeader" style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
             <span id="hrFormTitle" style="font-size:14px;font-weight:700;color:white;"></span>
             <div style="display:flex;gap:8px;">
                 <button onclick="saveHrForm()" style="padding:6px 14px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save</button>
@@ -107,7 +107,7 @@
                 <button onclick="closeHrForm()" style="padding:6px 12px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">&times;</button>
             </div>
         </div>
-        <div id="hrFormContent" style="padding:32px 40px;font-family:'Times New Roman',serif;font-size:13px;color:#111;"></div>
+        <div id="hrFormContent" style="padding:32px 40px;font-family:'Times New Roman',serif;font-size:13px;color:#111;flex:1;overflow-y:auto;"></div>
     </div>
 </div>
 
