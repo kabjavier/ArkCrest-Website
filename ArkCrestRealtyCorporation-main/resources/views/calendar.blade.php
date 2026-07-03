@@ -145,20 +145,21 @@
         </div>
         <div class="cal-controls" style="position:relative;z-index:2;">
             <form method="GET" action="{{ route('calendar') }}" style="display:flex;align-items:center;gap:6px;">
-                <input type="hidden" name="month" value="{{ $month }}">
+                <select name="month" class="cal-month-sel" onchange="this.form.submit()" style="background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;">
+                    @foreach($monthNames as $num => $name)
+                        @if($num > 0)
+                        <option value="{{ $num }}" {{ $num == $month ? 'selected' : '' }} style="color:#1e4575;background:white;">{{ $name }}</option>
+                        @endif
+                    @endforeach
+                </select>
                 <select name="year" class="cal-year-sel" onchange="this.form.submit()" style="background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;">
                     @foreach($availableYears as $y)
                         <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }} style="color:#1e4575;background:white;">{{ $y }}</option>
                     @endforeach
                 </select>
             </form>
-            <a href="{{ route('calendar', ['month'=>$prevMonth,'year'=>$prevYear]) }}" class="cal-nav-btn" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:white;">&#8249;</a>
-            <span class="cal-month-pill" style="background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.3);">{{ $monthNames[$month] }}</span>
-            <a href="{{ route('calendar', ['month'=>$nextMonth,'year'=>$nextYear]) }}" class="cal-nav-btn" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:white;">&#8250;</a>
+            
             <a href="{{ route('calendar', ['month'=>date('n'),'year'=>date('Y')]) }}" class="cal-today-btn" style="background:rgba(255,255,255,.2);color:white;border:1.5px solid rgba(255,255,255,.3);">Today</a>
-            <a href="{{ route('calendar', ['month'=>$month,'year'=>$year,'view'=>'month']) }}" style="{{ ($view??'month')=='month' ? 'background:rgba(255,255,255,.25);color:white;border-color:rgba(255,255,255,.4);' : 'background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.2);' }} padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                Month
             </a>
             <a href="{{ route('calendar', ['month'=>$month,'year'=>$year,'view'=>'list']) }}" style="{{ ($view??'month')=='list' ? 'background:rgba(255,255,255,.25);color:white;border-color:rgba(255,255,255,.4);' : 'background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.2);' }} padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
