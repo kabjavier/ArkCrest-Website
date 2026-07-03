@@ -533,6 +533,22 @@
     </div>
 
     <script>
+    // Fix: modals inside .main-content get clipped because .main-content,
+    // .content-wrapper and .dashboard-container all use overflow:hidden.
+    // A position:fixed element is still clipped by an overflow:hidden ancestor,
+    // so it never expands to fill the whole screen. Moving each modal to be a
+    // direct child of <body> takes it out of that clipped subtree while
+    // keeping its id (so existing onclick/getElementById code keeps working).
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.main-content *').forEach(function (el) {
+            if (window.getComputedStyle(el).position === 'fixed') {
+                document.body.appendChild(el);
+            }
+        });
+    });
+    </script>
+
+    <script>
     // Close on Escape key - go back
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') history.back();
