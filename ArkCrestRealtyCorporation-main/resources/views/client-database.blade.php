@@ -33,6 +33,10 @@
     @if(session('success'))
     <div style="background:#dcfce7;color:#166534;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">✓ {{ session('success') }}</div>
     @endif
+    <div id="existingRecordBanner" style="display:none;background:#dbeafe;color:#1e40af;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;align-items:center;justify-content:space-between;">
+      <span>📌 Showing the existing record you searched for — highlighted below.</span>
+      <button type="button" onclick="document.getElementById('existingRecordBanner').style.display='none'" style="background:none;border:none;cursor:pointer;color:#1e40af;font-size:18px;font-weight:700;line-height:1;padding:0 4px;">&times;</button>
+    </div>
     <div class="cd-header">
         <div style="position:relative;z-index:2;">
             <div class="cd-header-eyebrow">Sales & Marketing</div>
@@ -119,7 +123,7 @@
                 </div>
                 <div class="form-group">
                     <label>RESERVATION DATE</label>
-                    <input type="date" name="reservation_date">
+                    <input type="date" name="reservation_date" id="f_reservation_date" oninput="validateDownpaymentDate()">
                 </div>
                 <div class="form-group">
                     <label>NUMBER OF UNITS</label>
@@ -127,7 +131,8 @@
                 </div>
                 <div class="form-group">
                     <label>DATE OF DOWNPAYMENT</label>
-                    <input type="date" name="date_of_downpayment">
+                    <input type="date" name="date_of_downpayment" id="f_date_of_downpayment" oninput="validateDownpaymentDate()">
+                    <div id="downpaymentDateError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;font-weight:600;">⚠ Downpayment date cannot be earlier than the reservation date.</div>
                 </div>
                 <div class="form-group">
                     <label>AGENT'S NAME <span class="required">*</span></label>
@@ -741,6 +746,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const highlightId = params.get('highlight');
     const hlStatus = params.get('status');
     const hlAction = params.get('action');
+    const hlReason = params.get('reason');
     if (highlightId) {
         // Wait for full page render then scroll
         function doHighlight() {
@@ -750,14 +756,19 @@ document.addEventListener('DOMContentLoaded',function(){
             // Force show the row even if filtered
             row.style.display = '';
 
+            const isDuplicate = hlReason === 'duplicate';
+            if (isDuplicate) {
+                document.getElementById('existingRecordBanner').style.display = 'flex';
+            }
             const isApproved = hlStatus === 'approved';
             const isPending  = hlStatus === 'pending';
-            const bgColor    = isApproved ? 'rgba(22,163,74,.15)' : (isPending ? 'rgba(234,179,8,.15)' : 'rgba(220,38,38,.12)');
-            const borderColor= isApproved ? '#16a34a' : (isPending ? '#d97706' : '#dc2626');
-            const badgeColor = isApproved ? '#16a34a' : (isPending ? '#d97706' : '#dc2626');
-            const badgeText  = isApproved ? '✓ Approved — Can ' + (hlAction||'edit')
+            const bgColor    = isDuplicate ? 'rgba(37,99,235,.12)' : (isApproved ? 'rgba(22,163,74,.15)' : (isPending ? 'rgba(234,179,8,.15)' : 'rgba(220,38,38,.12)'));
+            const borderColor= isDuplicate ? '#2563eb' : (isApproved ? '#16a34a' : (isPending ? '#d97706' : '#dc2626'));
+            const badgeColor = isDuplicate ? '#2563eb' : (isApproved ? '#16a34a' : (isPending ? '#d97706' : '#dc2626'));
+            const badgeText  = isDuplicate ? '📌 Existing Record'
+                             : (isApproved ? '✓ Approved — Can ' + (hlAction||'edit')
                              : (isPending  ? '👁 ' + (hlAction||'edit') + ' requested'
-                             : '✕ Rejected');
+                             : '✕ Rejected'));
 
             row.style.background   = bgColor;
             row.style.outline      = '2px solid ' + borderColor;
@@ -1264,10 +1275,35 @@ function unmarkPaid(instId) {
     }).then(r => r.json()).then(() => loadInstallments());
 }
 
+// ---- Downpayment Date Validation ----
+function validateDownpaymentDate() {
+    var resDateEl = document.getElementById('f_reservation_date');
+    var dpDateEl = document.getElementById('f_date_of_downpayment');
+    var errorEl = document.getElementById('downpaymentDateError');
+    var isValid = true;
+
+    if (resDateEl.value && dpDateEl.value && dpDateEl.value < resDateEl.value) {
+        errorEl.style.display = 'block';
+        dpDateEl.style.borderColor = '#dc2626';
+        isValid = false;
+    } else {
+        errorEl.style.display = 'none';
+        dpDateEl.style.borderColor = '';
+    }
+
+    return isValid;
+}
+
 // ---- Duplicate Client Record Check ----
 document.getElementById('commissionForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = this;
+
+    if (!validateDownpaymentDate()) {
+        document.getElementById('f_date_of_downpayment').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
     var clientName  = (form.querySelector('[name="client_name"]').value || '').trim();
     var projectName = (form.querySelector('[name="project_name"]').value || '').trim();
     var blockLot    = (form.querySelector('[name="block_lot_number"]').value || '').trim();
@@ -1277,7 +1313,6 @@ document.getElementById('commissionForm').addEventListener('submit', function (e
         project_name: projectName,
         block_lot_number: blockLot
     });
-
     fetch('/api/client-database/check-duplicate?' + params.toString())
         .then(r => r.json())
         .then(data => {
@@ -1300,6 +1335,7 @@ function showDuplicateModal(recordId) {
 function closeDuplicateModal() {
     document.getElementById('duplicateRecordModal').style.display = 'none';
 }
+
 function goToDuplicateRecord() {
     var modal = document.getElementById('duplicateRecordModal');
     var id = modal.dataset.recordId;
