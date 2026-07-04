@@ -99,9 +99,9 @@
 {{-- Form Modal --}}
 <div id="hrFormModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeHrForm()">
     <div style="background:white;border-radius:14px;width:95vw;max-width:1100px;max-height:90vh;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;">
-        <div id="hrFormHeader" style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-            <span id="hrFormTitle" style="font-size:14px;font-weight:700;color:white;"></span>
-            <div style="display:flex;gap:8px;">
+        <div id="hrFormHeader" style="padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;">
+            <span id="hrFormTitle" style="font-size:14px;font-weight:700;color:white;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;"></span>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
                 <button onclick="saveHrForm()" style="padding:6px 14px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save</button>
                 <button onclick="printHrForm()" style="padding:6px 14px;background:rgba(255,255,255,.2);color:white;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">🖨 Print</button>
                 <button onclick="closeHrForm()" style="padding:6px 12px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">&times;</button>
@@ -413,25 +413,26 @@ function loadSavedForms(type) {
             container.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px;font-size:13px;">No saved forms yet.</div>';
             return;
         }
-        container.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'+
+        container.innerHTML = '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'+
+            '<table style="width:100%;min-width:680px;border-collapse:collapse;font-size:13px;">'+
             '<thead><tr style="background:#f8fafc;">'+
             '@if(auth()->user()->isAdmin())<th style="padding:8px 12px;border-bottom:1px solid #e2e8f0;width:32px;"><input type="checkbox" id="selectAll-'+type+'" onclick="toggleSelectAll(\''+type+'\')"></th>@endif'+
-            '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Title</th>'+
-            '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Saved By</th>'+
-            '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;">Date</th>'+
+            '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;white-space:nowrap;">Title</th>'+
+            '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;white-space:nowrap;">Saved By</th>'+
+            '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;white-space:nowrap;">Date</th>'+
             '<th style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"></th></tr></thead><tbody>'+
             list.map(function(f, idx){
                 return '<tr style="border-bottom:1px solid #f1f5f9;">'+
                     '@if(auth()->user()->isAdmin())<td style="padding:10px 12px;"><input type="checkbox" class="row-checkbox-'+type+'" value="'+f.id+'" onclick="updateBulkDeleteBar(\''+type+'\')"></td>@endif'+
-                    '<td style="padding:10px 12px;font-weight:600;color:#0f172a;">'+f.title+'</td>'+
-                    '<td style="padding:10px 12px;color:#64748b;">'+f.created_by+'</td>'+
-                    '<td style="padding:10px 12px;color:#94a3b8;font-size:12px;">'+f.created_at+'</td>'+
+                    '<td style="padding:10px 12px;font-weight:600;color:#0f172a;word-break:break-word;">'+f.title+'</td>'+
+                    '<td style="padding:10px 12px;color:#64748b;white-space:nowrap;">'+f.created_by+'</td>'+
+                    '<td style="padding:10px 12px;color:#94a3b8;font-size:12px;white-space:nowrap;">'+f.created_at+'</td>'+
                     '<td style="padding:10px 12px;text-align:right;white-space:nowrap;">'+
                     '<button onclick="viewSavedForm(\''+type+'\','+idx+')" style="padding:4px 10px;background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;">View</button>'+
                     '<button onclick="editSavedForm(\''+type+'\','+idx+')" style="padding:4px 10px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;">Edit</button>'+
                     '@if(auth()->user()->isAdmin())<button onclick="deleteSavedForm('+f.id+',\''+type+'\')" style="padding:4px 10px;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Delete</button>@endif'+
                     '</td></tr>';
-            }).join('')+'</tbody></table>';
+            }).join('')+'</tbody></table></div>';
     });
 }
 
