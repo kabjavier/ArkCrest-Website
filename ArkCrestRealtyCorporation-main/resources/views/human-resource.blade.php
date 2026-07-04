@@ -233,9 +233,38 @@ function saveHrForm() {
     });
 }
 function printHrForm() {
-    var content = document.getElementById('hrFormContent').innerHTML;
+    var source = document.getElementById('hrFormContent');
+    var clone = source.cloneNode(true);
+    // innerHTML only serializes the *original* attributes/content of each
+    // element, not what the user actually typed — an <input>'s typed text
+    // lives in its .value property (never written back to the "value"
+    // attribute), and a <textarea>'s typed text lives in .value too (its
+    // innerHTML/child text node stays empty, since it started empty). That
+    // mismatch is why the print preview showed blank fields and an
+    // apparently "missing" Explanation box. Fix: copy each live value into
+    // the clone (as an attribute for inputs, as text content for
+    // textareas) before reading its HTML.
+    var liveFields = source.querySelectorAll('input, textarea');
+    var cloneFields = clone.querySelectorAll('input, textarea');
+    liveFields.forEach(function (live, i) {
+        var c = cloneFields[i];
+        if (!c) return;
+        if (live.tagName === 'TEXTAREA') {
+            c.textContent = live.value;
+        } else {
+            c.setAttribute('value', live.value);
+        }
+    });
+    var content = clone.innerHTML;
     var win = window.open('','_blank');
-    var printHtml = '<html><head><title>HR Form</title><style>@page{size:letter;margin:.75in}body{font-family:"Times New Roman",serif;font-size:13px;color:#111;margin:0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #111;padding:4px 8px}.nb td,.nb th{border:none}input,textarea{font-family:"Times New Roman",serif;font-size:13px;color:#111;}@media print{body{margin:0}input,textarea{border:none!important;outline:none!important;}}</style>'
+    var printHtml = '<html><head><title>HR Form</title><style>@page{size:letter;margin:.75in}body{font-family:"Times New Roman",serif;font-size:13px;color:#111;margin:0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #111;padding:4px 8px}.nb td,.nb th{border:none}input,textarea{font-family:"Times New Roman",serif;font-size:13px;color:#111;}'
+        // Only strip the outline (browser focus-ring styling, irrelevant to print).
+        // A previous version also forced border:none!important here, which — because
+        // !important beats a plain inline style — wiped out every field's intentional
+        // border: the Explanation textarea's box (inline border:1px solid #111) and the
+        // underline (border-bottom) on every other text field. Removing that override
+        // restores both.
+        + '@media print{body{margin:0}input,textarea{outline:none!important;}}</style>'
         // NOTE: the closing head tag below is split on purpose. Dev-only HTML injector tools
         // (e.g. Laravel Boost's browser logger) scan raw response bodies for that literal
         // closing tag text to insert a script tag. Since this string is inside a JS
