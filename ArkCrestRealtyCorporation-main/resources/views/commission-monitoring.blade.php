@@ -24,7 +24,7 @@
     <!-- Statistics Cards -->
     @if(!in_array('commission-monitoring.cards', $hiddenSections))
     <div class="stats-grid">
-        <div class="stat-card card-blue">
+        <div class="stat-card card-blue" onclick="filterByStat('')" style="cursor:pointer;" title="Click to view all requests">
             <div class="stat-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <div class="stat-card card-yellow">
+        <div class="stat-card card-yellow" onclick="filterByStat('Not Yet Released')" style="cursor:pointer;" title="Click to view Not Yet Released requests">
             <div class="stat-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <div class="stat-card card-green">
+        <div class="stat-card card-green" onclick="filterByStat('Released')" style="cursor:pointer;" title="Click to view Released requests">
             <div class="stat-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -609,6 +609,8 @@
         opacity: 0.05;
     }
 
+    
+
     .card-blue::before { background: #1e4575; }
     .card-yellow::before { background: #f59e0b; }
     .card-green::before { background: #10b981; }
@@ -1141,14 +1143,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cmNoResults) {
             cmNoResults.style.display = (visible === 0 && dataRows.length > 0) ? '' : 'none';
         }
-
-        // Update stat cards (null-check in case cards section is hidden)
-        const elTotal = document.getElementById('statTotal');
-        const elNYR   = document.getElementById('statNotReleased');
-        const elRel   = document.getElementById('statReleased');
-        if (elTotal) elTotal.textContent = visible;
-        if (elNYR)   elNYR.textContent   = dataRows.filter(r => r.style.display !== 'none' && r.getAttribute('data-status') === 'Not Yet Released').length;
-        if (elRel)   elRel.textContent   = dataRows.filter(r => r.style.display !== 'none' && r.getAttribute('data-status') === 'Released').length;
     }
 
     searchInput.addEventListener('input', filterTable);
@@ -1157,11 +1151,30 @@ document.addEventListener('DOMContentLoaded', function() {
     yearFilter.addEventListener('change', filterTable);
 });
 
+function filterByStat(status) {
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.value = status;
+        statusFilter.dispatchEvent(new Event('change'));
+    }
+
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('stat-card-selected'));
+    const cardMap = { '': 'card-blue', 'Not Yet Released': 'card-yellow', 'Released': 'card-green' };
+    const activeCard = document.querySelector('.stat-card.' + cardMap[status]);
+    if (activeCard) activeCard.classList.add('stat-card-selected');
+
+    const tableContainer = document.querySelector('.monitoring-table-container');
+    if (tableContainer) {
+        tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
 function resetFilters() {
     document.getElementById('monitoringSearch').value = '';
     document.getElementById('statusFilter').value = '';
     document.getElementById('monthFilter').value = '';
     document.getElementById('yearFilter').value = '';
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('stat-card-selected'));
 
     const tableBody = document.getElementById('monitoringTableBody');
     const rows = Array.from(tableBody.getElementsByTagName('tr'))
