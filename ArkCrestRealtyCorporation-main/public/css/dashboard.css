@@ -3572,6 +3572,18 @@ background: #FFD700 !important;
 .nav-subitem.active .nav-icon {
 color: #FFD700 !important;
 }
+.nav-submenu-label {
+font-size: 10px;
+font-weight: 700;
+color: rgba(255,255,255,.5);
+letter-spacing: 1.2px;
+text-transform: uppercase;
+padding: 10px 12px 4px 28px;
+margin: 0;
+}
+#settingsSubmenu.open {
+max-height: 900px;
+}
 .sidebar-collapsed .dropdown-toggle-btn {
 display: none;
 }
