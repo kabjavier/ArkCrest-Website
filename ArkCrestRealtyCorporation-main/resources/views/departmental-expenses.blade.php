@@ -1107,44 +1107,46 @@ document.getElementById('addRequestForm')?.addEventListener('submit', function(e
     if (!validateAmountField('requested_amount', 'Requested Amount', true)) return;
     if (!validateAmountField('total_expenses', 'Total Expenses', false)) return;
 
-    const formData = {
-        requestor_name: document.getElementById('requestor_name').value.trim(),
-        department: document.getElementById('department').value.trim(),
-        category: document.getElementById('category').value.trim(),
-        date_requested: document.getElementById('date_requested').value || null,
-        requested_amount: parseFloat(document.getElementById('requested_amount').value.replace(/,/g,'')) || 0,
-        status: document.getElementById('status').value,
-        date_released: document.getElementById('date_released').value || null,
-        total_expenses: document.getElementById('total_expenses').value ? parseFloat(document.getElementById('total_expenses').value.replace(/,/g,'')) : null,
-        amount_returned: document.getElementById('amount_returned').value ? parseFloat(document.getElementById('amount_returned').value.replace(/,/g,'')) : null,
-        date_of_amount_returned: document.getElementById('date_of_amount_returned').value || null
-    };
-    
-    fetch('/api/departmental-expenses', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.message || 'Error adding request');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showToast('success', 'Success', 'Request added successfully!');
-            setTimeout(() => location.reload(), 1500);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('error', 'Error', error.message || 'Error adding request');
+    showConfirm('Add this expense request?', function() {
+        const formData = {
+            requestor_name: document.getElementById('requestor_name').value.trim(),
+            department: document.getElementById('department').value.trim(),
+            category: document.getElementById('category').value.trim(),
+            date_requested: document.getElementById('date_requested').value || null,
+            requested_amount: parseFloat(document.getElementById('requested_amount').value.replace(/,/g,'')) || 0,
+            status: document.getElementById('status').value,
+            date_released: document.getElementById('date_released').value || null,
+            total_expenses: document.getElementById('total_expenses').value ? parseFloat(document.getElementById('total_expenses').value.replace(/,/g,'')) : null,
+            amount_returned: document.getElementById('amount_returned').value ? parseFloat(document.getElementById('amount_returned').value.replace(/,/g,'')) : null,
+            date_of_amount_returned: document.getElementById('date_of_amount_returned').value || null
+        };
+
+        fetch('/api/departmental-expenses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Error adding request');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showToast('success', 'Success', 'Request added successfully!');
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Error', error.message || 'Error adding request');
+        });
     });
 });
 
