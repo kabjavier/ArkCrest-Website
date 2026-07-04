@@ -622,7 +622,7 @@
 
             <!-- Logout Button -->
             <div class="logout-section">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" data-confirm="Are you sure you want to log out?">
                     @csrf
                     <button type="submit" class="nav-item logout-btn">
                         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
