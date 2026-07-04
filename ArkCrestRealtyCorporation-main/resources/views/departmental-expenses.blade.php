@@ -282,29 +282,37 @@
             </div>
             
             <!-- Filters and Search below title -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 12px;">
-                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <label for="monthFilter" style="font-weight: 600; color: #1e4575; font-size: 13px; white-space: nowrap;">Month:</label>
-                        <select id="monthFilter" class="filter-select" style="min-width: 110px; max-width: 100%; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
-                            <option value="all">All</option>
-                        </select>
+            <div class="expenses-filters-bar" style="display: flex; flex-direction: column; gap: 14px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
+                <div class="expenses-filters-row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div class="expenses-date-filters" style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+                        <div class="date-range-group" style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-weight: 600; color: #1e4575; font-size: 12px; text-transform: uppercase; letter-spacing: .3px;">Date Requested</label>
+                            <div class="date-range-inputs" style="display: flex; align-items: center; gap: 6px;">
+                                <input type="date" id="dateRequestedFrom" class="filter-select" style="font-size: 13px; padding: 7px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054;">
+                                <span style="color:#8a9bad;font-size:12px;">to</span>
+                                <input type="date" id="dateRequestedTo" class="filter-select" style="font-size: 13px; padding: 7px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054;">
+                            </div>
+                        </div>
+
+                        <div class="date-range-group" style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-weight: 600; color: #1e4575; font-size: 12px; text-transform: uppercase; letter-spacing: .3px;">Date Released</label>
+                            <div class="date-range-inputs" style="display: flex; align-items: center; gap: 6px;">
+                                <input type="date" id="dateReleasedFrom" class="filter-select" style="font-size: 13px; padding: 7px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054;">
+                                <span style="color:#8a9bad;font-size:12px;">to</span>
+                                <input type="date" id="dateReleasedTo" class="filter-select" style="font-size: 13px; padding: 7px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054;">
+                            </div>
+                        </div>
+
+                        <button type="button" class="clear-dates-btn" onclick="clearDateFilters()" style="font-size:12px;font-weight:600;color:#1e4575;background:#eef2f7;border:1px solid #d0d5dd;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap;height:34px;">Clear Dates</button>
                     </div>
-                    
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <label for="yearFilter" style="font-weight: 600; color: #1e4575; font-size: 13px; white-space: nowrap;">Year:</label>
-                        <select id="yearFilter" class="filter-select" style="min-width: 90px; max-width: 100%; font-size: 13px; padding: 6px 10px; border: 1.5px solid #d0d5dd; border-radius: 6px; background-color: white; color: #344054; font-weight: 500; cursor: pointer; transition: all 0.2s;">
-                            <option value="all">All</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="display: flex; align-items: center; width: 100%; max-width: 320px; margin-left: auto;">
-                    <div class="search-box" style="width: 100%;">
-                        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        <input type="text" id="tableSearch" class="search-input-table" placeholder="Search requests..." style="width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
+
+                    <div class="expenses-search-wrapper" style="display: flex; align-items: center; width: 100%; max-width: 320px;">
+                        <div class="search-box" style="width: 100%;">
+                            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" id="tableSearch" class="search-input-table" placeholder="Search requests..." style="width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -329,7 +337,7 @@
                 </thead>
                 <tbody id="requestsTableBody">
                     @foreach($requests as $req)
-                    <tr id="expense-{{ $req->id }}" data-id="{{ $req->id }}" data-department="{{ $req->department }}" data-date-released="{{ $req->date_released ? $req->date_released->format('Y-m-d') : '' }}" data-control="{{ $req->control_number }}">
+                    <tr id="expense-{{ $req->id }}" data-id="{{ $req->id }}" data-department="{{ $req->department }}" data-date-requested="{{ $req->date_requested ? $req->date_requested->format('Y-m-d') : '' }}" data-date-released="{{ $req->date_released ? $req->date_released->format('Y-m-d') : '' }}" data-control="{{ $req->control_number }}">
                         <td>{{ $req->control_number }}</td>
                         <td>{{ $req->requestor_name }}</td>
                         <td class="department-cell">{{ $req->department }}</td>
@@ -364,6 +372,47 @@
     </div>
     @endif
 </div>
+
+<style>
+/* Mobile responsiveness fix for the "All Expenses" date-range filters and
+   search bar. These were plain inline-styled flex rows with no breakpoint,
+   so on narrow screens the two date inputs, the "to" labels, the Clear
+   Dates button, and the search bar all tried to stay on one line and
+   overflowed the viewport instead of wrapping/stacking. */
+@media (max-width: 768px) {
+    .expenses-filters-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .expenses-date-filters {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100%;
+        gap: 14px !important;
+    }
+    .date-range-group {
+        width: 100%;
+    }
+    .date-range-inputs {
+        flex-wrap: wrap !important;
+        width: 100%;
+    }
+    .date-range-inputs input[type="date"] {
+        flex: 1 1 120px !important;
+        min-width: 0 !important;
+        width: auto !important;
+    }
+    .clear-dates-btn {
+        width: 100% !important;
+        text-align: center;
+    }
+    .expenses-search-wrapper {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+}
+</style>
+
 <div id="budgetModal" class="modal">
     <div class="modal-content modal-compact" style="max-width: 480px;max-height:85vh;overflow-y:auto;">
         <div class="modal-header">
@@ -1464,152 +1513,67 @@ window.onclick = function(event) {
     }
 }
 
-// Simple Table Search - Multiple words support WITH FILTER RESPECT
-const searchInput = document.getElementById('tableSearch');
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        const searchText = this.value.toLowerCase().trim();
-        const rows = document.querySelectorAll('#requestsTableBody tr');
-        const monthFilter = document.getElementById('monthFilter');
-        const yearFilter = document.getElementById('yearFilter');
-        
-        if (searchText.length > 0) {
-            const searchWords = searchText.split(/\s+/).filter(word => word.length > 0);
-            const selectedMonth = monthFilter ? monthFilter.value : 'all';
-            const selectedYear = yearFilter ? yearFilter.value : 'all';
-            
-            let visibleCount = 0;
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const dateRequested = row.getAttribute('data-date-released') || '';
-                
-                // Check if text matches search
-                const allWordsFound = searchWords.every(word => text.includes(word));
-                
-                // Check if row matches current month/year filter
-                let matchesFilter = true;
-                if (dateRequested) {
-                    const rowDate = new Date(dateRequested);
-                    const rowMonth = String(rowDate.getMonth() + 1).padStart(2, '0');
-                    const rowYear = String(rowDate.getFullYear());
-                    
-                    if (selectedMonth !== 'all' && rowMonth !== selectedMonth) {
-                        matchesFilter = false;
-                    }
-                    if (selectedYear !== 'all' && rowYear !== selectedYear) {
-                        matchesFilter = false;
-                    }
-                }
-                
-                // Show only if matches both search AND filter
-                if (allWordsFound && matchesFilter) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        } else {
-            // If no search text, just apply the month/year filters
-            applyMonthYearFilters();
-        }
-        
-        checkNoResults();
-    });
+// Date Requested / Date Released range filter check
+function matchesDateRangeFilters(row) {
+    const reqFrom = document.getElementById('dateRequestedFrom')?.value || '';
+    const reqTo   = document.getElementById('dateRequestedTo')?.value || '';
+    const relFrom = document.getElementById('dateReleasedFrom')?.value || '';
+    const relTo   = document.getElementById('dateReleasedTo')?.value || '';
+
+    const rowReq = row.getAttribute('data-date-requested') || '';
+    const rowRel = row.getAttribute('data-date-released') || '';
+
+    if (reqFrom || reqTo) {
+        if (!rowReq) return false;
+        if (reqFrom && rowReq < reqFrom) return false;
+        if (reqTo && rowReq > reqTo) return false;
+    }
+    if (relFrom || relTo) {
+        if (!rowRel) return false;
+        if (relFrom && rowRel < relFrom) return false;
+        if (relTo && rowRel > relTo) return false;
+    }
+    return true;
 }
 
-// Month/Year Filter Function
-function applyMonthYearFilters() {
-    const monthFilter = document.getElementById('monthFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    
-    if (!monthFilter || !yearFilter) {
-        return;
-    }
-    
-    const selectedMonth = monthFilter.value;
-    const selectedYear = yearFilter.value;
-    
-    localStorage.setItem('expensesMonthFilter', selectedMonth);
-    localStorage.setItem('expensesYearFilter', selectedYear);
-    
+function clearDateFilters() {
+    ['dateRequestedFrom','dateRequestedTo','dateReleasedFrom','dateReleasedTo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    applyFilters();
+}
+
+['dateRequestedFrom','dateRequestedTo','dateReleasedFrom','dateReleasedTo'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', applyFilters);
+});
+
+// Table Search + Date Range filtering (combined) - Multiple words support
+const searchInput = document.getElementById('tableSearch');
+
+function applyFilters() {
+    const searchText = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const searchWords = searchText.split(/\s+/).filter(word => word.length > 0);
     const rows = document.querySelectorAll('#requestsTableBody tr');
-    
+
     rows.forEach(row => {
         if (row.cells.length === 0) {
             row.style.display = 'none';
             return;
         }
-        
-        const dateCell = row.cells[7].textContent.trim();
-        
-        if (dateCell === '-' || !dateCell) {
-            row.style.display = 'none';
-            return;
-        }
-        
-        const [month, day, year] = dateCell.split('/');
-        
-        if (!month || !year) {
-            row.style.display = 'none';
-            return;
-        }
-        
-        const monthMatch = selectedMonth === 'all' || month === selectedMonth.padStart(2, '0');
-        const yearMatch = selectedYear === 'all' || year === selectedYear;
-        
-        if (monthMatch && yearMatch) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+
+        const text = row.textContent.toLowerCase();
+        const allWordsFound = searchWords.length === 0 || searchWords.every(word => text.includes(word));
+        const dateRangeMatch = matchesDateRangeFilters(row);
+
+        row.style.display = (allWordsFound && dateRangeMatch) ? '' : 'none';
     });
-    
+
     checkNoResults();
 }
 
-// Populate month filter from table data
-function populateMonthFilter() {
-    const monthFilter = document.getElementById('monthFilter');
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    monthNames.forEach((name, i) => {
-        const option = document.createElement('option');
-        option.value = String(i + 1).padStart(2, '0');
-        option.textContent = name;
-        monthFilter.appendChild(option);
-    });
-}
-
-// Populate year filter from table data
-function populateYearFilter() {
-    const rows = document.querySelectorAll('#requestsTableBody tr');
-    const years = new Set();
-    
-    rows.forEach(row => {
-        if (row.cells.length > 4) {
-            const dateCell = row.cells[7].textContent.trim();
-            if (dateCell && dateCell !== '-' && dateCell.includes('/')) {
-                const parts = dateCell.split('/');
-                if (parts.length === 3) {
-                    const year = parts[2];
-                    if (year && year.length === 4) {
-                        years.add(year);
-                    }
-                }
-            }
-        }
-    });
-    
-    const yearFilter = document.getElementById('yearFilter');
-    const sortedYears = Array.from(years).sort((a, b) => b - a);
-    
-    sortedYears.forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearFilter.appendChild(option);
-    });
+if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
 }
 
 function checkNoResults() {
@@ -1639,52 +1603,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.department-cell').forEach(cell => {
         cell.textContent = mapDepartmentName(cell.textContent);
     });
-    
-    populateMonthFilter();
-    populateYearFilter();
-    
-    const monthFilter = document.getElementById('monthFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    
-    // Default to current month/year instead of localStorage
-    const now = new Date();
-    const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-    const currentYear = String(now.getFullYear());
 
-    const savedMonth = localStorage.getItem('expensesMonthFilter') || currentMonth;
-    const savedYear = localStorage.getItem('expensesYearFilter') || currentYear;
-    
-    if (monthFilter) {
-        monthFilter.value = savedMonth;
-    }
-    
-    if (yearFilter) {
-        yearFilter.value = savedYear;
-    }
-    
-    applyMonthYearFilters();
-    
-    if (monthFilter) {
-        monthFilter.addEventListener('change', function() {
-            // Clear search box when filter changes
-            const searchInput = document.getElementById('tableSearch');
-            if (searchInput) {
-                searchInput.value = '';
-            }
-            applyMonthYearFilters();
-        });
-    }
-    
-    if (yearFilter) {
-        yearFilter.addEventListener('change', function() {
-            // Clear search box when filter changes
-            const searchInput = document.getElementById('tableSearch');
-            if (searchInput) {
-                searchInput.value = '';
-            }
-            applyMonthYearFilters();
-        });
-    }
+    applyFilters();
 });
 
 // Set active state for Departments nav item - run separately to avoid conflicts
