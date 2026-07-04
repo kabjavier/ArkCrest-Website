@@ -1303,7 +1303,7 @@ function closeDuplicateModal() {
 function goToDuplicateRecord() {
     var modal = document.getElementById('duplicateRecordModal');
     var id = modal.dataset.recordId;
-    window.location.href = '{{ route("client-database") }}?highlight=' + id;
+    window.location.href = '{{ route("client-database") }}?highlight=' + id + '&reason=duplicate';
 }
 
 @if(session('duplicate_error'))
