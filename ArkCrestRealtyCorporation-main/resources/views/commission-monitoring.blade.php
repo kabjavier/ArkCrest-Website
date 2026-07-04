@@ -69,17 +69,17 @@
             <h2>ADD NEW COMMISSION REQUEST</h2>
         </div>
         @if(session('error'))
-        <div style="background:#fee2e2;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;">{{ session('error') }}</div>
+        <script>document.addEventListener('DOMContentLoaded', function(){ showCmToast(@json(session('error')), 'error'); });</script>
         @endif
         @if(session('success'))
-        <div style="background:#dcfce7;color:#166534;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;">✔ {{ session('success') }}</div>
+        <script>document.addEventListener('DOMContentLoaded', function(){ showCmToast(@json(session('success')), 'success'); });</script>
         @endif
         @if($errors->any())
         <div style="background:#fee2e2;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;">
             @foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach
         </div>
         @endif
-        <form id="cmAddForm" class="commission-form" action="{{ route('commission-monitoring.store') }}" method="POST">
+        <form id="cmAddForm" class="commission-form" action="{{ route('commission-monitoring.store') }}" method="POST" onsubmit="return confirm('Are you sure you want to submit this request?')">
             @csrf
             <div class="form-section">
                 <div class="section-title-bar">
@@ -212,7 +212,7 @@
             </div>
             <input type="hidden" name="commission" id="cm_add_commission" value="">
             <div class="form-actions">
-                <button type="button" class="btn-clear" onclick="document.getElementById('cmAddForm').reset()">
+                <button type="button" class="btn-clear" onclick="clearCmAddForm()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -1445,10 +1445,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.getElementById('cmEditForm').addEventListener('submit', function() {
+    document.getElementById('cmEditForm').addEventListener('submit', function(e) {
+        if (!confirm('Save changes to this commission request?')) {
+            e.preventDefault();
+            return;
+        }
         const id = document.getElementById('cm_edit_id').value;
         this.action = `/commission-monitoring/${id}`;
-        showToast('Saving changes...', 'info');
     });
 
     // Auto-open edit/delete after admin approval redirect
@@ -1519,19 +1522,61 @@ function requireAdmin(callback, recordId, action) {
         });
 }
 
+// ── FIXED: window.confirm on this site is globally overridden (see
+// layouts/dashboard.blade.php) to always return true instantly with NO
+// visible popup, because the real confirm UI is a custom async modal
+// (window.showConfirmModal, exposed from that same file). Any code that
+// calls the plain confirm(...) directly — like this function used to —
+// never shows anything to the user. We now await the real modal instead. ──
 function requireAdminSync(event, recordId) {
     if (!IS_ADMIN) {
         event.preventDefault();
         requireAdmin(null, recordId, 'delete');
         return false;
     }
-    return confirm('Are you sure you want to delete this commission request?');
+    event.preventDefault();
+    var form = event.target;
+    if (typeof window.showConfirmModal === 'function') {
+        window.showConfirmModal('Are you sure you want to delete this commission request?').then(function(confirmed) {
+            if (confirmed) form.submit();
+        });
+    } else {
+        // Fallback if the custom modal isn't available for some reason
+        if (window.confirm('Are you sure you want to delete this commission request?')) form.submit();
+    }
+    return false;
 }
 
 function closeCmPermModal() {
     document.getElementById('permissionModal').classList.remove('active');
 }
+function showCmToast(message, type) {
+    type = type || 'success';
+    const toast = document.createElement('div');
+    toast.textContent = (type === 'success' ? '✔ ' : '✖ ') + message;
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' +
+        (type === 'success' ? '#1e4575' : '#dc2626') +
+        ';color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:fadeIn .3s ease';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
 
+// ── FIXED: same window.confirm problem as above — this now awaits the
+// real custom confirm modal instead of the fake always-true confirm(). ──
+function clearCmAddForm() {
+    if (typeof window.showConfirmModal === 'function') {
+        window.showConfirmModal('Clear all fields in this form?').then(function(confirmed) {
+            if (!confirmed) return;
+            document.getElementById('cmAddForm').reset();
+            showCmToast('Form cleared.');
+        });
+    } else {
+        // Fallback if the custom modal isn't available for some reason
+        if (!window.confirm('Clear all fields in this form?')) return;
+        document.getElementById('cmAddForm').reset();
+        showCmToast('Form cleared.');
+    }
+}
 function submitCmPermRequest() {
     const reason = document.getElementById('cmPermReason').value.trim();
     if (reason.length < 5) { document.getElementById('cmPermError').style.display = 'block'; return; }

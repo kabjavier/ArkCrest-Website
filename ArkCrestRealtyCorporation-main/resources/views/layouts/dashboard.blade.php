@@ -508,7 +508,7 @@
 
             <!-- Logout Button -->
             <div class="logout-section">
-                <form method="POST" action="{{ route('logout') }}" data-confirm="Are you sure you want to log out?">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="nav-item logout-btn">
                         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1656,6 +1656,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Store pending form and use async approach
         return true; // fallback — handled below
     };
+
+    // Expose the real custom confirm modal so other pages/scripts can await it
+    // directly (window.confirm above always returns true immediately and has
+    // no visual popup, so any code that needs a real yes/no prompt outside of
+    // the form[onsubmit="confirm(...)"] auto-conversion below must call
+    // window.showConfirmModal(message).then(confirmed => ...) instead).
+    window.showConfirmModal = showConfirmModal;
 
     // Intercept all form submissions with onsubmit confirm
     document.addEventListener('submit', function(e) {
