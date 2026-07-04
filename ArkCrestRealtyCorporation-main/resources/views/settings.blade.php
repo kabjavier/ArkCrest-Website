@@ -575,7 +575,7 @@
 
       </div></div>
 
-      <div class="st-card"><div class="st-card-hdr"><div class="st-card-hdr-text"><h3>Change Password</h3><p>Update your login password</p></div></div>
+<div class="st-card"><div class="st-card-hdr"><div class="st-card-hdr-text"><h3>Change Password</h3><p>Update your login password</p></div></div>
 
       <div class="st-card-body">
 
@@ -589,22 +589,37 @@
 
               <label class="st-label">Current Password</label>
 
-              <input class="st-input" type="password" name="current_password">
+              <div style="position:relative;">
+                <input class="st-input" type="password" name="current_password" id="settings_current_password" style="width:100%;box-sizing:border-box;padding-right:38px;">
+                <button type="button" onclick="toggleSettingsPwdField('settings_current_password', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;display:flex;color:#94a3b8;" aria-label="Show password">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
               @error('current_password')
-              <div style="color:#dc2626;font-size:12px;margin-top:4px;">{{ $message }}</div>
-                @enderror
+                <div style="color:#dc2626;font-size:12px;margin-top:4px;">{{ $message }}</div>
+              @enderror
+
             </div>
 
             <div class="st-form-group">
 
               <label class="st-label">New Password</label>
 
-              <input class="st-input" type="password" name="password" id="settings_new_password" placeholder="Min. 8 chars, upper, lower, number, symbol" oninput="checkSettingsPwd(this.value)">
+              <div style="position:relative;">
+                <input class="st-input" type="password" name="password" id="settings_new_password" placeholder="Min. 8 chars, upper, lower, number, symbol" oninput="checkSettingsPwd(this.value)" style="width:100%;box-sizing:border-box;padding-right:38px;">
+                <button type="button" onclick="toggleSettingsPwdField('settings_new_password', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;display:flex;color:#94a3b8;" aria-label="Show password">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
               <div id="settings-pwd-bar" style="height:3px;border-radius:2px;margin-top:5px;background:#e2e8f0;overflow:hidden;"><div id="settings-pwd-fill" style="height:100%;width:0;transition:width .3s,background .3s;"></div></div>
               <div id="settings-pwd-text" style="font-size:10px;color:#94a3b8;margin-top:2px;"></div>
-              @error('password')
-              <div style="color:#dc2626;font-size:12px;margin-top:4px;">{{ $message }}</div>
-              @enderror
+              @if ($errors->has('password'))
+                <ul style="color:#dc2626;font-size:12px;margin-top:4px;padding-left:18px;">
+                  @foreach ($errors->get('password') as $msg)
+                    <li>{{ $msg }}</li>
+                  @endforeach
+                </ul>
+              @endif
 
             </div>
 
@@ -612,7 +627,12 @@
 
               <label class="st-label">Confirm New Password</label>
 
-              <input class="st-input" type="password" name="password_confirmation">
+              <div style="position:relative;">
+                <input class="st-input" type="password" name="password_confirmation" id="settings_confirm_password" style="width:100%;box-sizing:border-box;padding-right:38px;">
+                <button type="button" onclick="toggleSettingsPwdField('settings_confirm_password', this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;display:flex;color:#94a3b8;" aria-label="Show password">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
 
             </div>
 
@@ -665,6 +685,7 @@
         </form>
 
       </div></div>
+
 
     </div>
 
@@ -2230,6 +2251,17 @@ function checkSettingsPwd(val) {
     if (!hasSym) reqs.push('symbol');
     text.style.color = colors[score - 1] || '#94a3b8';
     text.textContent = (labels[score - 1] || '') + (reqs.length ? ' — needs: ' + reqs.join(', ') : ' ✓');
+}
+// Show/hide password toggle for the Change Password fields
+function toggleSettingsPwdField(inputId, btn) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    var showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    btn.innerHTML = showing
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>'
+        : '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.68 19.68 0 0 1 4.22-5.94M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a19.6 19.6 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 }
 </script>
 @endsection
