@@ -24,7 +24,7 @@
     <!-- Statistics Cards -->
     @if(!in_array('commission-monitoring.cards', $hiddenSections))
     <div class="stats-grid">
-        <div class="stat-card card-blue">
+        <div class="stat-card card-blue" onclick="filterByStat('')" style="cursor:pointer;" title="Click to view all requests">
             <div class="stat-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <div class="stat-card card-yellow">
+        <div class="stat-card card-yellow" onclick="filterByStat('Not Yet Released')" style="cursor:pointer;" title="Click to view Not Yet Released requests">
             <div class="stat-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <div class="stat-card card-green">
+        <div class="stat-card card-green" onclick="filterByStat('Released')" style="cursor:pointer;" title="Click to view Released requests">
             <div class="stat-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -69,17 +69,17 @@
             <h2>ADD NEW COMMISSION REQUEST</h2>
         </div>
         @if(session('error'))
-        <script>document.addEventListener('DOMContentLoaded', function(){ showCmToast(@json(session('error')), 'error'); });</script>
+        <div style="background:#fee2e2;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;">{{ session('error') }}</div>
         @endif
         @if(session('success'))
-        <script>document.addEventListener('DOMContentLoaded', function(){ showCmToast(@json(session('success')), 'success'); });</script>
+        <div style="background:#dcfce7;color:#166534;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;">✔ {{ session('success') }}</div>
         @endif
         @if($errors->any())
         <div style="background:#fee2e2;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;">
             @foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach
         </div>
         @endif
-        <form id="cmAddForm" class="commission-form" action="{{ route('commission-monitoring.store') }}" method="POST" onsubmit="return confirm('Are you sure you want to submit this request?')">
+        <form id="cmAddForm" class="commission-form" action="{{ route('commission-monitoring.store') }}" method="POST">
             @csrf
             <div class="form-section">
                 <div class="section-title-bar">
@@ -171,7 +171,7 @@
                     </div>
                     <div class="form-group">
                         <label>MODE OF PAYMENT <span class="required">*</span></label>
-                        <select name="mode_of_payment" required>
+                        <select name="mode_of_payment" id="cm_add_mode_of_payment" onchange="calcCmDateReleased('cm_add')" required>
                             <option value="">Select mode of payment</option>
                             <option value="BANK DEPOSIT">BANK DEPOSIT</option>
                             <option value="BANK TRANSFER">BANK TRANSFER</option>
@@ -187,7 +187,7 @@
                     </div>
                     <div class="form-group">
                         <label>DATE REQUESTED <span class="required">*</span></label>
-                        <input type="date" name="date_requested" required>
+                        <input type="date" name="date_requested" id="cm_add_date_requested" onchange="calcCmDateReleased('cm_add')" required>
                     </div>
                     <div class="form-group">
                         <label>NUMBER OF UNITS <span class="required">*</span></label>
@@ -202,7 +202,7 @@
                     </div>
                     <div class="form-group">
                         <label>DATE RELEASED</label>
-                        <input type="date" name="date_released">
+                        <input type="date" name="date_released" id="cm_add_date_released" readonly style="background:#f3f4f6;cursor:not-allowed;color:#374151;">
                     </div>
                     <div class="form-group" style="grid-column:1/-1;">
                         <label>REMARKS</label>
@@ -212,7 +212,7 @@
             </div>
             <input type="hidden" name="commission" id="cm_add_commission" value="">
             <div class="form-actions">
-                <button type="button" class="btn-clear" onclick="clearCmAddForm()">
+                <button type="button" class="btn-clear" onclick="document.getElementById('cmAddForm').reset()">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -608,6 +608,8 @@
         width: 100%;
         opacity: 0.05;
     }
+
+    
 
     .card-blue::before { background: #1e4575; }
     .card-yellow::before { background: #f59e0b; }
@@ -1141,14 +1143,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cmNoResults) {
             cmNoResults.style.display = (visible === 0 && dataRows.length > 0) ? '' : 'none';
         }
-
-        // Update stat cards (null-check in case cards section is hidden)
-        const elTotal = document.getElementById('statTotal');
-        const elNYR   = document.getElementById('statNotReleased');
-        const elRel   = document.getElementById('statReleased');
-        if (elTotal) elTotal.textContent = visible;
-        if (elNYR)   elNYR.textContent   = dataRows.filter(r => r.style.display !== 'none' && r.getAttribute('data-status') === 'Not Yet Released').length;
-        if (elRel)   elRel.textContent   = dataRows.filter(r => r.style.display !== 'none' && r.getAttribute('data-status') === 'Released').length;
     }
 
     searchInput.addEventListener('input', filterTable);
@@ -1157,11 +1151,30 @@ document.addEventListener('DOMContentLoaded', function() {
     yearFilter.addEventListener('change', filterTable);
 });
 
+function filterByStat(status) {
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.value = status;
+        statusFilter.dispatchEvent(new Event('change'));
+    }
+
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('stat-card-selected'));
+    const cardMap = { '': 'card-blue', 'Not Yet Released': 'card-yellow', 'Released': 'card-green' };
+    const activeCard = document.querySelector('.stat-card.' + cardMap[status]);
+    if (activeCard) activeCard.classList.add('stat-card-selected');
+
+    const tableContainer = document.querySelector('.monitoring-table-container');
+    if (tableContainer) {
+        tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
 function resetFilters() {
     document.getElementById('monitoringSearch').value = '';
     document.getElementById('statusFilter').value = '';
     document.getElementById('monthFilter').value = '';
     document.getElementById('yearFilter').value = '';
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('stat-card-selected'));
 
     const tableBody = document.getElementById('monitoringTableBody');
     const rows = Array.from(tableBody.getElementsByTagName('tr'))
@@ -1244,6 +1257,42 @@ function editCommission(id) {
             document.getElementById('cm_edit_remarks').value = data.remarks ?? '';
             document.getElementById('cmEditModal').classList.add('active');
         });
+}
+
+/* Auto-calculates Date Released from Date Requested + Mode of Payment.
+   7 days for Bank Transfer / Cash Payment / Manager's Check / Bank Deposit.
+   10 days for Personal Check / Post-Dated Check.
+   Stays empty if either required field is missing. Used by both the
+   Add form ('cm_add') and the Edit modal ('cm_edit'). */
+function calcCmDateReleased(prefix) {
+    const modeEl = document.getElementById(prefix + '_mode_of_payment');
+    const reqEl  = document.getElementById(prefix + '_date_requested');
+    const relEl  = document.getElementById(prefix + '_date_released');
+    if (!modeEl || !reqEl || !relEl) return;
+
+    const mode   = modeEl.value;
+    const reqVal = reqEl.value;
+
+    const sevenDayModes = ['BANK TRANSFER', 'CASH PAYMENT', "MANAGER'S CHECK", 'BANK DEPOSIT'];
+    const tenDayModes    = ['PERSONAL CHECK', 'POST-DATED CHECK'];
+
+    let days = null;
+    if (sevenDayModes.includes(mode)) days = 7;
+    else if (tenDayModes.includes(mode)) days = 10;
+
+    if (!mode || !reqVal || days === null) {
+        relEl.value = '';
+        return;
+    }
+
+    const reqDate = new Date(reqVal + 'T00:00:00');
+    if (isNaN(reqDate.getTime())) { relEl.value = ''; return; }
+    reqDate.setDate(reqDate.getDate() + days);
+
+    const yyyy = reqDate.getFullYear();
+    const mm   = String(reqDate.getMonth() + 1).padStart(2, '0');
+    const dd   = String(reqDate.getDate()).padStart(2, '0');
+    relEl.value = yyyy + '-' + mm + '-' + dd;
 }
 
 function computeCommission() {
@@ -1445,13 +1494,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.getElementById('cmEditForm').addEventListener('submit', function(e) {
-        if (!confirm('Save changes to this commission request?')) {
-            e.preventDefault();
-            return;
-        }
+    document.getElementById('cmEditForm').addEventListener('submit', function() {
         const id = document.getElementById('cm_edit_id').value;
         this.action = `/commission-monitoring/${id}`;
+        showToast('Saving changes...', 'info');
     });
 
     // Auto-open edit/delete after admin approval redirect
@@ -1522,61 +1568,19 @@ function requireAdmin(callback, recordId, action) {
         });
 }
 
-// ── FIXED: window.confirm on this site is globally overridden (see
-// layouts/dashboard.blade.php) to always return true instantly with NO
-// visible popup, because the real confirm UI is a custom async modal
-// (window.showConfirmModal, exposed from that same file). Any code that
-// calls the plain confirm(...) directly — like this function used to —
-// never shows anything to the user. We now await the real modal instead. ──
 function requireAdminSync(event, recordId) {
     if (!IS_ADMIN) {
         event.preventDefault();
         requireAdmin(null, recordId, 'delete');
         return false;
     }
-    event.preventDefault();
-    var form = event.target;
-    if (typeof window.showConfirmModal === 'function') {
-        window.showConfirmModal('Are you sure you want to delete this commission request?').then(function(confirmed) {
-            if (confirmed) form.submit();
-        });
-    } else {
-        // Fallback if the custom modal isn't available for some reason
-        if (window.confirm('Are you sure you want to delete this commission request?')) form.submit();
-    }
-    return false;
+    return confirm('Are you sure you want to delete this commission request?');
 }
 
 function closeCmPermModal() {
     document.getElementById('permissionModal').classList.remove('active');
 }
-function showCmToast(message, type) {
-    type = type || 'success';
-    const toast = document.createElement('div');
-    toast.textContent = (type === 'success' ? '✔ ' : '✖ ') + message;
-    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' +
-        (type === 'success' ? '#1e4575' : '#dc2626') +
-        ';color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:fadeIn .3s ease';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-}
 
-// ── FIXED: same window.confirm problem as above — this now awaits the
-// real custom confirm modal instead of the fake always-true confirm(). ──
-function clearCmAddForm() {
-    if (typeof window.showConfirmModal === 'function') {
-        window.showConfirmModal('Clear all fields in this form?').then(function(confirmed) {
-            if (!confirmed) return;
-            document.getElementById('cmAddForm').reset();
-            showCmToast('Form cleared.');
-        });
-    } else {
-        // Fallback if the custom modal isn't available for some reason
-        if (!window.confirm('Clear all fields in this form?')) return;
-        document.getElementById('cmAddForm').reset();
-        showCmToast('Form cleared.');
-    }
-}
 function submitCmPermRequest() {
     const reason = document.getElementById('cmPermReason').value.trim();
     if (reason.length < 5) { document.getElementById('cmPermError').style.display = 'block'; return; }
@@ -1742,7 +1746,7 @@ function submitCmPermRequest() {
                     </div>
                     <div class="modal-field">
                         <label>Mode of Payment</label>
-                        <select id="cm_edit_mode_of_payment" name="mode_of_payment">
+                        <select id="cm_edit_mode_of_payment" name="mode_of_payment" onchange="calcCmDateReleased('cm_edit')">
                             <option value="">Select mode</option>
                             <option value="BANK DEPOSIT">BANK DEPOSIT</option>
                             <option value="BANK TRANSFER">BANK TRANSFER</option>
@@ -1758,7 +1762,7 @@ function submitCmPermRequest() {
                     </div>
                     <div class="modal-field">
                         <label>Date Requested <span style="color:#ef4444">*</span></label>
-                        <input type="date" id="cm_edit_date_requested" name="date_requested" required>
+                        <input type="date" id="cm_edit_date_requested" name="date_requested" onchange="calcCmDateReleased('cm_edit')" required>
                     </div>
                     <div class="modal-field">
                         <label>Number of Units <span style="color:#ef4444">*</span></label>
@@ -1766,7 +1770,7 @@ function submitCmPermRequest() {
                     </div>
                     <div class="modal-field">
                         <label>Date Released</label>
-                        <input type="date" id="cm_edit_date_released" name="date_released">
+                        <input type="date" id="cm_edit_date_released" name="date_released" readonly style="background:#f3f4f6;cursor:not-allowed;color:#374151;">
                     </div>
                     <div class="modal-field">
                         <label>Status <span style="color:#ef4444">*</span></label>
