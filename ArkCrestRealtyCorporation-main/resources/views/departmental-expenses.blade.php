@@ -306,7 +306,16 @@
                         <button type="button" class="clear-dates-btn" onclick="clearDateFilters()" style="font-size:12px;font-weight:600;color:#1e4575;background:#eef2f7;border:1px solid #d0d5dd;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap;height:34px;">Clear Dates</button>
                     </div>
 
-                    <div class="expenses-search-wrapper" style="display: flex; align-items: center; width: 100%; max-width: 320px;">
+                    <div class="expenses-search-wrapper" style="display: flex; align-items: center; gap: 10px; width: 100%; max-width: 560px;">
+                        <div class="column-filter-dropdown" id="columnFilterDropdown" style="position: relative;">
+                            <button type="button" id="columnFilterBtn" class="column-filter-btn" onclick="toggleColumnFilterMenu(event)">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                <span>Filter</span>
+                                <span id="filterCountBadge" class="filter-count-badge" style="display:none;">0</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div id="columnFilterMenu" class="column-filter-menu" style="display:none;"></div>
+                        </div>
                         <div class="search-box" style="width: 100%;">
                             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -315,6 +324,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="activeColumnFiltersRow" class="active-column-filters-row" style="display:none;"></div>
             </div>
         </div>
         <div class="table-wrapper">
@@ -337,7 +347,7 @@
                 </thead>
                 <tbody id="requestsTableBody">
                     @foreach($requests as $req)
-                    <tr id="expense-{{ $req->id }}" data-id="{{ $req->id }}" data-department="{{ $req->department }}" data-date-requested="{{ $req->date_requested ? $req->date_requested->format('Y-m-d') : '' }}" data-date-released="{{ $req->date_released ? $req->date_released->format('Y-m-d') : '' }}" data-control="{{ $req->control_number }}">
+                    <tr id="expense-{{ $req->id }}" data-id="{{ $req->id }}" data-department="{{ $req->department }}" data-date-requested="{{ $req->date_requested ? $req->date_requested->format('Y-m-d') : '' }}" data-date-released="{{ $req->date_released ? $req->date_released->format('Y-m-d') : '' }}" data-control="{{ $req->control_number }}" data-requestor="{{ $req->requestor_name }}" data-category="{{ $req->category }}" data-status="{{ $req->status }}" data-requested-amount="{{ $req->requested_amount }}" data-total-expenses="{{ $req->total_expenses }}" data-amount-returned="{{ $req->amount_returned }}" data-date-returned="{{ $req->date_of_amount_returned ? $req->date_of_amount_returned->format('Y-m-d') : '' }}">
                         <td>{{ $req->control_number }}</td>
                         <td>{{ $req->requestor_name }}</td>
                         <td class="department-cell">{{ $req->department }}</td>
@@ -409,7 +419,177 @@
     .expenses-search-wrapper {
         max-width: 100% !important;
         width: 100% !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
     }
+    .column-filter-dropdown {
+        width: 100% !important;
+    }
+    .column-filter-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    .column-filter-menu {
+        left: 0 !important;
+        right: 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    .active-column-filters-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .column-filter-chip {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        box-sizing: border-box;
+    }
+    .column-filter-chip label {
+        flex: 1 1 100%;
+    }
+    .column-filter-chip input,
+    .column-filter-chip select {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100%;
+    }
+    .clear-column-filters-btn {
+        width: 100% !important;
+        text-align: center;
+    }
+
+}
+
+/* Column Filter (per-field filter dropdown) */
+.column-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e4575;
+    background: white;
+    border: 2px solid #1e4575;
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+    height: 40px;
+    box-sizing: border-box;
+    transition: all .2s ease;
+}
+.column-filter-btn:hover {
+    background: #eef2f7;
+}
+.filter-count-badge {
+    background: #A37929;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+.column-filter-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 240px;
+    background: white;
+    border: 1.5px solid #d0d5dd;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 500;
+    padding: 6px;
+}
+.column-filter-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #344054;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.column-filter-menu-item:hover {
+    background: #eef2f7;
+}
+.column-filter-menu-item .cfm-check {
+    width: 14px;
+    color: #A37929;
+    font-weight: 700;
+    visibility: hidden;
+}
+.column-filter-menu-item.is-active .cfm-check {
+    visibility: visible;
+}
+.column-filter-menu-item.is-active {
+    color: #1e4575;
+    font-weight: 700;
+}
+.active-column-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+.column-filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f5f7fa;
+    border: 1.5px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 6px 8px 6px 12px;
+}
+.column-filter-chip label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1e4575;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    white-space: nowrap;
+}
+.column-filter-chip input,
+.column-filter-chip select {
+    font-size: 13px;
+    padding: 6px 8px;
+    border: 1.5px solid #d0d5dd;
+    border-radius: 6px;
+    color: #344054;
+    min-width: 130px;
+}
+.column-filter-chip .cfm-remove {
+    background: none;
+    border: none;
+    color: #8a9bad;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+}
+.column-filter-chip .cfm-remove:hover {
+    color: #dc2626;
+}
+.clear-column-filters-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e4575;
+    background: #eef2f7;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    white-space: nowrap;
 }
 </style>
 
@@ -1551,6 +1731,153 @@ function clearDateFilters() {
 // Table Search + Date Range filtering (combined) - Multiple words support
 const searchInput = document.getElementById('tableSearch');
 
+// ---- Per-column "Filter" dropdown (Control Number, Requestor Name, Department,
+// Category, Requested Amount, Status, Total Expenses, Amount Returned,
+// Date of Amount Returned) ----
+const FILTERABLE_FIELDS = [
+    { key: 'control_number',           label: 'Control Number',           dataAttr: 'data-control',          type: 'text'  },
+    { key: 'requestor_name',           label: 'Requestor Name',           dataAttr: 'data-requestor',        type: 'text'  },
+    { key: 'department',               label: 'Department',               dataAttr: 'data-department',       type: 'text'  },
+    { key: 'category',                 label: 'Category',                 dataAttr: 'data-category',         type: 'text'  },
+    { key: 'requested_amount',         label: 'Requested Amount',         dataAttr: 'data-requested-amount', type: 'text'  },
+    { key: 'status',                   label: 'Status',                   dataAttr: 'data-status',           type: 'select', options: ['NOT YET LIQUIDATED', 'LIQUIDATED'] },
+    { key: 'total_expenses',           label: 'Total Expenses',           dataAttr: 'data-total-expenses',   type: 'text'  },
+    { key: 'amount_returned',          label: 'Amount Returned',          dataAttr: 'data-amount-returned',  type: 'text'  },
+    { key: 'date_of_amount_returned',  label: 'Date of Amount Returned',  dataAttr: 'data-date-returned',    type: 'date'  },
+];
+
+// Active per-column filters: { fieldKey: currentValue }
+const columnFilters = {};
+
+function fieldConfig(key) {
+    return FILTERABLE_FIELDS.find(f => f.key === key);
+}
+
+function toggleColumnFilterMenu(evt) {
+    if (evt) evt.stopPropagation();
+    const menu = document.getElementById('columnFilterMenu');
+    if (!menu) return;
+    const isOpen = menu.style.display === 'block';
+    menu.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) renderColumnFilterMenu();
+}
+
+function closeColumnFilterMenu() {
+    const menu = document.getElementById('columnFilterMenu');
+    if (menu) menu.style.display = 'none';
+}
+
+// Close the dropdown when clicking anywhere outside of it
+document.addEventListener('click', function(evt) {
+    const wrapper = document.getElementById('columnFilterDropdown');
+    if (wrapper && !wrapper.contains(evt.target)) {
+        closeColumnFilterMenu();
+    }
+});
+
+function renderColumnFilterMenu() {
+    const menu = document.getElementById('columnFilterMenu');
+    if (!menu) return;
+    menu.innerHTML = FILTERABLE_FIELDS.map(f => {
+        const active = columnFilters.hasOwnProperty(f.key);
+        return `<div class="column-filter-menu-item${active ? ' is-active' : ''}" onclick="toggleColumnFilter('${f.key}')">
+                    <span class="cfm-check">&#10003;</span><span>${f.label}</span>
+                </div>`;
+    }).join('');
+}
+
+function toggleColumnFilter(key) {
+    if (columnFilters.hasOwnProperty(key)) {
+        removeColumnFilter(key);
+    } else {
+        columnFilters[key] = '';
+        renderColumnFilterMenu();
+        renderActiveColumnFilters();
+        closeColumnFilterMenu();
+        setTimeout(() => {
+            const el = document.getElementById('colFilterInput_' + key);
+            if (el) el.focus();
+        }, 0);
+    }
+}
+
+function removeColumnFilter(key) {
+    delete columnFilters[key];
+    renderColumnFilterMenu();
+    renderActiveColumnFilters();
+    applyFilters();
+}
+
+function clearAllColumnFilters() {
+    Object.keys(columnFilters).forEach(k => delete columnFilters[k]);
+    renderColumnFilterMenu();
+    renderActiveColumnFilters();
+    applyFilters();
+}
+
+function updateColumnFilterValue(key, value) {
+    columnFilters[key] = value;
+    applyFilters();
+}
+
+function renderActiveColumnFilters() {
+    const row = document.getElementById('activeColumnFiltersRow');
+    const badge = document.getElementById('filterCountBadge');
+    if (!row) return;
+    const keys = Object.keys(columnFilters);
+
+    if (badge) {
+        badge.style.display = keys.length ? 'inline-flex' : 'none';
+        badge.textContent = keys.length;
+    }
+
+    if (keys.length === 0) {
+        row.style.display = 'none';
+        row.innerHTML = '';
+        return;
+    }
+
+    row.style.display = 'flex';
+    row.innerHTML = keys.map(key => {
+        const f = fieldConfig(key);
+        const val = columnFilters[key] || '';
+        let inputHtml = '';
+        if (f.type === 'select') {
+            inputHtml = `<select id="colFilterInput_${key}" onchange="updateColumnFilterValue('${key}', this.value)">
+                            <option value="">All</option>
+                            ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+                         </select>`;
+        } else if (f.type === 'date') {
+            inputHtml = `<input type="date" id="colFilterInput_${key}" value="${val}" oninput="updateColumnFilterValue('${key}', this.value)">`;
+        } else {
+            inputHtml = `<input type="text" id="colFilterInput_${key}" placeholder="Search ${f.label.toLowerCase()}..." value="${val}" oninput="updateColumnFilterValue('${key}', this.value)">`;
+        }
+        return `<div class="column-filter-chip">
+                    <label>${f.label}</label>
+                    ${inputHtml}
+                    <button type="button" class="cfm-remove" title="Remove filter" onclick="removeColumnFilter('${key}')">&times;</button>
+                </div>`;
+    }).join('') + `<button type="button" class="clear-column-filters-btn" onclick="clearAllColumnFilters()">Clear Filters</button>`;
+}
+
+function matchesColumnFilters(row) {
+    for (const key in columnFilters) {
+        const filterVal = (columnFilters[key] || '').toString().trim().toLowerCase();
+        if (!filterVal) continue;
+        const f = fieldConfig(key);
+        const rowVal = (row.getAttribute(f.dataAttr) || '').toString().toLowerCase();
+
+        if (f.type === 'date') {
+            if (rowVal !== filterVal) return false;
+        } else if (f.type === 'select') {
+            if (rowVal !== filterVal) return false;
+        } else {
+            if (!rowVal.includes(filterVal)) return false;
+        }
+    }
+    return true;
+}
+
 function applyFilters() {
     const searchText = searchInput ? searchInput.value.toLowerCase().trim() : '';
     const searchWords = searchText.split(/\s+/).filter(word => word.length > 0);
@@ -1565,8 +1892,9 @@ function applyFilters() {
         const text = row.textContent.toLowerCase();
         const allWordsFound = searchWords.length === 0 || searchWords.every(word => text.includes(word));
         const dateRangeMatch = matchesDateRangeFilters(row);
+        const columnMatch = matchesColumnFilters(row);
 
-        row.style.display = (allWordsFound && dateRangeMatch) ? '' : 'none';
+        row.style.display = (allWordsFound && dateRangeMatch && columnMatch) ? '' : 'none';
     });
 
     checkNoResults();
