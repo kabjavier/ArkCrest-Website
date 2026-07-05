@@ -47,6 +47,16 @@
     .table-wrapper::-webkit-scrollbar-thumb:hover,
     .table-container::-webkit-scrollbar-thumb:hover,
     .tbl-scroll::-webkit-scrollbar-thumb:hover { background:#475569; }
+    @media (max-width: 480px) {
+        #searchBar, #notesPanel, .notification-panel {
+            position: fixed !important;
+            top: 64px !important;
+            left: 10px !important;
+            right: 10px !important;
+            width: auto !important;
+            max-width: calc(100vw - 20px) !important;
+        }
+    }
     </style>
 </head>
 <body>
