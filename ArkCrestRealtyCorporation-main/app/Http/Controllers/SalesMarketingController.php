@@ -334,7 +334,7 @@ class SalesMarketingController extends Controller
             'agent_name'          => 'required|string|max:255',
             'number_of_units'     => 'nullable|integer|min:1',
             'commission_percent'  => 'nullable|numeric|min:0|max:100',
-            'commission'          => 'nullable|numeric',
+            'commission'          => 'nullable|numeric|min:0',
             'mode_of_payment'     => 'nullable|string|max:255',
             'remarks'             => 'nullable|string',
             'date_released'       => 'nullable|date',

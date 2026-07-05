@@ -1265,7 +1265,14 @@ function goToDuplicateRecord() {
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
 
-        window.history.replaceState({}, '', window.location.pathname);
+        const cleanParams = new URLSearchParams(window.location.search);
+        cleanParams.delete('highlight');
+        cleanParams.delete('status');
+        cleanParams.delete('action');
+        cleanParams.delete('reason');
+        const newQuery = cleanParams.toString();
+        const newUrl = window.location.pathname + (newQuery ? '?' + newQuery : '');
+        window.history.replaceState(null, '', newUrl);
     });
 })();
 </script>
