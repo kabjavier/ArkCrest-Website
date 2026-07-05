@@ -79,7 +79,7 @@
             @foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach
         </div>
         @endif
-        <form id="cmAddForm" class="commission-form" action="{{ route('commission-monitoring.store') }}" method="POST">
+        <form id="cmAddForm" class="commission-form" action="{{ route('commission-monitoring.store') }}" method="POST" onsubmit="return confirm('Submit this commission request?')">
             @csrf
             <div class="form-section">
                 <div class="section-title-bar">
@@ -212,8 +212,7 @@
             </div>
             <input type="hidden" name="commission" id="cm_add_commission" value="">
             <div class="form-actions">
-                <button type="button" class="btn-clear" onclick="document.getElementById('cmAddForm').reset()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;">
+                <button type="button" class="btn-clear" onclick="clearCmAddForm()">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                     Clear
@@ -235,47 +234,50 @@
         <!-- Table Header with Title + Filters -->
         <div class="table-top-bar">
             <h3 class="table-section-title">ALL COMMISSION REQUESTS</h3>
-            <div class="table-filters-row">
-                <div class="filter-left">
-                    <label>Status:</label>
-                    <select id="statusFilter" class="filter-select-inline">
-                        <option value="">All</option>
-                        <option value="Not Yet Released">Not Yet Released</option>
-                        <option value="Released">Released</option>
-                    </select>
-                    <label>Month:</label>
-                    <select id="monthFilter" class="filter-select-inline">
-                        <option value="">All</option>
-                        <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                    </select>
-                    <label>Year:</label>
-                    <select id="yearFilter" class="filter-select-inline">
-                        <option value="">All</option>
-                        @foreach($years as $year)
-                            <option value="{{ $year }}">{{ $year }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="filter-right">
-                    <div class="search-box-inline">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        <input type="text" id="monitoringSearch" placeholder="Search requests...">
+
+            <div class="expenses-filters-bar">
+                <div class="expenses-filters-row">
+                    <div class="expenses-date-filters">
+                        <div class="date-range-group">
+                            <label>Date Requested</label>
+                            <div class="date-range-inputs">
+                                <input type="date" id="dateRequestedFrom" class="filter-select">
+                                <span class="date-range-to">to</span>
+                                <input type="date" id="dateRequestedTo" class="filter-select">
+                            </div>
+                        </div>
+
+                        <div class="date-range-group">
+                            <label>Date Released</label>
+                            <div class="date-range-inputs">
+                                <input type="date" id="dateReleasedFrom" class="filter-select">
+                                <span class="date-range-to">to</span>
+                                <input type="date" id="dateReleasedTo" class="filter-select">
+                            </div>
+                        </div>
+
+                        <button type="button" class="clear-dates-btn" onclick="clearDateFilters()">Clear Dates</button>
                     </div>
 
+                    <div class="expenses-search-wrapper">
+                        <div class="column-filter-dropdown" id="columnFilterDropdown">
+                            <button type="button" id="columnFilterBtn" class="column-filter-btn" onclick="toggleColumnFilterMenu(event)">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                <span>Filter</span>
+                                <span id="filterCountBadge" class="filter-count-badge" style="display:none;">0</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div id="columnFilterMenu" class="column-filter-menu" style="display:none;"></div>
+                        </div>
+                        <div class="search-box-inline" style="width:100%;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" id="monitoringSearch" placeholder="Search requests..." style="width:100%;">
+                        </div>
+                    </div>
                 </div>
+                <div id="activeColumnFiltersRow" class="active-column-filters-row" style="display:none;"></div>
             </div>
         </div>
 
@@ -312,7 +314,29 @@
                 </thead>
                 <tbody id="monitoringTableBody">
                     @forelse($commissionRequests as $request)
-                    <tr id="cm-{{ $request->id }}" data-id="{{ $request->id }}" data-status="{{ $request->status }}" data-date="{{ $request->date_requested ? $request->date_requested->format('Y-m') : '' }}">
+                    <tr id="cm-{{ $request->id }}" data-id="{{ $request->id }}"
+                        data-status="{{ $request->status }}"
+                        data-date-requested="{{ $request->date_requested ? $request->date_requested->format('Y-m-d') : '' }}"
+                        data-date-released="{{ $request->date_released ? $request->date_released->format('Y-m-d') : '' }}"
+                        data-client="{{ $request->client_name }}"
+                        data-reservation-date="{{ $request->reservation_date ? $request->reservation_date->format('Y-m-d') : '' }}"
+                        data-project="{{ $request->project_name }}"
+                        data-property="{{ $request->property_details }}"
+                        @if($isAdmin)
+                        data-price-sqm="{{ $request->price_sqm }}"
+                        data-lot-area="{{ $request->lot_area }}"
+                        data-discount="{{ $request->discount }}"
+                        data-commission-percent="{{ $request->commission_percent }}"
+                        data-commission="{{ $request->commission }}"
+                        @endif
+                        data-net-tcp="{{ $request->net_tcp }}"
+                        data-terms="{{ $request->terms_of_payment }}"
+                        data-mode="{{ $request->mode_of_payment }}"
+                        data-remarks="{{ $request->remarks }}"
+                        data-units="{{ $request->number_of_units }}"
+                        data-commission-terms="{{ $request->payment_type }}"
+                        data-value-commission-terms="{{ $request->value_of_payment_terms }}"
+                        data-agent="{{ $request->agent_name }}">
                         <td>{{ $request->client_name ?? '-' }}</td>
                         <td>{{ $request->reservation_date ? $request->reservation_date->format('M d, Y') : '-' }}</td>
                         <td>{{ $request->project_name ?? '-' }}</td>
@@ -352,13 +376,23 @@
                                 <button class="btn-action-text btn-edit" title="Edit" onclick="requireAdmin(() => editCommission({{ $request->id }}))">
                                     EDIT
                                 </button>
-                                <form action="{{ route('commission-monitoring.destroy', $request->id) }}" method="POST" style="display: inline-flex; align-items: center;" onsubmit="return requireAdminSync(event)">
+                                @if($isAdmin)
+                                <form action="{{ route('commission-monitoring.destroy', $request->id) }}" method="POST" style="display: inline-flex; align-items: center;" onsubmit="return confirm('Are you sure you want to delete this commission request? This action cannot be undone.')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-action-text btn-delete" title="Delete">
                                         DELETE
                                     </button>
                                 </form>
+                                @else
+                                <form action="{{ route('commission-monitoring.destroy', $request->id) }}" method="POST" style="display: inline-flex; align-items: center;" onsubmit="return staffDeleteCommission(event, {{ $request->id }})">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-action-text btn-delete" title="Delete">
+                                        DELETE
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -768,6 +802,280 @@
         box-shadow: 0 0 0 3px rgba(30,69,117,0.1);
     }
 
+    /* ---- Date Requested / Date Released range filters + column Filter dropdown
+       (matches the "All Expenses" filter pattern) ---- */
+    .expenses-filters-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .expenses-filters-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .expenses-date-filters {
+        display: flex;
+        gap: 20px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+    .date-range-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .date-range-group label {
+        font-weight: 600;
+        color: #1e4575;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+    .date-range-inputs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .date-range-inputs input[type="date"] {
+        font-size: 13px;
+        padding: 7px 10px;
+        border: 1.5px solid #d0d5dd;
+        border-radius: 6px;
+        background-color: white;
+        color: #344054;
+    }
+    .date-range-to {
+        color: #8a9bad;
+        font-size: 12px;
+    }
+    .clear-dates-btn {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e4575;
+        background: #eef2f7;
+        border: 1px solid #d0d5dd;
+        border-radius: 6px;
+        padding: 8px 14px;
+        cursor: pointer;
+        white-space: nowrap;
+        height: 34px;
+    }
+    .expenses-search-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        max-width: 560px;
+    }
+    .column-filter-dropdown {
+        position: relative;
+    }
+    .column-filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e4575;
+        background: white;
+        border: 2px solid #1e4575;
+        border-radius: 8px;
+        padding: 9px 14px;
+        cursor: pointer;
+        height: 40px;
+        box-sizing: border-box;
+        transition: all .2s ease;
+    }
+    .column-filter-btn:hover {
+        background: #eef2f7;
+    }
+    .filter-count-badge {
+        background: #A37929;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 999px;
+        min-width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+    }
+    .column-filter-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        min-width: 240px;
+        max-height: 320px;
+        overflow-y: auto;
+        background: white;
+        border: 1.5px solid #d0d5dd;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        z-index: 500;
+        padding: 6px;
+    }
+    .column-filter-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 10px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #344054;
+        border-radius: 6px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .column-filter-menu-item:hover {
+        background: #eef2f7;
+    }
+    .column-filter-menu-item .cfm-check {
+        width: 14px;
+        color: #A37929;
+        font-weight: 700;
+        visibility: hidden;
+    }
+    .column-filter-menu-item.is-active .cfm-check {
+        visibility: visible;
+    }
+    .column-filter-menu-item.is-active {
+        color: #1e4575;
+        font-weight: 700;
+    }
+    .active-column-filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+    .column-filter-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #f5f7fa;
+        border: 1.5px solid #d0d5dd;
+        border-radius: 8px;
+        padding: 6px 8px 6px 12px;
+    }
+    .column-filter-chip label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #1e4575;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        white-space: nowrap;
+    }
+    .column-filter-chip input,
+    .column-filter-chip select {
+        font-size: 13px;
+        padding: 6px 8px;
+        border: 1.5px solid #d0d5dd;
+        border-radius: 6px;
+        color: #344054;
+        min-width: 130px;
+    }
+    .column-filter-chip .cfm-remove {
+        background: none;
+        border: none;
+        color: #8a9bad;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        padding: 2px 4px;
+    }
+    .column-filter-chip .cfm-remove:hover {
+        color: #dc2626;
+    }
+    .clear-column-filters-btn {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e4575;
+        background: #eef2f7;
+        border: 1px solid #d0d5dd;
+        border-radius: 6px;
+        padding: 8px 14px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .expenses-filters-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .expenses-date-filters {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 14px;
+        }
+        .date-range-group {
+            width: 100%;
+        }
+        .date-range-inputs {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        .date-range-inputs input[type="date"] {
+            flex: 1 1 120px;
+            min-width: 0;
+            width: auto;
+        }
+        .clear-dates-btn {
+            width: 100%;
+            text-align: center;
+        }
+        .expenses-search-wrapper {
+            max-width: 100%;
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .column-filter-dropdown {
+            width: 100%;
+        }
+        .column-filter-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .column-filter-menu {
+            left: 0;
+            right: 0;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .active-column-filters-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .column-filter-chip {
+            width: 100%;
+            flex-wrap: wrap;
+            box-sizing: border-box;
+        }
+        .column-filter-chip label {
+            flex: 1 1 100%;
+        }
+        .column-filter-chip input,
+        .column-filter-chip select {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: 100%;
+        }
+        .clear-column-filters-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
     .btn-reset-inline {
         display: flex;
         align-items: center;
@@ -1128,62 +1436,245 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('monitoringSearch');
-    const statusFilter = document.getElementById('statusFilter');
-    const monthFilter = document.getElementById('monthFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    const tableBody = document.getElementById('monitoringTableBody');
+// ---- Column Filter fields (matches the "All Expenses" filter dropdown pattern) ----
+// Date Requested / Date Released are handled separately as range pickers above.
+const FILTERABLE_FIELDS = [
+    { key: 'client_name',       label: "Client's Name",             dataAttr: 'data-client',                type: 'text'  },
+    { key: 'reservation_date',  label: 'Reservation Date',          dataAttr: 'data-reservation-date',      type: 'date'  },
+    { key: 'project_name',      label: 'Project Name',              dataAttr: 'data-project',                type: 'text'  },
+    { key: 'property_details',  label: 'Property Details',          dataAttr: 'data-property',               type: 'text'  },
+    { key: 'agent_name',        label: "Agent's Name",              dataAttr: 'data-agent',                  type: 'text'  },
+    @if($isAdmin)
+    { key: 'price_sqm',         label: 'Price/SQM',                 dataAttr: 'data-price-sqm',              type: 'text'  },
+    { key: 'lot_area',          label: 'Lot Area',                  dataAttr: 'data-lot-area',                type: 'text'  },
+    { key: 'discount',          label: 'Discount',                  dataAttr: 'data-discount',                type: 'text'  },
+    @endif
+    { key: 'net_tcp',           label: 'Net TCP',                   dataAttr: 'data-net-tcp',                 type: 'text'  },
+    { key: 'terms_of_payment',  label: 'Terms of Payment',          dataAttr: 'data-terms',                   type: 'text'  },
+    { key: 'mode_of_payment',   label: 'Mode of Payment',           dataAttr: 'data-mode',                    type: 'text'  },
+    { key: 'remarks',           label: 'Remarks',                   dataAttr: 'data-remarks',                 type: 'text'  },
+    { key: 'units',             label: 'Units',                     dataAttr: 'data-units',                   type: 'text'  },
+    @if($isAdmin)
+    { key: 'commission_percent',label: 'Commission %',              dataAttr: 'data-commission-percent',      type: 'text'  },
+    { key: 'commission',        label: 'Commission',                dataAttr: 'data-commission',              type: 'text'  },
+    @endif
+    { key: 'commission_terms',  label: 'Commission Terms',          dataAttr: 'data-commission-terms',        type: 'text'  },
+    { key: 'value_commission_terms', label: 'Value of Commission Terms', dataAttr: 'data-value-commission-terms', type: 'text' },
+    { key: 'status',            label: 'Status',                    dataAttr: 'data-status',                  type: 'select', options: ['Not Yet Released', 'Released'] },
+];
 
-    function filterTable() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedStatus = statusFilter.value;
-        const selectedMonth = monthFilter.value;
-        const selectedYear = yearFilter.value;
+// Active per-column filters: { fieldKey: currentValue }
+const columnFilters = {};
 
-        // Only real data rows (has data-status attribute)
-        const dataRows = Array.from(tableBody.querySelectorAll('tr[data-status]'));
+function fieldConfig(key) {
+    return FILTERABLE_FIELDS.find(f => f.key === key);
+}
 
-        let visible = 0;
+function toggleColumnFilterMenu(evt) {
+    if (evt) evt.stopPropagation();
+    const menu = document.getElementById('columnFilterMenu');
+    if (!menu) return;
+    const isOpen = menu.style.display === 'block';
+    menu.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) renderColumnFilterMenu();
+}
 
-        for (let row of dataRows) {
-            const text = row.textContent.toLowerCase();
-            const rowStatus = row.getAttribute('data-status');
-            const rowDate = row.getAttribute('data-date') || '';
-            const [rowYear, rowMonth] = rowDate.split('-');
+function closeColumnFilterMenu() {
+    const menu = document.getElementById('columnFilterMenu');
+    if (menu) menu.style.display = 'none';
+}
 
-            const matchesSearch = !searchTerm || text.includes(searchTerm);
-            const matchesStatus = !selectedStatus || rowStatus === selectedStatus;
-            const matchesMonth = !selectedMonth || rowMonth === selectedMonth;
-            const matchesYear = !selectedYear || rowYear === selectedYear;
+// Close the dropdown when clicking anywhere outside of it
+document.addEventListener('click', function(evt) {
+    const wrapper = document.getElementById('columnFilterDropdown');
+    if (wrapper && !wrapper.contains(evt.target)) {
+        closeColumnFilterMenu();
+    }
+});
 
-            if (matchesSearch && matchesStatus && matchesMonth && matchesYear) {
-                row.style.display = '';
-                visible++;
-            } else {
-                row.style.display = 'none';
-            }
+function renderColumnFilterMenu() {
+    const menu = document.getElementById('columnFilterMenu');
+    if (!menu) return;
+    menu.innerHTML = FILTERABLE_FIELDS.map(f => {
+        const active = columnFilters.hasOwnProperty(f.key);
+        return `<div class="column-filter-menu-item${active ? ' is-active' : ''}" onclick="toggleColumnFilter('${f.key}')">
+                    <span class="cfm-check">&#10003;</span><span>${f.label}</span>
+                </div>`;
+    }).join('');
+}
+
+function toggleColumnFilter(key) {
+    if (columnFilters.hasOwnProperty(key)) {
+        removeColumnFilter(key);
+    } else {
+        columnFilters[key] = '';
+        renderColumnFilterMenu();
+        renderActiveColumnFilters();
+        closeColumnFilterMenu();
+        setTimeout(() => {
+            const el = document.getElementById('colFilterInput_' + key);
+            if (el) el.focus();
+        }, 0);
+    }
+}
+
+function removeColumnFilter(key) {
+    delete columnFilters[key];
+    renderColumnFilterMenu();
+    renderActiveColumnFilters();
+    applyFilters();
+}
+
+function clearAllColumnFilters() {
+    Object.keys(columnFilters).forEach(k => delete columnFilters[k]);
+    renderColumnFilterMenu();
+    renderActiveColumnFilters();
+    applyFilters();
+}
+
+function updateColumnFilterValue(key, value) {
+    columnFilters[key] = value;
+    applyFilters();
+}
+
+function renderActiveColumnFilters() {
+    const row = document.getElementById('activeColumnFiltersRow');
+    const badge = document.getElementById('filterCountBadge');
+    if (!row) return;
+    const keys = Object.keys(columnFilters);
+
+    if (badge) {
+        badge.style.display = keys.length ? 'inline-flex' : 'none';
+        badge.textContent = keys.length;
+    }
+
+    if (keys.length === 0) {
+        row.style.display = 'none';
+        row.innerHTML = '';
+        return;
+    }
+
+    row.style.display = 'flex';
+    row.innerHTML = keys.map(key => {
+        const f = fieldConfig(key);
+        const val = columnFilters[key] || '';
+        let inputHtml = '';
+        if (f.type === 'select') {
+            inputHtml = `<select id="colFilterInput_${key}" onchange="updateColumnFilterValue('${key}', this.value)">
+                            <option value="">All</option>
+                            ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+                         </select>`;
+        } else if (f.type === 'date') {
+            inputHtml = `<input type="date" id="colFilterInput_${key}" value="${val}" oninput="updateColumnFilterValue('${key}', this.value)">`;
+        } else {
+            inputHtml = `<input type="text" id="colFilterInput_${key}" placeholder="Search ${f.label.toLowerCase()}..." value="${val}" oninput="updateColumnFilterValue('${key}', this.value)">`;
         }
+        return `<div class="column-filter-chip">
+                    <label>${f.label}</label>
+                    ${inputHtml}
+                    <button type="button" class="cfm-remove" title="Remove filter" onclick="removeColumnFilter('${key}')">&times;</button>
+                </div>`;
+    }).join('') + `<button type="button" class="clear-column-filters-btn" onclick="clearAllColumnFilters()">Clear Filters</button>`;
+}
 
-        // Show/hide no results message
-        const cmNoResults = document.getElementById('cmNoResults');
-        if (cmNoResults) {
-            cmNoResults.style.display = (visible === 0 && dataRows.length > 0) ? '' : 'none';
+function matchesColumnFilters(row) {
+    for (const key in columnFilters) {
+        const filterVal = (columnFilters[key] || '').toString().trim().toLowerCase();
+        if (!filterVal) continue;
+        const f = fieldConfig(key);
+        const rowVal = (row.getAttribute(f.dataAttr) || '').toString().toLowerCase();
+
+        if (f.type === 'date') {
+            if (rowVal !== filterVal) return false;
+        } else if (f.type === 'select') {
+            if (rowVal !== filterVal) return false;
+        } else {
+            if (!rowVal.includes(filterVal)) return false;
+        }
+    }
+    return true;
+}
+
+// Date Requested / Date Released range filter check
+function matchesDateRangeFilters(row) {
+    const reqFrom = document.getElementById('dateRequestedFrom')?.value || '';
+    const reqTo   = document.getElementById('dateRequestedTo')?.value || '';
+    const relFrom = document.getElementById('dateReleasedFrom')?.value || '';
+    const relTo   = document.getElementById('dateReleasedTo')?.value || '';
+
+    const rowReq = row.getAttribute('data-date-requested') || '';
+    const rowRel = row.getAttribute('data-date-released') || '';
+
+    if (reqFrom || reqTo) {
+        if (!rowReq) return false;
+        if (reqFrom && rowReq < reqFrom) return false;
+        if (reqTo && rowReq > reqTo) return false;
+    }
+    if (relFrom || relTo) {
+        if (!rowRel) return false;
+        if (relFrom && rowRel < relFrom) return false;
+        if (relTo && rowRel > relTo) return false;
+    }
+    return true;
+}
+
+function clearDateFilters() {
+    ['dateRequestedFrom','dateRequestedTo','dateReleasedFrom','dateReleasedTo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    applyFilters();
+}
+
+function applyFilters() {
+    const searchInput = document.getElementById('monitoringSearch');
+    const tableBody = document.getElementById('monitoringTableBody');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const searchWords = searchTerm.split(/\s+/).filter(w => w.length > 0);
+
+    // Only real data rows (has data-status attribute)
+    const dataRows = Array.from(tableBody.querySelectorAll('tr[data-status]'));
+
+    let visible = 0;
+
+    for (let row of dataRows) {
+        const text = row.textContent.toLowerCase();
+        const matchesSearch = searchWords.length === 0 || searchWords.every(w => text.includes(w));
+        const dateRangeMatch = matchesDateRangeFilters(row);
+        const columnMatch = matchesColumnFilters(row);
+
+        if (matchesSearch && dateRangeMatch && columnMatch) {
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
         }
     }
 
-    searchInput.addEventListener('input', filterTable);
-    statusFilter.addEventListener('change', filterTable);
-    monthFilter.addEventListener('change', filterTable);
-    yearFilter.addEventListener('change', filterTable);
+    const cmNoResults = document.getElementById('cmNoResults');
+    if (cmNoResults) {
+        cmNoResults.style.display = (visible === 0 && dataRows.length > 0) ? '' : 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('monitoringSearch');
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+
+    ['dateRequestedFrom','dateRequestedTo','dateReleasedFrom','dateReleasedTo'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', applyFilters);
+    });
 });
 
 function filterByStat(status) {
-    const statusFilter = document.getElementById('statusFilter');
-    if (statusFilter) {
-        statusFilter.value = status;
-        statusFilter.dispatchEvent(new Event('change'));
+    if (status) {
+        columnFilters['status'] = status;
+    } else {
+        delete columnFilters['status'];
     }
+    renderColumnFilterMenu();
+    renderActiveColumnFilters();
+    applyFilters();
 
     document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('stat-card-selected'));
     const cardMap = { '': 'card-blue', 'Not Yet Released': 'card-yellow', 'Released': 'card-green' };
@@ -1197,10 +1688,18 @@ function filterByStat(status) {
 }
 
 function resetFilters() {
-    document.getElementById('monitoringSearch').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('monthFilter').value = '';
-    document.getElementById('yearFilter').value = '';
+    const searchInput = document.getElementById('monitoringSearch');
+    if (searchInput) searchInput.value = '';
+
+    ['dateRequestedFrom','dateRequestedTo','dateReleasedFrom','dateReleasedTo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    Object.keys(columnFilters).forEach(k => delete columnFilters[k]);
+    renderColumnFilterMenu();
+    renderActiveColumnFilters();
+
     document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('stat-card-selected'));
 
     const tableBody = document.getElementById('monitoringTableBody');
@@ -1224,7 +1723,13 @@ function resetFilters() {
     document.getElementById('statNotReleased').textContent = notReleased;
     document.getElementById('statReleased').textContent = released;
 }
-
+function clearCmAddForm() {
+    window.showConfirmModal('Clear all entered fields? This cannot be undone.').then(function(confirmed) {
+        if (confirmed) {
+            document.getElementById('cmAddForm').reset();
+        }
+    });
+}
 function viewCommission(id) {
     fetch(`/api/commission-monitoring/${id}`)
         .then(r => r.json())
@@ -1554,10 +2059,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (_hlAction === 'delete') {
                 setTimeout(() => {
-                    if (confirm('Your delete request was approved. Delete this record now?')) {
-                        const delForm = row.querySelector('form');
-                        if (delForm) delForm.submit();
-                    }
+                    window.showConfirmModal('Your delete request was approved. Delete this record now?').then(function(confirmed) {
+                        if (confirmed) {
+                            const delForm = row.querySelector('form');
+                            if (delForm) delForm.submit();
+                        }
+                    });
                 }, 700);
             }
             setTimeout(() => { row.style.background = ''; row.style.outline = ''; }, 10000);
@@ -1602,6 +2109,40 @@ function requireAdminSync(event, recordId) {
         return false;
     }
     return confirm('Are you sure you want to delete this commission request?');
+}
+
+// Staff delete — check permission first, same pattern as client-database.blade.php
+function staffDeleteCommission(e, id) {
+    e.preventDefault();
+    fetch(`/api/permission-requests/check?action=delete&record_id=${id}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.approved) {
+                window.showConfirmModal('Delete this record?').then(function(confirmed) {
+                    if (confirmed) {
+                        var rows = document.querySelectorAll('tr[data-id="' + id + '"] form');
+                        for (var f of rows) {
+                            var m = f.querySelector('input[name="_method"]');
+                            if (m && m.value === 'DELETE') { f.submit(); return; }
+                        }
+                    }
+                });
+            } else {
+                _cmPermAction = 'delete';
+                _cmPermRecordId = id;
+                document.getElementById('cmPermTitle').textContent = 'Request to Delete Record';
+                document.getElementById('cmPermReason').value = '';
+                document.getElementById('cmPermError').style.display = 'none';
+                document.getElementById('permissionModal').classList.add('active');
+                setTimeout(() => document.getElementById('cmPermReason').focus(), 100);
+            }
+        })
+        .catch(() => {
+            _cmPermAction = 'delete';
+            _cmPermRecordId = id;
+            document.getElementById('permissionModal').classList.add('active');
+        });
+    return false;
 }
 
 function closeCmPermModal() {
