@@ -184,7 +184,12 @@
     </tr>
     <tr>
     <td class="lbl">Amount Requested: &#8369;</td>
-    <td><input type="number" id="f_amount" placeholder="0.00" step="0.01" min="0"></td>
+    <td><input
+    type="text"
+    id="f_amount"
+    placeholder="0.00"
+    inputmode="decimal"
+    oninput="formatAmountInput(this)"></td>
     <td class="lbl">Target Date Released:</td>
     <td>
     <span class="friendly-date-wrap">
@@ -305,8 +310,7 @@
 
     <!-- Buttons (screen only) -->
     <div class="frm-btns dept-sel">
-    <button class="btn-clear-f" onclick="clearForm()">Clear</button>
-    <button class="btn-print-f" onclick="openPreview('frmCard','Budget Request Form')">
+    <button class="btn-clear-f" onclick="openClearConfirm('budget')">Clear</button>    <button class="btn-print-f" onclick="openPreview('frmCard','Budget Request Form')">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
     Print Budget Request Form
     </button>
@@ -473,8 +477,7 @@
 
     <!-- Buttons (screen only) -->
     <div class="frm-btns dept-sel">
-    <button class="btn-clear-f" type="button" onclick="clearSVForm()">Clear</button>
-    <button class="btn-submit-f" type="button" id="svSubmitBtn" onclick="submitSiteVisit()">Submit Site Visit</button>
+    <button class="btn-clear-f" type="button" onclick="openClearConfirm('sitevisit')">Clear</button>    <button class="btn-submit-f" type="button" id="svSubmitBtn" onclick="submitSiteVisit()">Submit Site Visit</button>
     <button class="btn-print-f" type="button" onclick="openPreview('frmCardSV','Site Visit Form')">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
     Print Site Visit Form
@@ -527,7 +530,52 @@
     </div>
     </div>
 
+{{-- ============================= --}}
+{{-- Clear Form Confirmation Modal --}}
+{{-- ============================= --}}
+<div id="clearConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:white;border-radius:12px;max-width:380px;width:100%;padding:28px 24px;box-shadow:0 10px 40px rgba(0,0,0,.3);text-align:center;font-family:Arial,sans-serif;">
+    <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+    <svg fill="none" stroke="#dc2626" viewBox="0 0 24 24" style="width:26px;height:26px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </div>
+    <div style="font-size:17px;font-weight:700;color:#111827;margin-bottom:6px;">Clear this form?</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:22px;line-height:1.5;">This will erase everything you've entered. This can't be undone.</div>
+    <div style="display:flex;gap:10px;">
+    <button onclick="closeClearConfirm()" style="flex:1;padding:11px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
+    <button onclick="confirmClear()" style="flex:1;padding:11px;background:#dc2626;color:white;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Yes, clear</button>
+    </div>
+    </div>
+</div>
+
+
+
+
 <script>
+    /* ============================================================
+   CLEAR FORM CONFIRMATION (shared by both forms)
+   ============================================================ */
+var _clearTarget = null;
+function openClearConfirm(target){
+    _clearTarget = target;
+    document.getElementById('clearConfirmModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeClearConfirm(){
+    document.getElementById('clearConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+    _clearTarget = null;
+}
+function confirmClear(){
+    if(_clearTarget === 'budget'){
+    clearForm();
+    } else if(_clearTarget === 'sitevisit'){
+    clearSVForm();
+    }
+    closeClearConfirm();
+}
+document.getElementById('clearConfirmModal').addEventListener('click', function(e){
+  if(e.target === this) closeClearConfirm();
+});
 /* ============================================================
    FRIENDLY DATE PICKER HELPERS
    Pairs a hidden native <input type="date"> with a visible
