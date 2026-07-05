@@ -1,6 +1,5 @@
-@extends('layouts.dashboard')
-@section('title', 'Client Database')
-@section('content')
+<?php $__env->startSection('title', 'Client Database'); ?>
+<?php $__env->startSection('content'); ?>
 <style>
 .cd-wrap{padding:0}
 .cd-header{background:linear-gradient(135deg,#1e4575 0%,#2563eb 60%,#1e4575 100%);border-radius:20px;padding:36px 40px;margin-bottom:28px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(30,69,117,.25)}
@@ -52,12 +51,12 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
 </style>
 
 <div class="cd-wrap">
-    @if(session('error'))
-    <div style="background:#fee2e2;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">⚠ {{ session('error') }}</div>
-    @endif
-    @if(session('success'))
-    <div style="background:#dcfce7;color:#166534;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">✓ {{ session('success') }}</div>
-    @endif
+    <?php if(session('error')): ?>
+    <div style="background:#fee2e2;color:#dc2626;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">⚠ <?php echo e(session('error')); ?></div>
+    <?php endif; ?>
+    <?php if(session('success')): ?>
+    <div style="background:#dcfce7;color:#166534;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">✓ <?php echo e(session('success')); ?></div>
+    <?php endif; ?>
     <div class="cd-header">
         <div style="position:relative;z-index:2;">
             <div class="cd-header-eyebrow">Sales & Marketing</div>
@@ -74,8 +73,8 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
         <div class="section-header-commission">
             <h2>ADD NEW CLIENT RECORD</h2>
         </div>
-        <form id="commissionForm" action="{{ route('client-database.store') }}" method="POST">
-            @csrf
+        <form id="commissionForm" action="<?php echo e(route('client-database.store')); ?>" method="POST">
+            <?php echo csrf_field(); ?>
             <div class="section-title-bar"><span>📋</span> COMMISSION REQUEST INFORMATION</div>
             <div class="form-grid">
                 <div class="form-group">
@@ -136,9 +135,9 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                         <input type="text" id="terms_of_payment" name="terms_of_payment" required autocomplete="off" placeholder="Type or select payment terms" onclick="toggleTermsDropdown()" oninput="filterTerms(this.value)" style="width:100%;padding:12px 40px 12px 16px;border:2px solid #1e4575;border-radius:8px;font-size:14px;font-weight:500;background:white;color:#344054;box-sizing:border-box">
                         <button type="button" onclick="toggleTermsDropdown()" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);width:36px;height:calc(100% - 4px);background:linear-gradient(135deg,#1e4575,#2563eb);color:white;border:none;border-radius:0 6px 6px 0;cursor:pointer;font-size:12px">▼</button>
                         <div id="termsDropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:white;border:2px solid #1e4575;border-radius:8px;max-height:250px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
-                            @foreach(['30% DP - 70% BAL 5 YRS','50% DP - 50% BAL 5 YRS','30% DP (6 MOS) - 70% BAL 54 MOS','30% DP (3 MOS) - 70% BAL 57 MOS','30% DP (9 MOS) - 70% BAL 36 MOS','30% DP (2 MOS) - 70% BAL 57 MOS','30% DP (2 MOS) - 70% BAL 5 YRS','STRAIGHT PAYMENT','30% DP - 70% BAL 3 YRS'] as $term)
-                            <div onclick="selectTerm('{{ $term }}')" style="padding:12px 16px;cursor:pointer;font-size:14px;color:#374151;font-weight:500;border-bottom:1px solid #f3f4f6" onmouseover="this.style.background='#e3f2fd'" onmouseout="this.style.background=''">{{ $term }}</div>
-                            @endforeach
+                            <?php $__currentLoopData = ['30% DP - 70% BAL 5 YRS','50% DP - 50% BAL 5 YRS','30% DP (6 MOS) - 70% BAL 54 MOS','30% DP (3 MOS) - 70% BAL 57 MOS','30% DP (9 MOS) - 70% BAL 36 MOS','30% DP (2 MOS) - 70% BAL 57 MOS','30% DP (2 MOS) - 70% BAL 5 YRS','STRAIGHT PAYMENT','30% DP - 70% BAL 3 YRS']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $term): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div onclick="selectTerm('<?php echo e($term); ?>')" style="padding:12px 16px;cursor:pointer;font-size:14px;color:#374151;font-weight:500;border-bottom:1px solid #f3f4f6" onmouseover="this.style.background='#e3f2fd'" onmouseout="this.style.background=''"><?php echo e($term); ?></div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
                 </div>
@@ -167,7 +166,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                     </select>
                 </div>
             </div>
-            <input type="hidden" name="date_requested" value="{{ date('Y-m-d') }}">
+            <input type="hidden" name="date_requested" value="<?php echo e(date('Y-m-d')); ?>">
 
             <input type="hidden" name="property_details" value="">
             <input type="hidden" name="commission" value="">
@@ -249,87 +248,89 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                             <input type="checkbox" id="cdSelectAll" onchange="cdToggleSelectAll(this)" title="Select all">
                         </th>
                         <th class="cd-sticky-col cd-sticky-index" style="padding:14px 8px;color:white;text-transform:uppercase;font-size:11px;">#</th>
-                        @foreach(['Developer','Project','Block & Lot','Client','Lot Area','Price/SQM','TCP','Discount (%)','Discount Value','Net TCP','Terms','Reservation Date','Units','Downpayment Date','Agent','Status','Downpayment Status','Actions'] as $h)
-                        <th style="padding:14px 12px;text-align:left;font-weight:600;color:white;text-transform:uppercase;font-size:11px;white-space:nowrap">{{ $h }}</th>
-                        @endforeach
+                        <?php $__currentLoopData = ['Developer','Project','Block & Lot','Client','Lot Area','Price/SQM','TCP','Discount (%)','Discount Value','Net TCP','Terms','Reservation Date','Units','Downpayment Date','Agent','Status','Downpayment Status','Actions']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $h): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <th style="padding:14px 12px;text-align:left;font-weight:600;color:white;text-transform:uppercase;font-size:11px;white-space:nowrap"><?php echo e($h); ?></th>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tr>
                 </thead>
                 <tbody id="cdTableBody">
-                    @forelse($commissionRequests ?? [] as $req)
-                    <tr data-id="{{ $req->id }}"
-                        data-search="{{ strtolower($req->client_name ?? '') }} {{ strtolower($req->agent_name ?? '') }} {{ strtolower($req->project_name ?? '') }} {{ strtolower($req->developer_name ?? '') }} {{ strtolower($req->block_lot_number ?? '') }}"
+                    <?php $__empty_1 = true; $__currentLoopData = $commissionRequests ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $req): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr data-id="<?php echo e($req->id); ?>"
+                        data-search="<?php echo e(strtolower($req->client_name ?? '')); ?> <?php echo e(strtolower($req->agent_name ?? '')); ?> <?php echo e(strtolower($req->project_name ?? '')); ?> <?php echo e(strtolower($req->developer_name ?? '')); ?> <?php echo e(strtolower($req->block_lot_number ?? '')); ?>"
                         style="border-bottom:1px solid #e5e7eb">
                         <td class="cd-sticky-col cd-sticky-checkbox" style="padding:14px 8px">
-                            <input type="checkbox" class="cd-row-checkbox" value="{{ $req->id }}" onchange="cdUpdateBulkBar()">
+                            <input type="checkbox" class="cd-row-checkbox" value="<?php echo e($req->id); ?>" onchange="cdUpdateBulkBar()">
                         </td>
-                        <td class="cd-sticky-col cd-sticky-index" style="padding:14px 8px;color:#374151;font-weight:600">{{ $loop->iteration }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->developer_name ?? '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->project_name ?? '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->block_lot_number ?? '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->client_name ?? '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->lot_area ? number_format($req->lot_area,2).' sqm' : '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->price_sqm ? '₱'.number_format($req->price_sqm,2) : '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->tcp ? '₱'.number_format($req->tcp,2) : '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->discount !== null ? number_format($req->discount, 2).'%' : '-' }}</td>
+                        <td class="cd-sticky-col cd-sticky-index" style="padding:14px 8px;color:#374151;font-weight:600"><?php echo e($loop->iteration); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->developer_name ?? '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->project_name ?? '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->block_lot_number ?? '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->client_name ?? '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->lot_area ? number_format($req->lot_area,2).' sqm' : '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->price_sqm ? '₱'.number_format($req->price_sqm,2) : '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->tcp ? '₱'.number_format($req->tcp,2) : '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->discount !== null ? number_format($req->discount, 2).'%' : '-'); ?></td>
                         <td style="padding:14px 12px;color:#374151;white-space:nowrap">
-                            @php $discVal = $req->tcp && $req->discount ? $req->tcp * ($req->discount / 100) : null; @endphp
-                            {{ $discVal ? '₱'.number_format($discVal, 2) : '-' }}
+                            <?php $discVal = $req->tcp && $req->discount ? $req->tcp * ($req->discount / 100) : null; ?>
+                            <?php echo e($discVal ? '₱'.number_format($discVal, 2) : '-'); ?>
+
                         </td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->net_tcp ? '₱'.number_format($req->net_tcp,2) : '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->terms_of_payment ?? '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->reservation_date ? $req->reservation_date->format('M d, Y') : '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap;text-align:center;">{{ $req->number_of_units ?? '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->date_of_downpayment ? $req->date_of_downpayment->format('M d, Y') : '-' }}</td>
-                        <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->agent_name ?? '-' }}</td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->net_tcp ? '₱'.number_format($req->net_tcp,2) : '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->terms_of_payment ?? '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->reservation_date ? $req->reservation_date->format('M d, Y') : '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap;text-align:center;"><?php echo e($req->number_of_units ?? '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->date_of_downpayment ? $req->date_of_downpayment->format('M d, Y') : '-'); ?></td>
+                        <td style="padding:14px 12px;color:#374151;white-space:nowrap"><?php echo e($req->agent_name ?? '-'); ?></td>
                         <td style="padding:10px 12px;white-space:nowrap">
-                            <form method="POST" action="{{ route('client-database.status', $req->id) }}">
-                                @csrf @method('PATCH')
+                            <form method="POST" action="<?php echo e(route('client-database.status', $req->id)); ?>">
+                                <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
                                 <select name="client_status" onchange="this.form.submit()"
-                                    data-client-status="{{ strtolower($req->client_status ?? '') }}"
+                                    data-client-status="<?php echo e(strtolower($req->client_status ?? '')); ?>"
                                     style="padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;outline:none;
-                                    background:{{ $req->client_status === 'Done' ? '#dcfce7' : ($req->client_status === 'Cancelled' ? '#fee2e2' : '#f1f5f9') }};
-                                    color:{{ $req->client_status === 'Done' ? '#166534' : ($req->client_status === 'Cancelled' ? '#991b1b' : '#64748b') }};">
-                                    <option value="" {{ !$req->client_status ? 'selected' : '' }}>— Set Status —</option>
-                                    <option value="Done" {{ $req->client_status === 'Done' ? 'selected' : '' }} style="background:#dcfce7;color:#166534;">Done</option>
-                                    <option value="Cancelled" {{ $req->client_status === 'Cancelled' ? 'selected' : '' }} style="background:#fee2e2;color:#991b1b;">Cancelled</option>
+                                    background:<?php echo e($req->client_status === 'Done' ? '#dcfce7' : ($req->client_status === 'Cancelled' ? '#fee2e2' : '#f1f5f9')); ?>;
+                                    color:<?php echo e($req->client_status === 'Done' ? '#166534' : ($req->client_status === 'Cancelled' ? '#991b1b' : '#64748b')); ?>;">
+                                    <option value="" <?php echo e(!$req->client_status ? 'selected' : ''); ?>>— Set Status —</option>
+                                    <option value="Done" <?php echo e($req->client_status === 'Done' ? 'selected' : ''); ?> style="background:#dcfce7;color:#166534;">Done</option>
+                                    <option value="Cancelled" <?php echo e($req->client_status === 'Cancelled' ? 'selected' : ''); ?> style="background:#fee2e2;color:#991b1b;">Cancelled</option>
                                 </select>
                             </form>
                         </td>
                         <td style="padding:10px 12px;white-space:nowrap">
-                            <button onclick="openDPModal({{ $req->id }}, {{ $req->downpayment_amount ?? 0 }}, {{ $req->downpayment_terms ?? 1 }}, {{ $req->downpayment_per_term ?? 0 }}, '{{ addslashes($req->downpayment_status ?? '') }}', '{{ $req->downpayment_date ? $req->downpayment_date->format('Y-m-d') : '' }}')"
+                            <button onclick="openDPModal(<?php echo e($req->id); ?>, <?php echo e($req->downpayment_amount ?? 0); ?>, <?php echo e($req->downpayment_terms ?? 1); ?>, <?php echo e($req->downpayment_per_term ?? 0); ?>, '<?php echo e(addslashes($req->downpayment_status ?? '')); ?>', '<?php echo e($req->downpayment_date ? $req->downpayment_date->format('Y-m-d') : ''); ?>')"
                                 style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;
-                                background:{{ $req->downpayment_status === 'Paid' || $req->downpayment_status === 'Spot Paid' ? '#dcfce7' : ($req->downpayment_status && $req->downpayment_status !== '— Set —' ? '#fef3c7' : '#f1f5f9') }};
-                                color:{{ $req->downpayment_status === 'Paid' || $req->downpayment_status === 'Spot Paid' ? '#166534' : ($req->downpayment_status && $req->downpayment_status !== '— Set —' ? '#92400e' : '#64748b') }};">
-                                {{ $req->downpayment_status ?: '— Set —' }}
+                                background:<?php echo e($req->downpayment_status === 'Paid' || $req->downpayment_status === 'Spot Paid' ? '#dcfce7' : ($req->downpayment_status && $req->downpayment_status !== '— Set —' ? '#fef3c7' : '#f1f5f9')); ?>;
+                                color:<?php echo e($req->downpayment_status === 'Paid' || $req->downpayment_status === 'Spot Paid' ? '#166534' : ($req->downpayment_status && $req->downpayment_status !== '— Set —' ? '#92400e' : '#64748b')); ?>;">
+                                <?php echo e($req->downpayment_status ?: '— Set —'); ?>
+
                             </button>
                         </td>
                         <td style="padding:14px 12px;white-space:nowrap">
                             <div style="display:flex;gap:6px">
-                                <button onclick="viewRow({{ $req->id }})" style="width:60px;height:28px;background:#1e4575;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">VIEW</button>
-                                @if(auth()->user()->isAdmin())
-                                <button onclick="editRow({{ $req->id }})" style="width:60px;height:28px;background:#f59e0b;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">EDIT</button>
-                                <form action="{{ route('client-database.destroy', $req->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this record?')">
-                                    @csrf @method('DELETE')
+                                <button onclick="viewRow(<?php echo e($req->id); ?>)" style="width:60px;height:28px;background:#1e4575;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">VIEW</button>
+                                <?php if(auth()->user()->isAdmin()): ?>
+                                <button onclick="editRow(<?php echo e($req->id); ?>)" style="width:60px;height:28px;background:#f59e0b;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">EDIT</button>
+                                <form action="<?php echo e(route('client-database.destroy', $req->id)); ?>" method="POST" style="display:inline" onsubmit="return confirm('Delete this record?')">
+                                    <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                     <button type="submit" style="width:60px;height:28px;background:#ef4444;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">DELETE</button>
                                 </form>
-                                @else
-                                @php $dpLocked = in_array($req->downpayment_status, ['Paid', 'Spot Paid']) && $req->downpayment_amount > 0; @endphp
-                                @if($dpLocked)
+                                <?php else: ?>
+                                <?php $dpLocked = in_array($req->downpayment_status, ['Paid', 'Spot Paid']) && $req->downpayment_amount > 0; ?>
+                                <?php if($dpLocked): ?>
                                 <button disabled title="Locked — downpayment has been paid. Only admin can edit." style="width:60px;height:28px;background:#9ca3af;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:not-allowed;opacity:0.7;">🔒 EDIT</button>
-                                @else
-                                <button onclick="staffEditRow({{ $req->id }}, '{{ addslashes($req->client_name ?? '') }} - {{ addslashes($req->project_name ?? '') }}')" style="width:60px;height:28px;background:#f59e0b;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">EDIT</button>
-                                @endif
-                                <form action="{{ route('client-database.destroy', $req->id) }}" method="POST" style="display:inline" onsubmit="return staffDeleteConfirm(event, {{ $req->id }}, '{{ addslashes($req->client_name ?? '') }} - {{ addslashes($req->project_name ?? '') }}')">
-                                    @csrf @method('DELETE')
+                                <?php else: ?>
+                                <button onclick="staffEditRow(<?php echo e($req->id); ?>, '<?php echo e(addslashes($req->client_name ?? '')); ?> - <?php echo e(addslashes($req->project_name ?? '')); ?>')" style="width:60px;height:28px;background:#f59e0b;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">EDIT</button>
+                                <?php endif; ?>
+                                <form action="<?php echo e(route('client-database.destroy', $req->id)); ?>" method="POST" style="display:inline" onsubmit="return staffDeleteConfirm(event, <?php echo e($req->id); ?>, '<?php echo e(addslashes($req->client_name ?? '')); ?> - <?php echo e(addslashes($req->project_name ?? '')); ?>')">
+                                    <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                     <button type="submit" style="width:60px;height:28px;background:#ef4444;color:white;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">DELETE</button>
                                 </form>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="20" style="text-align:center;padding:40px;color:#6b7280">No client records yet.</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -394,7 +395,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
             <button onclick="document.getElementById('editModal').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">✕</button>
         </div>
         <form id="editForm" method="POST">
-            @csrf @method('PUT')
+            <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
             <input type="hidden" id="edit_id" name="id">
             <input type="hidden" id="edit_date_requested" name="date_requested">
             <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
@@ -453,7 +454,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
 </div>
 
 <script>
-const IS_ADMIN = {{ (auth()->check() && auth()->user()->isAdmin()) ? 'true' : 'false' }};
+const IS_ADMIN = <?php echo e((auth()->check() && auth()->user()->isAdmin()) ? 'true' : 'false'); ?>;
 
 let _localPermAction = '', _localPermModule = 'Client Database', _localPermRecordId = null, _localPermRecordLabel = '';
 let _pendingDeleteForm = null;
@@ -1156,7 +1157,7 @@ function cdConfirmBulkDelete() {
             <button onclick="document.getElementById('dpModal').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">✕</button>
         </div>
 
-        {{-- Step 1: Choose type --}}
+        
         <div id="dp_step_type" style="padding:24px;display:flex;flex-direction:column;gap:12px;flex-shrink:0">
             <p style="font-size:13px;color:#64748b;margin:0;">Select downpayment type:</p>
             <div style="display:flex;gap:12px">
@@ -1174,7 +1175,7 @@ function cdConfirmBulkDelete() {
             </div>
         </div>
 
-        {{-- Spot DP --}}
+        
         <div id="dp_spot_section" style="display:none;padding:0 24px 24px;flex-direction:column;gap:12px">
             <div id="dp_spot_locked_notice" style="display:none;background:#fef3c7;border-left:3px solid #f59e0b;padding:10px 14px;border-radius:6px;font-size:12px;color:#92400e;">
                 🔒 This downpayment has been finalized. Only admin can modify it.
@@ -1193,7 +1194,7 @@ function cdConfirmBulkDelete() {
             </div>
         </div>
 
-        {{-- Installment DP --}}
+        
         <div id="dp_installment_section" style="display:none;flex-direction:column;flex:1;min-height:0">
             <div style="padding:16px 24px;border-bottom:1px solid #e5e7eb;display:flex;gap:12px;align-items:flex-end;flex-shrink:0">
                 <div style="flex:1">
@@ -1204,9 +1205,9 @@ function cdConfirmBulkDelete() {
                 <div>
                     <label style="font-size:11px;font-weight:700;color:#1e4575;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Terms</label>
                     <select id="dp_terms_select" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:14px">
-                        @for($i = 1; $i <= 6; $i++)
-                        <option value="{{ $i }}">{{ $i }}</option>
-                        @endfor
+                        <?php for($i = 1; $i <= 6; $i++): ?>
+                        <option value="<?php echo e($i); ?>"><?php echo e($i); ?></option>
+                        <?php endfor; ?>
                     </select>
                 </div>
                 <button onclick="setupInstallments()" style="padding:9px 16px;background:linear-gradient(135deg,#1e4575,#2563eb);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Set Terms</button>
@@ -1216,7 +1217,7 @@ function cdConfirmBulkDelete() {
             </div>
         </div>
 
-        {{-- Others DP --}}
+        
         <div id="dp_others_section" style="display:none;padding:0 24px 24px;flex-direction:column;gap:12px">
             <div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:10px 14px;border-radius:6px;font-size:12px;color:#92400e;margin-bottom:4px;">
                 For more than 6 terms — enter total amount and number of terms, then click Set Terms.
@@ -1259,7 +1260,7 @@ function cdConfirmBulkDelete() {
 <script>
 let _dpRecordId = null;
 const _dpCsrf = document.querySelector('meta[name=csrf-token]')?.content || '';
-const _isAdmin = {{ auth()->user()->isAdmin() ? 'true' : 'false' }};
+const _isAdmin = <?php echo e(auth()->user()->isAdmin() ? 'true' : 'false'); ?>;
 
 function openDPModal(id, amount, terms, perTerm, status, dpDate) {
     _dpRecordId = id;
@@ -1489,4 +1490,5 @@ function unmarkPaid(instId) {
 }
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Joshua\Desktop\ArkCrest github working\ArkCrest-Website\ArkCrest-Website\ArkCrestRealtyCorporation-main\resources\views/client-database.blade.php ENDPATH**/ ?>
