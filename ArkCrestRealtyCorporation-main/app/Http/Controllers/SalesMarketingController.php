@@ -194,6 +194,7 @@ class SalesMarketingController extends Controller
             'chartTeamData'
         ));
     }
+    
 
     public function storeReservedClient(Request $request)
     {
@@ -342,6 +343,31 @@ class SalesMarketingController extends Controller
             // downpayment_per_term, downpayment_date are managed separately
             // via the downpayment modal — never overwritten by the edit form
         ];
+    }
+
+    public function checkDuplicate(Request $request)
+    {
+        $clientName  = trim($request->query('client_name', ''));
+        $projectName = trim($request->query('project_name', ''));
+        $blockLot    = trim($request->query('block_lot_number', ''));
+
+        if ($clientName === '' || $projectName === '') {
+            return response()->json(['duplicate' => false]);
+        }
+
+        $query = CommissionRequestSales::whereRaw('LOWER(client_name) = ?', [strtolower($clientName)])
+            ->whereRaw('LOWER(project_name) = ?', [strtolower($projectName)]);
+
+        if ($blockLot !== '') {
+            $query->whereRaw('LOWER(block_lot_number) = ?', [strtolower($blockLot)]);
+        }
+
+        $existing = $query->first();
+
+        return response()->json([
+            'duplicate' => (bool) $existing,
+            'id' => $existing->id ?? null,
+        ]);
     }
 
     public function store(Request $request)
