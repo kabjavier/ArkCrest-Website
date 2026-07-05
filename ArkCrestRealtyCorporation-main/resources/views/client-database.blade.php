@@ -24,11 +24,31 @@
 .btn-clear:hover{background:#e5e7eb;transform:translateY(-2px)}
 .btn-submit{background:#1e4575;color:white;box-shadow:0 2px 8px rgba(30,69,117,0.3)}
 .btn-submit:hover{background:#152e4d;transform:translateY(-2px)}
-@media (max-width: 768px) {
-    .cd-modal-overlay { padding: 0; }
-    .cd-modal-box { width: 100% !important; max-width: 100% !important; height: 100%; max-height: 100%; overflow-y: auto !important; -webkit-overflow-scrolling: touch; border-radius: 0 !important; }
-    .cd-modal-grid { grid-template-columns: 1fr !important; }
-}
+
+/* Sticky checkbox + index columns for the records table */
+.cd-sticky-col{position:sticky;background:#fff;z-index:2}
+.cd-sticky-checkbox{left:0;width:40px;min-width:40px;max-width:40px;text-align:center}
+.cd-sticky-index{left:40px;width:52px;min-width:52px;max-width:52px;text-align:center;box-shadow:2px 0 4px -2px rgba(0,0,0,0.15)}
+thead .cd-sticky-col{background:#1e4575;z-index:3}
+tbody tr:hover .cd-sticky-col{background:#f8fafc}
+.cd-bulk-btn{padding:9px 14px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:#ef4444;color:#fff;transition:opacity .2s}
+.cd-bulk-btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Records table polish */
+.cd-table-wrap{overflow-x:auto;overflow-y:hidden;border:1.5px solid #d0d5dd;border-radius:10px}
+/* Hide the native scrollbar — replaced by the custom #cdScrollTrack bar below the table, which is fully JS-driven and guaranteed to work regardless of OS/browser scrollbar quirks. */
+.cd-table-wrap::-webkit-scrollbar{display:none}
+.cd-table-wrap{scrollbar-width:none;-ms-overflow-style:none}
+.cd-scroll-track{position:relative;height:12px;background:#f1f5f9;border-radius:6px;margin-top:8px;cursor:pointer;display:none;user-select:none}
+.cd-scroll-thumb{position:absolute;top:1px;left:0;height:10px;background:#94a3b8;border-radius:5px;cursor:grab;transition:background .15s}
+.cd-scroll-thumb:hover{background:#64748b}
+.cd-scroll-thumb.dragging{cursor:grabbing;background:#475569}
+.cd-records-table{width:100%;border-collapse:collapse;font-size:13px}
+.cd-records-table th,.cd-records-table td{border-right:1px solid #eef1f5}
+.cd-records-table th:last-child,.cd-records-table td:last-child{border-right:none}
+.cd-records-table thead th{border-bottom:2px solid #16345c}
+.cd-records-table tbody tr:last-child td{border-bottom:none}
+#cdTableBody tr:hover td{background:#f8fafc}
 </style>
 
 <div class="cd-wrap">
@@ -148,7 +168,7 @@
                 </div>
             </div>
             <input type="hidden" name="date_requested" value="{{ date('Y-m-d') }}">
-            
+
             <input type="hidden" name="property_details" value="">
             <input type="hidden" name="commission" value="">
             <input type="hidden" name="remarks" value="">
@@ -188,7 +208,7 @@
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <div class="cd-search-wrap" style="position:relative;">
                     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#6b7280" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" id="cdSearch" placeholder="Search by name, agent, project... (space = AND)" style="width:320px;max-width:100%;padding:9px 12px 9px 36px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;box-sizing:border-box;outline:none;" oninput="cdFilter()">
+                    <input type="text" id="cdSearch" placeholder="Search name, agent, project, client, block & lot... (space = AND)" style="width:340px;max-width:100%;padding:9px 12px 9px 36px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;box-sizing:border-box;outline:none;" oninput="cdFilter()">
                 </div>
                 <select id="cdStatusFilter" onchange="cdFilter()" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;">
                     <option value="">All Status</option>
@@ -232,14 +252,18 @@
                         <option value="dec">December</option>
                     </select>
                 </div>
-                <button onclick="document.getElementById('cdSearch').value='';document.getElementById('cdStatusFilter').value='';document.getElementById('cdReservationMonthFilter').value='';document.getElementById('cdDownpaymentMonthFilter').value='';cdFilter();" style="padding:9px 14px;background:#f1f5f9;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#64748b;cursor:pointer;">Clear</button>
+                <button id="cdBulkDeleteBtn" class="cd-bulk-btn" disabled onclick="cdDeleteSelected()">Delete Selected (0)</button>
                 <span id="cdCount" style="font-size:12px;color:#94a3b8;white-space:nowrap;"></span>
             </div>
         </div>
-        <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <div class="cd-table-wrap">
+            <table class="cd-records-table">
                 <thead style="background:linear-gradient(135deg,#1e4575,#2563eb)">
                     <tr>
+                        <th class="cd-sticky-col cd-sticky-checkbox" style="padding:14px 8px">
+                            <input type="checkbox" id="cdSelectAll" onchange="cdToggleSelectAll(this)" title="Select all">
+                        </th>
+                        <th class="cd-sticky-col cd-sticky-index" style="padding:14px 8px;color:white;text-transform:uppercase;font-size:11px;">#</th>
                         @foreach(['Developer','Project','Block & Lot','Client','Lot Area','Price/SQM','TCP','Discount (%)','Discount Value','Net TCP','Terms','Reservation Date','Units','Downpayment Date','Agent','Status','Downpayment Status','Actions'] as $h)
                         <th style="padding:14px 12px;text-align:left;font-weight:600;color:white;text-transform:uppercase;font-size:11px;white-space:nowrap">{{ $h }}</th>
                         @endforeach
@@ -247,7 +271,13 @@
                 </thead>
                 <tbody id="cdTableBody">
                     @forelse($commissionRequests ?? [] as $req)
-                    <tr data-id="{{ $req->id }}" style="border-bottom:1px solid #e5e7eb">
+                    <tr data-id="{{ $req->id }}"
+                        data-search="{{ strtolower($req->client_name ?? '') }} {{ strtolower($req->agent_name ?? '') }} {{ strtolower($req->project_name ?? '') }} {{ strtolower($req->developer_name ?? '') }} {{ strtolower($req->block_lot_number ?? '') }}"
+                        style="border-bottom:1px solid #e5e7eb">
+                        <td class="cd-sticky-col cd-sticky-checkbox" style="padding:14px 8px">
+                            <input type="checkbox" class="cd-row-checkbox" value="{{ $req->id }}" onchange="cdUpdateBulkBar()">
+                        </td>
+                        <td class="cd-sticky-col cd-sticky-index" style="padding:14px 8px;color:#374151;font-weight:600">{{ $loop->iteration }}</td>
                         <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->developer_name ?? '-' }}</td>
                         <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->project_name ?? '-' }}</td>
                         <td style="padding:14px 12px;color:#374151;white-space:nowrap">{{ $req->block_lot_number ?? '-' }}</td>
@@ -313,10 +343,13 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="15" style="text-align:center;padding:40px;color:#6b7280">No client records yet.</td></tr>
+                    <tr><td colspan="20" style="text-align:center;padding:40px;color:#6b7280">No client records yet.</td></tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div id="cdScrollTrack" class="cd-scroll-track">
+            <div id="cdScrollThumb" class="cd-scroll-thumb"></div>
         </div>
     </div>
 </div>
@@ -353,14 +386,14 @@
 </div>
 
 <!-- View Modal -->
-<div id="viewModal" class="cd-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
-    <div class="cd-modal-box" style="background:white;border-radius:16px;width:95%;max-width:960px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div id="viewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:16px;width:95%;max-width:960px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
         <div style="background:linear-gradient(135deg,#1e4575,#2563eb);color:white;padding:20px 24px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center">
             <h3 style="margin:0;font-size:18px;font-weight:700">Commission Request Details</h3>
             <button onclick="document.getElementById('viewModal').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">✕</button>
         </div>
         <div style="padding:24px">
-            <div class="cd-modal-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" id="viewContent"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" id="viewContent"></div>
         </div>
         <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end">
             <button onclick="document.getElementById('viewModal').style.display='none'" style="padding:10px 20px;background:#f3f4f6;color:#374151;border:2px solid #d0d5dd;border-radius:8px;font-weight:600;cursor:pointer">Close</button>
@@ -369,8 +402,8 @@
 </div>
 
 <!-- Edit Modal -->
-<div id="editModal" class="cd-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
-    <div class="cd-modal-box" style="background:white;border-radius:16px;width:95%;max-width:960px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:16px;width:95%;max-width:960px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
         <div style="background:linear-gradient(135deg,#1e4575,#2563eb);color:white;padding:20px 24px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:center">
             <h3 style="margin:0;font-size:18px;font-weight:700">Edit Commission Request</h3>
             <button onclick="document.getElementById('editModal').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:white;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">✕</button>
@@ -379,7 +412,7 @@
             @csrf @method('PUT')
             <input type="hidden" id="edit_id" name="id">
             <input type="hidden" id="edit_date_requested" name="date_requested">
-            <div class="cd-modal-grid" style="padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+            <div style="padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
                 <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11px;font-weight:700;color:#1e4575;text-transform:uppercase">Developer's Name</label><input type="text" id="edit_developer_name" name="developer_name" style="padding:10px 14px;border:2px solid #d0d5dd;border-radius:8px;font-size:14px"></div>
                 <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11px;font-weight:700;color:#1e4575;text-transform:uppercase">Project Name *</label><input type="text" id="edit_project_name" name="project_name" required style="padding:10px 14px;border:2px solid #d0d5dd;border-radius:8px;font-size:14px"></div>
                 <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11px;font-weight:700;color:#1e4575;text-transform:uppercase">Block & Lot Number</label><input type="text" id="edit_block_lot_number" name="block_lot_number" style="padding:10px 14px;border:2px solid #d0d5dd;border-radius:8px;font-size:14px"></div>
@@ -408,6 +441,29 @@
             </div>
             <div id="editFormError" style="display:none;margin:0 24px 16px;background:#fee2e2;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;"></div>
         </form>
+    </div>
+</div>
+
+<!-- Bulk Delete Confirm Modal -->
+<div id="cdBulkDeleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center" onclick="if(event.target===this)cdCancelBulkDelete()">
+    <div style="background:white;border-radius:16px;max-width:420px;width:90%;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.2);">
+        <div style="background:linear-gradient(135deg,#dc2626,#ef4444);padding:18px 22px;display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg fill="none" stroke="white" viewBox="0 0 24 24" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <div style="flex:1;">
+                <div style="color:rgba(255,255,255,.75);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Confirm Deletion</div>
+                <div style="color:white;font-size:15px;font-weight:700;margin-top:1px;">Delete Selected Records</div>
+            </div>
+        </div>
+        <div style="padding:20px 22px;">
+            <p style="font-size:14px;color:#374151;margin:0 0 4px;">Delete <strong id="cdBulkDeleteCount">0</strong> selected record(s)?</p>
+            <p style="font-size:12px;color:#94a3b8;margin:0 0 18px;">This action cannot be undone.</p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button onclick="cdCancelBulkDelete()" style="padding:9px 18px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">No, Cancel</button>
+                <button onclick="cdConfirmBulkDelete()" style="padding:9px 20px;background:#dc2626;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Yes, Delete</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -738,8 +794,19 @@ function submitEditForm() {
     });
 }
 
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded', function () {
     cdFilter();
+    cdInitScrollbar();
+
+    // Force recalculation after the page fully renders
+    setTimeout(function () {
+        window.dispatchEvent(new Event('resize'));
+    }, 100);
+
+    setTimeout(function () {
+        window.dispatchEvent(new Event('resize'));
+    }, 500);
+});
 
     // Highlight row from permission notification
     const params = new URLSearchParams(window.location.search);
@@ -769,13 +836,15 @@ document.addEventListener('DOMContentLoaded',function(){
             row.style.outlineOffset= '-1px';
             row.style.transition   = 'all .3s';
 
-            const firstTd = row.querySelector('td');
-            if (firstTd && !firstTd.querySelector('.hl-badge')) {
+            // Badge goes on the index cell (2nd cell) — 1st cell is the select checkbox
+            const cells = row.querySelectorAll('td');
+            const badgeTd = cells[1] || cells[0];
+            if (badgeTd && !badgeTd.querySelector('.hl-badge')) {
                 const badge = document.createElement('span');
                 badge.className = 'hl-badge';
                 badge.style.cssText = 'display:inline-block;margin-left:6px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:' + badgeColor + ';color:white;vertical-align:middle;';
                 badge.textContent = badgeText;
-                firstTd.appendChild(badge);
+                badgeTd.appendChild(badge);
             }
 
             // Find the scrollable container and scroll to row
@@ -839,6 +908,76 @@ const MONTH_ALIASES = {
     'oct':'oct','nov':'nov','dec':'dec'
 };
 
+function cdInitScrollbar() {
+    var wrap  = document.querySelector('.cd-table-wrap');
+    var track = document.getElementById('cdScrollTrack');
+    var thumb = document.getElementById('cdScrollThumb');
+    if (!wrap || !track || !thumb) return;
+
+    function update() {
+        var scrollable = wrap.scrollWidth > wrap.clientWidth + 1;
+        track.style.display = scrollable ? 'block' : 'none';
+        if (!scrollable) return;
+        var trackWidth = track.clientWidth;
+        var thumbWidth = Math.max(30, (wrap.clientWidth / wrap.scrollWidth) * trackWidth);
+        thumb.style.width = thumbWidth + 'px';
+        var maxThumbLeft  = trackWidth - thumbWidth;
+        var maxScrollLeft = wrap.scrollWidth - wrap.clientWidth;
+        var ratio = maxScrollLeft > 0 ? wrap.scrollLeft / maxScrollLeft : 0;
+        thumb.style.left = (ratio * maxThumbLeft) + 'px';
+    }
+
+    function scrollToThumbLeft(newLeft) {
+        var trackWidth   = track.clientWidth;
+        var thumbWidth   = thumb.offsetWidth;
+        var maxThumbLeft = trackWidth - thumbWidth;
+        newLeft = Math.min(maxThumbLeft, Math.max(0, newLeft));
+        thumb.style.left = newLeft + 'px';
+        var maxScrollLeft = wrap.scrollWidth - wrap.clientWidth;
+        wrap.scrollLeft = maxThumbLeft > 0 ? (newLeft / maxThumbLeft) * maxScrollLeft : 0;
+    }
+
+    update();
+    window.addEventListener('resize', update);
+    wrap.addEventListener('scroll', update);
+
+    var dragging = false, startX = 0, startLeft = 0;
+
+    thumb.addEventListener('mousedown', function(e) {
+        dragging = true;
+        thumb.classList.add('dragging');
+        startX = e.clientX;
+        startLeft = thumb.offsetLeft;
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        scrollToThumbLeft(startLeft + (e.clientX - startX));
+    });
+    document.addEventListener('mouseup', function() {
+        if (dragging) { dragging = false; thumb.classList.remove('dragging'); }
+    });
+
+    // Click on the track (not the thumb itself) jumps to that position
+    track.addEventListener('click', function(e) {
+        if (e.target === thumb) return;
+        var rect = track.getBoundingClientRect();
+        scrollToThumbLeft((e.clientX - rect.left) - (thumb.offsetWidth / 2));
+    });
+
+    // Touch support
+    thumb.addEventListener('touchstart', function(e) {
+        dragging = true;
+        startX = e.touches[0].clientX;
+        startLeft = thumb.offsetLeft;
+    }, { passive: true });
+    document.addEventListener('touchmove', function(e) {
+        if (!dragging) return;
+        scrollToThumbLeft(startLeft + (e.touches[0].clientX - startX));
+    }, { passive: true });
+    document.addEventListener('touchend', function() { dragging = false; });
+}
+
 function cdFilter() {
     var raw = (document.getElementById('cdSearch')?.value || '').toLowerCase().trim();
     var statusFilter       = (document.getElementById('cdStatusFilter')?.value || '').toLowerCase();
@@ -850,11 +989,13 @@ function cdFilter() {
     var rows = document.querySelectorAll('#cdTableBody tr');
     var visible = 0;
     rows.forEach(function(r) {
-        var text = r.textContent.toLowerCase();
         var cells = r.querySelectorAll('td');
+        if (!cells.length) { return; } // skip "no records" placeholder row
 
-        // Keyword search
-        var keyMatch = keywords.every(k => text.includes(k));
+        // Keyword search — matches Name, Agent, Project, Client, Block & Lot
+        // (stored on the row as data-search) so it stays accurate regardless of column order.
+        var searchText = (r.dataset.search || '').toLowerCase();
+        var keyMatch = keywords.every(k => searchText.includes(k));
 
         // Status filter
         var statusCell = r.querySelector('[data-client-status]');
@@ -864,16 +1005,16 @@ function cdFilter() {
         else if (statusFilter === 'cancelled') statusMatch = rowStatus === 'cancelled';
         else if (statusFilter === 'none')      statusMatch = rowStatus === '';
 
-        // Reservation date month filter — column index 11
+        // Reservation date month filter — column index 13 (checkbox + index columns shift indices by 2)
         var reservationMatch = true;
-        if (reservationMonth && cells[11]) {
-            reservationMatch = cells[11].textContent.toLowerCase().includes(reservationMonth);
+        if (reservationMonth && cells[13]) {
+            reservationMatch = cells[13].textContent.toLowerCase().includes(reservationMonth);
         }
 
-        // Downpayment date month filter — column index 13
+        // Downpayment date month filter — column index 15
         var downpaymentMatch = true;
-        if (downpaymentMonth && cells[13]) {
-            downpaymentMatch = cells[13].textContent.toLowerCase().includes(downpaymentMonth);
+        if (downpaymentMonth && cells[15]) {
+            downpaymentMatch = cells[15].textContent.toLowerCase().includes(downpaymentMonth);
         }
 
         var show = keyMatch && statusMatch && reservationMatch && downpaymentMatch;
@@ -882,7 +1023,100 @@ function cdFilter() {
     });
     var countEl = document.getElementById('cdCount');
     if (countEl) countEl.textContent = visible + ' record(s) shown';
+
+    cdUpdateBulkBar();
 }
+
+// ── Multi-select / bulk delete ──
+function cdToggleSelectAll(source) {
+    var rows = document.querySelectorAll('#cdTableBody tr');
+    rows.forEach(function(r) {
+        if (r.style.display === 'none') return; // only affect currently visible/filtered rows
+        var cb = r.querySelector('.cd-row-checkbox');
+        if (cb) cb.checked = source.checked;
+    });
+    cdUpdateBulkBar();
+}
+
+function cdUpdateBulkBar() {
+    var checked = document.querySelectorAll('.cd-row-checkbox:checked');
+    var btn = document.getElementById('cdBulkDeleteBtn');
+    if (btn) {
+        btn.textContent = 'Delete Selected (' + checked.length + ')';
+        btn.disabled = checked.length === 0;
+    }
+
+    // Keep the "select all" checkbox in sync with the visible rows
+    var selectAll = document.getElementById('cdSelectAll');
+    if (selectAll) {
+        var visibleCheckboxes = Array.from(document.querySelectorAll('#cdTableBody tr'))
+            .filter(function(r) { return r.style.display !== 'none'; })
+            .map(function(r) { return r.querySelector('.cd-row-checkbox'); })
+            .filter(Boolean);
+        selectAll.checked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(function(cb) { return cb.checked; });
+        selectAll.indeterminate = !selectAll.checked && visibleCheckboxes.some(function(cb) { return cb.checked; });
+    }
+}
+
+function cdGetSelectedIds() {
+    return Array.from(document.querySelectorAll('.cd-row-checkbox:checked')).map(function(cb) { return cb.value; });
+}
+
+function cdDeleteSelected() {
+    var ids = cdGetSelectedIds();
+    if (!ids.length) {
+        alert('Please select at least one record first (use the checkboxes on the left).');
+        return;
+    }
+
+    if (!IS_ADMIN) {
+        alert('Bulk delete is only available to admins. Please delete records individually — each will go through the usual permission request flow.');
+        return;
+    }
+
+    // Open the custom confirm modal instead of relying on the native confirm(),
+    // which browsers can silently suppress after repeated dialogs on a page.
+    document.getElementById('cdBulkDeleteCount').textContent = ids.length;
+    document.getElementById('cdBulkDeleteModal').style.display = 'flex';
+}
+
+function cdCancelBulkDelete() {
+    document.getElementById('cdBulkDeleteModal').style.display = 'none';
+}
+
+function cdConfirmBulkDelete() {
+    var ids = cdGetSelectedIds();
+    document.getElementById('cdBulkDeleteModal').style.display = 'none';
+    if (!ids.length) return;
+
+    var btn = document.getElementById('cdBulkDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    var csrfMeta = document.querySelector('meta[name=csrf-token]');
+    if (!csrfMeta) {
+        console.error('[cdConfirmBulkDelete] No <meta name="csrf-token"> found on this page — cannot send authenticated requests.');
+        alert('Missing CSRF token meta tag on this page. Cannot delete records — check the console for details.');
+        btn.disabled = false;
+        btn.textContent = 'Delete Selected (' + ids.length + ')';
+        return;
+    }
+    var csrf = csrfMeta.content;
+
+    Promise.all(ids.map(function(id) {
+        return fetch(`/client-database/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+        });
+    })).then(function() {
+        window.location.reload();
+    }).catch(function(err) {
+        console.error('[cdConfirmBulkDelete] error during delete:', err);
+        alert('Some records may not have been deleted. Reloading the page...');
+        window.location.reload();
+    });
+}
+
 // ── Prefill from site visit Reserve button ──
 (function() {
     const p = new URLSearchParams(window.location.search);
