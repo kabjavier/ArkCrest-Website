@@ -131,11 +131,11 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                     <input type="text" name="client_name" placeholder="Enter client name" required>
                 </div>
                 <div class="form-group">
-                    <label>LOT AREA</label>
-                    <input type="number" name="lot_area" id="f_lot_area" placeholder="0.0000" step="0.0001" min="0" oninput="computeTCP()">
+                    <label>LOT AREA <span class="required">*</span></label>
+                    <input type="number" name="lot_area" id="f_lot_area" placeholder="0.0000" step="0.0001" min="0" oninput="computeTCP()" required>
                 </div>
                 <div class="form-group">
-                    <label>PRICE PER SQM</label>
+                    <label>PRICE PER SQM <span class="required">*</span></label>
                     <input type="text" id="f_price_sqm_display" placeholder="0.00" oninput="onPriceSqmInput(this)" style="color:#374151;">
                     <input type="hidden" name="price_sqm" id="f_price_sqm">
                 </div>
@@ -145,8 +145,8 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                     <input type="hidden" name="tcp" id="f_tcp">
                 </div>
                 <div class="form-group">
-                    <label>DISCOUNT (%)</label>
-                    <input type="number" name="discount" id="f_discount_pct" placeholder="0.00" step="0.0000000001" min="0" max="100" oninput="computeDiscount()">
+                    <label>DISCOUNT (%) <span class="required">*</span></label>
+                    <input type="number" name="discount" id="f_discount_pct" placeholder="0.00" step="0.0000000001" min="0" max="100" oninput="computeDiscount()" required>
                 </div>
                 <div class="form-group">
                     <label>DISCOUNT VALUE <span style="font-size:11px;color:#9ca3af;font-weight:400">(auto)</span></label>
@@ -201,7 +201,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
             <input type="hidden" name="remarks" value="">
             <input type="hidden" name="commission_percent" value="">
             <div class="form-actions">
-                <button type="button" class="btn-clear" onclick="document.getElementById('commissionForm').reset()">
+                <button type="button" class="btn-clear" id="commissionClearBtn">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     Clear
                 </button>
@@ -853,6 +853,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const hlStatus = params.get('status');
     const hlAction = params.get('action');
     if (highlightId) {
+        // Strip highlight params from the URL now that we've read them, so a
+        // browser refresh loads a clean URL and the highlight does not reappear.
+        window.history.replaceState({}, '', window.location.pathname);
+
         // Wait for full page render then scroll
         function doHighlight() {
             const row = document.querySelector('tr[data-id="' + highlightId + '"]');
@@ -863,12 +867,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const isApproved = hlStatus === 'approved';
             const isPending  = hlStatus === 'pending';
-            const bgColor    = isApproved ? 'rgba(22,163,74,.15)' : (isPending ? 'rgba(234,179,8,.15)' : 'rgba(220,38,38,.12)');
-            const borderColor= isApproved ? '#16a34a' : (isPending ? '#d97706' : '#dc2626');
-            const badgeColor = isApproved ? '#16a34a' : (isPending ? '#d97706' : '#dc2626');
+            const isDuplicate= hlStatus === 'duplicate';
+            const bgColor    = isApproved ? 'rgba(22,163,74,.15)' : (isPending ? 'rgba(234,179,8,.15)' : (isDuplicate ? 'rgba(30,69,117,.12)' : 'rgba(220,38,38,.12)'));
+            const borderColor= isApproved ? '#16a34a' : (isPending ? '#d97706' : (isDuplicate ? '#1e4575' : '#dc2626'));
+            const badgeColor = isApproved ? '#16a34a' : (isPending ? '#d97706' : (isDuplicate ? '#1e4575' : '#dc2626'));
             const badgeText  = isApproved ? '✓ Approved — Can ' + (hlAction||'edit')
                              : (isPending  ? '👁 ' + (hlAction||'edit') + ' requested'
-                             : '✕ Rejected');
+                             : (isDuplicate ? ''
+                             : '✕ Rejected'));
 
             row.style.background   = bgColor;
             row.style.outline      = '2px solid ' + borderColor;
@@ -1162,32 +1168,83 @@ function cdConfirmBulkDelete() {
     });
 }
 
+// ── Required + non-negative validation for Lot Area, Price per SQM, Discount ──
+function cdValidateNumericFields() {
+    var lotArea  = document.getElementById('f_lot_area').value.trim();
+    var priceSqm = document.getElementById('f_price_sqm').value.trim();
+    var discount = document.getElementById('f_discount_pct').value.trim();
+
+    if (lotArea === '') {
+        alert('Please enter the Lot Area.');
+        return false;
+    }
+    if (parseFloat(lotArea) < 0) {
+        alert('Lot Area cannot be negative.');
+        return false;
+    }
+    if (priceSqm === '') {
+        alert('Please enter the Price per SQM.');
+        return false;
+    }
+    if (parseFloat(priceSqm) < 0) {
+        alert('Price per SQM cannot be negative.');
+        return false;
+    }
+    if (discount === '') {
+        alert('Please enter the Discount (%). Enter 0 if there is no discount.');
+        return false;
+    }
+    if (parseFloat(discount) < 0) {
+        alert('Discount (%) cannot be negative.');
+        return false;
+    }
+    return true;
+}
+
+// ── Clear button — uses the app's real confirm modal, since window.confirm ──
+// is globally overridden (always returns true) in layouts/dashboard.blade.php.
+document.getElementById('commissionClearBtn').addEventListener('click', function () {
+    window.showConfirmModal('Clear all entered data on this form?').then(function (confirmed) {
+        if (!confirmed) return;
+        document.getElementById('commissionForm').reset();
+    });
+});
+
 // ── Duplicate client record check (restored from previous version) ──
 document.getElementById('commissionForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var form = this;
-    var clientName  = (form.querySelector('[name="client_name"]').value || '').trim();
-    var projectName = (form.querySelector('[name="project_name"]').value || '').trim();
-    var blockLot    = (form.querySelector('[name="block_lot_number"]').value || '').trim();
 
-    var params = new URLSearchParams({
-        client_name: clientName,
-        project_name: projectName,
-        block_lot_number: blockLot
-    });
+    if (!cdValidateNumericFields()) {
+        return;
+    }
 
-    fetch('/api/client-database/check-duplicate?' + params.toString())
-        .then(r => r.json())
-        .then(data => {
-            if (data.duplicate) {
-                showDuplicateModal(data.id);
-            } else {
-                form.submit();
-            }
-        })
-        .catch(() => {
-            form.submit();
+    window.showConfirmModal('Submit this client record?').then(function (confirmed) {
+        if (!confirmed) return;
+
+        var clientName  = (form.querySelector('[name="client_name"]').value || '').trim();
+        var projectName = (form.querySelector('[name="project_name"]').value || '').trim();
+        var blockLot    = (form.querySelector('[name="block_lot_number"]').value || '').trim();
+
+        var params = new URLSearchParams({
+            client_name: clientName,
+            project_name: projectName,
+            block_lot_number: blockLot
         });
+
+        fetch('/api/client-database/check-duplicate?' + params.toString())
+            .then(r => r.json())
+            .then(data => {
+                if (data.duplicate) {
+                    showDuplicateModal(data.id);
+                } else {
+                    form.submit();
+                }
+            })
+            .catch(() => {
+                form.submit();
+            });
+    });
 });
 
 function showDuplicateModal(recordId) {
@@ -1201,7 +1258,7 @@ function closeDuplicateModal() {
 function goToDuplicateRecord() {
     var modal = document.getElementById('duplicateRecordModal');
     var id = modal.dataset.recordId;
-    window.location.href = '{{ route("client-database") }}?highlight=' + id;
+    window.location.href = '{{ route("client-database") }}?highlight=' + id + '&status=duplicate';
 }
 
 // ── Prefill from site visit Reserve button ──
