@@ -239,6 +239,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                 </div>
                 <select id="cdStatusFilter" onchange="cdFilter()" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;">
                     <option value="">All Status</option>
+                    <option value="pending">Pending</option>
                     <option value="done">Done</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="none">No Status</option>
@@ -327,19 +328,26 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                         <td style="padding:10px 12px;white-space:nowrap">
                             <form method="POST" action="{{ route('client-database.status', $req->id) }}">
                                 @csrf @method('PATCH')
-                                <select name="client_status" onchange="this.form.submit()"
+                                <select id="csSel_{{ $req->id }}" name="client_status" onchange="this.form.submit()"
                                     data-client-status="{{ strtolower($req->client_status ?? '') }}"
                                     style="padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;outline:none;
-                                    background:{{ $req->client_status === 'Done' ? '#dcfce7' : ($req->client_status === 'Cancelled' ? '#fee2e2' : '#f1f5f9') }};
-                                    color:{{ $req->client_status === 'Done' ? '#166534' : ($req->client_status === 'Cancelled' ? '#991b1b' : '#64748b') }};">
+                                    background:{{ $req->client_status === 'Done' ? '#dcfce7' : ($req->client_status === 'Cancelled' ? '#fee2e2' : ($req->client_status === 'Pending' ? '#fef3c7' : '#f1f5f9')) }};
+                                    color:{{ $req->client_status === 'Done' ? '#166534' : ($req->client_status === 'Cancelled' ? '#991b1b' : ($req->client_status === 'Pending' ? '#92400e' : '#64748b')) }};">
                                     <option value="" {{ !$req->client_status ? 'selected' : '' }}>— Set Status —</option>
+                                    <option value="Pending" {{ $req->client_status === 'Pending' ? 'selected' : '' }} style="background:#fef3c7;color:#92400e;">Pending</option>
                                     <option value="Done" {{ $req->client_status === 'Done' ? 'selected' : '' }} style="background:#dcfce7;color:#166534;">Done</option>
                                     <option value="Cancelled" {{ $req->client_status === 'Cancelled' ? 'selected' : '' }} style="background:#fee2e2;color:#991b1b;">Cancelled</option>
                                 </select>
                             </form>
                         </td>
                         <td style="padding:10px 12px;white-space:nowrap">
-                            <button onclick="openDPModal({{ $req->id }}, {{ $req->downpayment_amount ?? 0 }}, {{ $req->downpayment_terms ?? 1 }}, {{ $req->downpayment_per_term ?? 0 }}, '{{ addslashes($req->downpayment_status ?? '') }}', '{{ $req->downpayment_date ? $req->downpayment_date->format('Y-m-d') : '' }}')"
+                            <button id="dpBtn_{{ $req->id }}" onclick="openDPModalFromBtn(this)"
+                                data-id="{{ $req->id }}"
+                                data-amount="{{ $req->downpayment_amount ?? 0 }}"
+                                data-terms="{{ $req->downpayment_terms ?? 1 }}"
+                                data-per-term="{{ $req->downpayment_per_term ?? 0 }}"
+                                data-status="{{ addslashes($req->downpayment_status ?? '') }}"
+                                data-dp-date="{{ $req->downpayment_date ? $req->downpayment_date->format('Y-m-d') : '' }}"
                                 style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;
                                 background:{{ $req->downpayment_status === 'Paid' || $req->downpayment_status === 'Spot Paid' ? '#dcfce7' : ($req->downpayment_status && $req->downpayment_status !== '— Set —' ? '#fef3c7' : '#f1f5f9') }};
                                 color:{{ $req->downpayment_status === 'Paid' || $req->downpayment_status === 'Spot Paid' ? '#166534' : ($req->downpayment_status && $req->downpayment_status !== '— Set —' ? '#92400e' : '#64748b') }};">
@@ -673,9 +681,13 @@ function viewRow(id){
             ['Net TCP',fmtP(d.net_tcp)],
             ['Terms of Payment',fmt(d.terms_of_payment)],
             ['Reservation Date',fmtD(d.reservation_date)],
-            ['Date of Downpayment',fmtD(d.date_of_downpayment)],
             ["Agent's Name",fmt(d.agent_name)],
-            ['Client Status',fmt(d.status)||'No Status'],
+            ['Client Status',fmt(d.client_status)||'No Status'],
+            ['Downpayment Status',fmt(d.downpayment_status)||'— Not Set —'],
+            ['Downpayment Amount',fmtP(d.downpayment_amount)],
+            ['Downpayment Terms',d.downpayment_terms?d.downpayment_terms+' month'+(d.downpayment_terms>1?'s':''):'-'],
+            ['Per Term Amount',fmtP(d.downpayment_per_term)],
+            ['Date of Downpayment',fmtD(d.downpayment_date || d.date_of_downpayment)],
         ];
         document.getElementById('viewContent').innerHTML=fields.map(([l,v])=>`<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11px;font-weight:700;color:#1e4575;text-transform:uppercase">${l}</label><div style="font-size:14px;color:#374151;font-weight:500;padding:10px 14px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb">${v}</div></div>`).join('');
         document.getElementById('viewModal').style.display='flex';
@@ -1032,7 +1044,9 @@ function cdFilter() {
         var statusCell = r.querySelector('[data-client-status]');
         var rowStatus  = statusCell ? statusCell.getAttribute('data-client-status').toLowerCase() : '';
         var statusMatch = true;
+        var statusMatch = true;
         if (statusFilter === 'done')           statusMatch = rowStatus === 'done';
+        else if (statusFilter === 'pending')   statusMatch = rowStatus === 'pending';
         else if (statusFilter === 'cancelled') statusMatch = rowStatus === 'cancelled';
         else if (statusFilter === 'none')      statusMatch = rowStatus === '';
 
@@ -1299,7 +1313,7 @@ function goToDuplicateRecord() {
                 </div>
                 <button onclick="setupInstallments()" style="padding:9px 16px;background:linear-gradient(135deg,#1e4575,#2563eb);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Set Terms</button>
             </div>
-            <div id="dp_installments_list" style="padding:16px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;min-height:60px">
+            <div id="dp_installments_list" style="padding:16px 24px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1;display:flex;flex-direction:column;gap:10px;min-height:60px">
                 <div style="text-align:center;color:#94a3b8;padding:20px;font-size:13px;">Set amount and terms, then click "Set Terms".</div>
             </div>
         </div>
@@ -1349,6 +1363,42 @@ let _dpRecordId = null;
 const _dpCsrf = document.querySelector('meta[name=csrf-token]')?.content || '';
 const _isAdmin = {{ auth()->user()->isAdmin() ? 'true' : 'false' }};
 
+function openDPModalFromBtn(btn) {
+    openDPModal(
+        parseInt(btn.dataset.id),
+        parseFloat(btn.dataset.amount) || 0,
+        parseInt(btn.dataset.terms) || 1,
+        parseFloat(btn.dataset.perTerm) || 0,
+        btn.dataset.status || '',
+        btn.dataset.dpDate || ''
+    );
+}
+
+function updateClientStatusSelect(id, clientStatus) {
+    const sel = document.getElementById('csSel_' + id);
+    if (!sel) return;
+    sel.value = clientStatus || '';
+    sel.dataset.clientStatus = (clientStatus || '').toLowerCase();
+    const bg  = clientStatus === 'Done' ? '#dcfce7' : (clientStatus === 'Cancelled' ? '#fee2e2' : (clientStatus === 'Pending' ? '#fef3c7' : '#f1f5f9'));
+    const col = clientStatus === 'Done' ? '#166534' : (clientStatus === 'Cancelled' ? '#991b1b' : (clientStatus === 'Pending' ? '#92400e' : '#64748b'));
+    sel.style.background = bg;
+    sel.style.color = col;
+}
+
+function updateDPStatusBadge(id, status, terms, amount) {
+    const btn = document.getElementById('dpBtn_' + id);
+    if (!btn) return;
+    status = status || '';
+    const isPaid = status === 'Paid' || status === 'Spot Paid';
+    const hasStatus = status && status !== '— Set —';
+    btn.style.background = isPaid ? '#dcfce7' : (hasStatus ? '#fef3c7' : '#f1f5f9');
+    btn.style.color      = isPaid ? '#166534' : (hasStatus ? '#92400e' : '#64748b');
+    btn.textContent = status || '— Set —';
+    btn.dataset.status = status;
+    if (terms  !== undefined) btn.dataset.terms  = terms;
+    if (amount !== undefined) btn.dataset.amount = amount;
+}
+
 function openDPModal(id, amount, terms, perTerm, status, dpDate) {
     _dpRecordId = id;
 
@@ -1357,7 +1407,19 @@ function openDPModal(id, amount, terms, perTerm, status, dpDate) {
 
     // Populate fields
     document.getElementById('dp_total_amount').value  = amount > 0 ? amount : '';
-    document.getElementById('dp_terms_select').value  = Math.min(terms || 1, 6);
+
+    // The quick picker only has options 1–6 built in. If this plan has more
+    // terms (created via "Others"), add a matching option on the fly so the
+    // dropdown actually reflects the real count instead of clamping to 6.
+    var termsSelect = document.getElementById('dp_terms_select');
+    var actualTerms  = terms || 1;
+    if (actualTerms > 6 && !termsSelect.querySelector('option[value="' + actualTerms + '"]')) {
+        var opt = document.createElement('option');
+        opt.value = actualTerms;
+        opt.textContent = actualTerms;
+        termsSelect.appendChild(opt);
+    }
+    termsSelect.value = actualTerms;
     document.getElementById('dp_spot_amount').value   = amount > 0 ? amount : '';
     document.getElementById('dp_spot_date').value     = dpDate || '';
     document.getElementById('dp_others_amount').value = amount > 0 ? amount : '';
@@ -1394,10 +1456,8 @@ function openDPModal(id, amount, terms, perTerm, status, dpDate) {
     if (isSpotPaid) {
         selectDPType('spot');
     } else if (status && (status.includes('month') || status === 'Partial' || status === 'Paid')) {
+        // Already has installments set up (any term count, including >6 from "Others") — show the paid/unpaid list
         selectDPType('installment');
-        loadInstallments();
-    } else if (terms > 6) {
-        selectDPType('others');
         loadInstallments();
     } else if (terms > 1) {
         selectDPType('installment');
@@ -1471,11 +1531,26 @@ function setupOthersInstallments() {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _dpCsrf },
         body: JSON.stringify({ terms, total_amount: amount })
     }).then(r => r.json()).then(data => {
+        // Sync the installment view's own header fields so they reflect
+        // what was just entered here, instead of showing stale 0.00 / 1
+        document.getElementById('dp_total_amount').value = amount > 0 ? amount : '';
+        var termsSelect = document.getElementById('dp_terms_select');
+        if (!termsSelect.querySelector('option[value="' + terms + '"]')) {
+            var opt = document.createElement('option');
+            opt.value = terms;
+            opt.textContent = terms;
+            termsSelect.appendChild(opt);
+        }
+        termsSelect.value = terms;
+
         // Switch to installment view to show the terms
         selectDPType('installment');
         renderInstallments(data);
+        const status = terms + ' month' + (terms > 1 ? 's' : '');
+        updateDPStatusBadge(_dpRecordId, status, terms, amount);
+        updateClientStatusSelect(_dpRecordId, 'Pending');
     });
-}
+}   
 
 function loadInstallments() {
     fetch(`/api/client-database/${_dpRecordId}/installments`)
@@ -1489,7 +1564,12 @@ function setupInstallments() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _dpCsrf },
         body: JSON.stringify({ terms, total_amount: amount })
-    }).then(r => r.json()).then(data => renderInstallments(data));
+    }).then(r => r.json()).then(data => {
+        renderInstallments(data);
+        const status = terms + ' month' + (terms > 1 ? 's' : '');
+        updateDPStatusBadge(_dpRecordId, status, terms, amount);
+        updateClientStatusSelect(_dpRecordId, 'Pending');
+    });
 }
 
 function renderInstallments(list) {
@@ -1521,7 +1601,7 @@ function renderInstallments(list) {
             `<input type="date" id="inst_date_${inst.id}" style="padding:8px 10px;border:none;border-left:1.5px solid #e2e8f0;outline:none;font-size:12px;background:transparent;color:#374151;" title="Date of payment">`;
 
         return `
-            <div style="display:flex;align-items:center;gap:0;border:1.5px solid ${border};border-radius:10px;overflow:hidden;background:${bg};">
+            <div style="display:flex;align-items:center;gap:0;border:1.5px solid ${border};border-radius:10px;overflow:hidden;background:${bg};min-width:460px;">
                 <span style="font-size:13px;font-weight:700;color:#1e4575;padding:10px 14px;white-space:nowrap;border-right:1.5px solid ${border};">Term ${inst.term_number}</span>
                 ${amountInput}
                 ${dateInput}
@@ -1563,8 +1643,13 @@ function markPaidWithDate(instId, btn) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _dpCsrf },
         body: JSON.stringify({ paid_date: date })
-    }).then(r => r.json()).then(() => loadInstallments())
-      .catch(() => { btn.disabled = false; btn.textContent = 'Paid'; alert('Failed to save. Please try again.'); });
+    }).then(r => r.json()).then(res => {
+        loadInstallments();
+        if (res.status) {
+            updateDPStatusBadge(_dpRecordId, res.status);
+            if (res.status === 'Paid') updateClientStatusSelect(_dpRecordId, 'Done');
+        }
+    }).catch(() => { btn.disabled = false; btn.textContent = 'Paid'; alert('Failed to save. Please try again.'); });
 }
 
 function unmarkPaid(instId) {
@@ -1573,7 +1658,10 @@ function unmarkPaid(instId) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _dpCsrf },
         body: JSON.stringify({})
-    }).then(r => r.json()).then(() => loadInstallments());
+    }).then(r => r.json()).then(res => {
+        loadInstallments();
+        updateDPStatusBadge(_dpRecordId, res.status || '');
+    });
 }
 </script>
 
