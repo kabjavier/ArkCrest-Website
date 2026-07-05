@@ -1078,6 +1078,7 @@
     .btn-modal-save:hover { background: #152e4d; }
 
     /* Responsive */
+    /* Responsive */
     @media (max-width: 768px) {
         .filters-section {
             flex-direction: column;
@@ -1096,6 +1097,32 @@
         .filter-select,
         .btn-reset {
             width: 100%;
+        }
+
+        /* Make Add/Edit/View commission modals fit small screens */
+        .modal-box {
+            width: 95vw !important;
+            max-width: 95vw !important;
+            max-height: 92vh !important;
+        }
+
+        .modal-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+        }
+
+        .add-commission-section {
+            padding: 20px !important;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr !important;
         }
     }
 </style>
