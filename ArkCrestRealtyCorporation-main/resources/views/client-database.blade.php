@@ -177,6 +177,7 @@
                 </div>
                 <select id="cdStatusFilter" onchange="cdFilter()" style="padding:9px 12px;border:2px solid #d0d5dd;border-radius:8px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;">
                     <option value="">All Status</option>
+                    <option value="pending">Pending</option>
                     <option value="done">Done</option>
                     <option value="cancelled">Cancelled</option>
                     <option value="none">No Status</option>
@@ -257,9 +258,10 @@
                                 <select name="client_status" onchange="this.form.submit()"
                                     data-client-status="{{ strtolower($req->client_status ?? '') }}"
                                     style="padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;outline:none;
-                                    background:{{ $req->client_status === 'Done' ? '#dcfce7' : ($req->client_status === 'Cancelled' ? '#fee2e2' : '#f1f5f9') }};
-                                    color:{{ $req->client_status === 'Done' ? '#166534' : ($req->client_status === 'Cancelled' ? '#991b1b' : '#64748b') }};">
+                                    background:{{ $req->client_status === 'Done' ? '#dcfce7' : ($req->client_status === 'Cancelled' ? '#fee2e2' : ($req->client_status === 'Pending' ? '#fef3c7' : '#f1f5f9')) }};
+                                    color:{{ $req->client_status === 'Done' ? '#166534' : ($req->client_status === 'Cancelled' ? '#991b1b' : ($req->client_status === 'Pending' ? '#92400e' : '#64748b')) }};">
                                     <option value="" {{ !$req->client_status ? 'selected' : '' }}>— Set Status —</option>
+                                    <option value="Pending" {{ $req->client_status === 'Pending' ? 'selected' : '' }} style="background:#fef3c7;color:#92400e;">Pending</option>
                                     <option value="Done" {{ $req->client_status === 'Done' ? 'selected' : '' }} style="background:#dcfce7;color:#166534;">Done</option>
                                     <option value="Cancelled" {{ $req->client_status === 'Cancelled' ? 'selected' : '' }} style="background:#fee2e2;color:#991b1b;">Cancelled</option>
                                 </select>
@@ -845,7 +847,9 @@ function cdFilter() {
         var statusCell = r.querySelector('[data-client-status]');
         var rowStatus  = statusCell ? statusCell.getAttribute('data-client-status').toLowerCase() : '';
         var statusMatch = true;
+        var statusMatch = true;
         if (statusFilter === 'done')           statusMatch = rowStatus === 'done';
+        else if (statusFilter === 'pending')   statusMatch = rowStatus === 'pending';
         else if (statusFilter === 'cancelled') statusMatch = rowStatus === 'cancelled';
         else if (statusFilter === 'none')      statusMatch = rowStatus === '';
 
@@ -1071,11 +1075,11 @@ function openDPModal(id, amount, terms, perTerm, status, dpDate) {
     // Route to correct view
     if (isSpotPaid) {
         selectDPType('spot');
-    } else if (status && (status.includes('month') || status === 'Partial' || status === 'Paid')) {
-        selectDPType('installment');
-        loadInstallments();
     } else if (terms > 6) {
         selectDPType('others');
+        loadInstallments();
+    } else if (status && (status.includes('month') || status === 'Partial' || status === 'Paid')) {
+        selectDPType('installment');
         loadInstallments();
     } else if (terms > 1) {
         selectDPType('installment');

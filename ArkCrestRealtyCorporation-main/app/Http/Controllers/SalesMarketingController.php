@@ -552,7 +552,15 @@ class SalesMarketingController extends Controller
             $updates['downpayment_amount'] = $request->total_amount;
             $updates['downpayment_per_term'] = round($request->total_amount / $terms, 2);
         }
-        CommissionRequestSales::findOrFail($id)->update($updates);
+
+        // NEW: setting up an installment plan means the client is now
+        // actively paying — auto-set client_status to Pending, unless the
+        // client has already been marked Cancelled.
+        $dpRecord = CommissionRequestSales::findOrFail($id);
+        if ($dpRecord->client_status !== 'Cancelled') {
+            $updates['client_status'] = 'Pending';
+        }
+        $dpRecord->update($updates);
 
         return response()->json(\App\Models\DownpaymentInstallment::where('commission_request_sales_id', $id)
             ->orderBy('term_number')->get());
@@ -584,7 +592,13 @@ class SalesMarketingController extends Controller
         $all   = \App\Models\DownpaymentInstallment::where('commission_request_sales_id', $parentId)->count();
         $paid  = \App\Models\DownpaymentInstallment::where('commission_request_sales_id', $parentId)->where('is_paid', true)->count();
         $status = $paid === $all ? 'Paid' : 'Partial';
-        CommissionRequestSales::findOrFail($parentId)->update(['downpayment_status' => $status]);
+
+        // NEW: once every term is paid, the client is fully Done too.
+        $parentUpdates = ['downpayment_status' => $status];
+        if ($status === 'Paid') {
+            $parentUpdates['client_status'] = 'Done';
+        }
+        CommissionRequestSales::findOrFail($parentId)->update($parentUpdates);
 
         return response()->json(['success' => true, 'status' => $status]);
     }
@@ -644,6 +658,12 @@ class SalesMarketingController extends Controller
         } catch (\Exception $e) {}
 
         $record->update($updates);
+
+        // NEW: Spot Paid (or fully Paid) downpayment automatically marks
+        // the client as Done.
+        if (in_array($updates['downpayment_status'], ['Spot Paid', 'Paid'])) {
+            $record->update(['client_status' => 'Done']);
+        }
 
         // Always return JSON for PATCH/AJAX requests
         if ($request->expectsJson() || $request->isJson() || $request->ajax()) {
@@ -705,7 +725,7 @@ class SalesMarketingController extends Controller
 
         // Consume the one-time permission after successful delete
         if (!$user->isAdmin()) {
-            \App\Http\Controllers\PermissionRequestController::consume($user->id, 'delete', (int) $id);
+            \App\Http\Controllers\PermissionRequestController::consume($user->id, 'edit', (int) $id);
         }
 
         return redirect()->route('client-database')->with('success', 'Commission request deleted successfully!');
