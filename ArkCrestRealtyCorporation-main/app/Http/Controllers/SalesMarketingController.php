@@ -319,8 +319,8 @@ class SalesMarketingController extends Controller
         return [
             'developer_name'      => 'nullable|string|max:255',
             'date_requested'      => 'nullable|date',
-            'reservation_date'    => 'nullable|date',
-            'date_of_downpayment' => 'nullable|date|after_or_equal:reservation_date',
+            'reservation_date'    => 'required|date',
+            'date_of_downpayment' => 'required|date|after_or_equal:reservation_date',
             'project_name'        => 'required|string|max:255',
             'property_details'    => 'nullable|string|max:255',
             'block_lot_number'    => 'nullable|string|max:255',
@@ -373,22 +373,6 @@ class SalesMarketingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate($this->validationRules());
-
-        // Safety net: block duplicates server-side even if the JS pre-check
-        // was bypassed or skipped (e.g. JavaScript disabled).
-        $dupQuery = CommissionRequestSales::whereRaw('LOWER(client_name) = ?', [strtolower($validated['client_name'])])
-            ->whereRaw('LOWER(project_name) = ?', [strtolower($validated['project_name'])]);
-        if (!empty($validated['block_lot_number'])) {
-            $dupQuery->whereRaw('LOWER(block_lot_number) = ?', [strtolower($validated['block_lot_number'])]);
-        }
-        $duplicate = $dupQuery->first();
-        if ($duplicate) {
-            return redirect()->route('client-database')
-                ->withInput()
-                ->with('duplicate_id', $duplicate->id)
-                ->with('duplicate_error', "Can't be submitted, there's an existing data like this on the database.");
-        }
-
         if (empty($validated['status'])) {
             $validated['status'] = 'Not Yet Released';
         }

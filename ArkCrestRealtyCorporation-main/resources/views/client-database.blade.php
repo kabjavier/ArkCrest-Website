@@ -123,7 +123,7 @@
                 </div>
                 <div class="form-group">
                     <label>RESERVATION DATE</label>
-                    <input type="date" name="reservation_date" id="f_reservation_date" oninput="validateDownpaymentDate()">
+                    <input type="date" name="reservation_date" id="f_reservation_date" oninput="validateDownpaymentDate()" required>
                 </div>
                 <div class="form-group">
                     <label>NUMBER OF UNITS</label>
@@ -131,7 +131,7 @@
                 </div>
                 <div class="form-group">
                     <label>DATE OF DOWNPAYMENT</label>
-                    <input type="date" name="date_of_downpayment" id="f_date_of_downpayment" oninput="validateDownpaymentDate()">
+                    <input type="date" name="date_of_downpayment" id="f_date_of_downpayment" oninput="validateDownpaymentDate()" required>
                     <div id="downpaymentDateError" style="display:none;color:#dc2626;font-size:12px;margin-top:4px;font-weight:600;">⚠ Downpayment date cannot be earlier than the reservation date.</div>
                 </div>
                 <div class="form-group">
