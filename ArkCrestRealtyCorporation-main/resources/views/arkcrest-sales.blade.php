@@ -2,7 +2,7 @@
 @section('title', 'ARC Sales')
 @section('content')
 <style>
-.arc-wrap{padding:24px 30px}
+.arc-wrap{padding:24px 30px;overflow-x:hidden}
 .arc-header{background:linear-gradient(135deg,#1e4575 0%,#2563eb 100%);border-radius:16px;padding:36px 40px;margin-bottom:24px;color:white}
 .arc-header h1{font-size:24px;font-weight:700;margin:0 0 4px}
 .arc-header p{font-size:13px;color:rgba(255,255,255,.7);margin:0}
@@ -11,6 +11,7 @@
 .arc-card-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .arc-card-value{font-size:22px;font-weight:800;color:#0f172a}
 .arc-table-wrap{background:white;border-radius:12px;border:1px solid #e8ecf0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.arc-table-scroll{overflow-x:auto !important;overflow-y:visible !important;max-height:none !important;}
 .arc-table{width:100%;border-collapse:collapse}
 .arc-table thead tr{background:linear-gradient(135deg,#0f2a4a,#1e4575)}
 .arc-table thead th{padding:11px 14px;text-align:left;font-size:10px;font-weight:700;color:rgba(255,255,255,.85);text-transform:uppercase;letter-spacing:.7px;white-space:nowrap}
@@ -21,6 +22,43 @@
 .arc-pct-input:focus{outline:none;border-color:#2563eb}
 .arc-save-btn{padding:5px 12px;background:#2563eb;color:white;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
 .arc-save-btn:hover{background:#1e4575}
+
+/* ---- Search + Column Filter bar (matches the Commission Monitoring / All Expenses pattern) ---- */
+.arc-filters-bar{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+.arc-filters-row{display:flex;align-items:center;gap:10px;width:100%;max-width:560px}
+.column-filter-dropdown{position:relative}
+.column-filter-btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;font-weight:600;color:#1e4575;background:white;border:2px solid #1e4575;border-radius:8px;padding:9px 14px;cursor:pointer;height:40px;box-sizing:border-box;transition:all .2s ease}
+.column-filter-btn:hover{background:#eef2f7}
+.filter-count-badge{background:#A37929;color:white;font-size:11px;font-weight:700;border-radius:999px;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.column-filter-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:220px;max-height:320px;overflow-y:auto;background:white;border:1.5px solid #d0d5dd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:500;padding:6px}
+.column-filter-menu-item{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:13px;font-weight:500;color:#344054;border-radius:6px;cursor:pointer;white-space:nowrap}
+.column-filter-menu-item:hover{background:#eef2f7}
+.column-filter-menu-item .cfm-check{width:14px;color:#A37929;font-weight:700;visibility:hidden}
+.column-filter-menu-item.is-active .cfm-check{visibility:visible}
+.column-filter-menu-item.is-active{color:#1e4575;font-weight:700}
+.search-box-inline{position:relative;display:flex;align-items:center;width:100%}
+.search-box-inline svg{position:absolute;left:10px;width:16px;height:16px;color:#9ca3af;pointer-events:none}
+.search-box-inline input{padding:8px 12px 8px 34px;border:1.5px solid #d0d5dd;border-radius:8px;font-size:13px;width:100%;transition:border-color .2s;color:#374151}
+.search-box-inline input:focus{outline:none;border-color:#1e4575;box-shadow:0 0 0 3px rgba(30,69,117,.1)}
+.active-column-filters-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.column-filter-chip{display:flex;align-items:center;gap:6px;background:#f5f7fa;border:1.5px solid #d0d5dd;border-radius:8px;padding:6px 8px 6px 12px}
+.column-filter-chip label{font-size:11px;font-weight:700;color:#1e4575;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.column-filter-chip input,.column-filter-chip select{font-size:13px;padding:6px 8px;border:1.5px solid #d0d5dd;border-radius:6px;color:#344054;min-width:130px}
+.column-filter-chip .cfm-remove{background:none;border:none;color:#8a9bad;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px}
+.column-filter-chip .cfm-remove:hover{color:#dc2626}
+.clear-column-filters-btn{font-size:12px;font-weight:600;color:#1e4575;background:#eef2f7;border:1px solid #d0d5dd;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+
+@media (max-width:768px){
+  .arc-filters-row{max-width:100%;flex-direction:column;align-items:stretch}
+  .column-filter-dropdown{width:100%}
+  .column-filter-btn{width:100%;justify-content:center}
+  .column-filter-menu{left:0;right:0;min-width:0;width:100%;box-sizing:border-box}
+  .active-column-filters-row{flex-direction:column;align-items:stretch}
+  .column-filter-chip{width:100%;flex-wrap:wrap;box-sizing:border-box}
+  .column-filter-chip label{flex:1 1 100%}
+  .column-filter-chip input,.column-filter-chip select{flex:1 1 auto;min-width:0;width:100%}
+  .clear-column-filters-btn{width:100%;text-align:center}
+}
 </style>
 
 <div class="arc-wrap">
@@ -35,28 +73,12 @@
             <p style="font-size:14px;color:rgba(255,255,255,.75);margin:0;">ArkCrest commission income from released agent commissions</p>
         </div>
     </div>
-
-    {{-- Period Filter --}}
-    <form method="GET" style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <select name="month" style="padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
-            @foreach(['January','February','March','April','May','June','July','August','September','October','November','December'] as $i => $m)
-            <option value="{{ $i+1 }}" {{ $month == $i+1 ? 'selected' : '' }}>{{ $m }}</option>
-            @endforeach
-        </select>
-        <select name="year" style="padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
-            @foreach($years as $y)
-            <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-            @endforeach
-        </select>
-        <button type="submit" style="padding:8px 18px;background:#1e4575;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Filter</button>
-    </form>
-
     {{-- Summary Cards --}}
     <div class="arc-cards">
         <div class="arc-card">
             <div class="arc-card-label">Released Commissions</div>
             <div class="arc-card-value">{{ $released->count() }}</div>
-            <div style="font-size:12px;color:#64748b;margin-top:4px;">transactions this month</div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px;">{{ $month === 'all' ? 'transactions this year' : 'transactions this month' }}</div>
         </div>
         <div class="arc-card">
             <div class="arc-card-label">Total Net TCP</div>
@@ -70,12 +92,53 @@
         </div>
     </div>
 
+
+    {{-- Month / Year Period Selector (separate, auto-searches on change) --}}
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <select id="arcMonthSelect" onchange="navigateArcPeriod(this.value, document.getElementById('arcYearSelect').value)"
+            style="padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;cursor:pointer;">
+            <option value="all" {{ $month === 'all' ? 'selected' : '' }}>All Months</option>
+            @foreach(['January','February','March','April','May','June','July','August','September','October','November','December'] as $i => $m)
+            <option value="{{ $i+1 }}" {{ (string)$month === (string)($i+1) ? 'selected' : '' }}>{{ $m }}</option>
+            @endforeach
+        </select>
+        <select id="arcYearSelect" onchange="navigateArcPeriod(document.getElementById('arcMonthSelect').value, this.value)"
+            style="padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;cursor:pointer;">
+            @foreach($years as $y)
+            <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    {{-- Search + Column Filter --}}
+    <div class="arc-filters-bar">
+        <div class="arc-filters-row">
+            <div class="column-filter-dropdown" id="columnFilterDropdown">
+                <button type="button" id="columnFilterBtn" class="column-filter-btn" onclick="toggleColumnFilterMenu(event)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    <span>Filter</span>
+                    <span id="filterCountBadge" class="filter-count-badge" style="display:none;">0</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div id="columnFilterMenu" class="column-filter-menu" style="display:none;"></div>
+            </div>
+            <div class="search-box-inline">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" id="arcSalesSearch" placeholder="Search requests...">
+            </div>
+        </div>
+        <div id="activeColumnFiltersRow" class="active-column-filters-row" style="display:none;"></div>
+    </div>
+
+    
     {{-- Table --}}
     <div class="arc-table-wrap">
         @if($released->isEmpty())
         <div style="padding:40px;text-align:center;color:#94a3b8;font-size:14px;">No released commissions for this period.</div>
         @else
-        <div style="overflow-x:auto;">
+        <div class="arc-table-scroll" style="overflow-x:auto;">
         <table class="arc-table">
             <thead>
                 <tr>
@@ -93,7 +156,15 @@
             <tbody>
             @foreach($released as $i => $r)
             @php $rate = $rates->get($r->id); @endphp
-            <tr id="row-{{ $r->id }}">
+            <tr id="row-{{ $r->id }}"
+                data-date-released="{{ $r->date_released ? $r->date_released->format('Y-m-d') : '' }}"
+                data-client="{{ $r->client_name ?? '' }}"
+                data-project="{{ $r->project_name ?? '' }}"
+                data-agent="{{ $r->agent_name ?? '' }}"
+                data-net-tcp="{{ $r->net_tcp ?? 0 }}"
+                data-commission-terms="{{ $r->payment_type ?? '' }}"
+                data-arc-percent="{{ $rate ? $rate->arkcrest_percent : '' }}"
+                data-arc-commission="{{ $rate ? $rate->arkcrest_commission : '' }}">
                 <td style="color:#cbd5e1;font-weight:600;">{{ $i + 1 }}</td>
                 <td style="white-space:nowrap;color:#059669;font-weight:600;">{{ $r->date_released ? $r->date_released->format('M d, Y') : '—' }}</td>
                 <td style="font-weight:600;color:#0f172a;">{{ $r->client_name ?? '—' }}</td>
@@ -138,6 +209,9 @@
 </div>
 
 <script>
+var arcCurrentMonth = "{{ $month }}";
+var arcCurrentYear  = {{ $year }};
+var arcYearsList    = @json($years);
 var arcTotals = {};
 @foreach($released as $r)
 @php $rate = $rates->get($r->id); @endphp
@@ -157,6 +231,13 @@ function onTermsChange(id, netTcp) {
             document.getElementById('arc-' + id).textContent = data.formatted;
             arcTotals[id] = data.arkcrest_commission;
             updateTotal();
+            var rowEl = document.getElementById('row-' + id);
+            if (rowEl) {
+                rowEl.dataset.commissionTerms = terms;
+                rowEl.dataset.arcPercent = pct;
+                rowEl.dataset.arcCommission = data.arkcrest_commission;
+                applyArcFilters();
+            }
         }
     });
 }
@@ -175,6 +256,13 @@ function saveRate(id, netTcp) {
             document.getElementById('arc-' + id).textContent = data.formatted;
             arcTotals[id] = data.arkcrest_commission;
             updateTotal();
+            var rowEl = document.getElementById('row-' + id);
+            if (rowEl) {
+                rowEl.dataset.commissionTerms = terms;
+                rowEl.dataset.arcPercent = pct;
+                rowEl.dataset.arcCommission = data.arkcrest_commission;
+                applyArcFilters();
+            }
         }
     });
 }
@@ -185,5 +273,211 @@ function updateTotal() {
     document.getElementById('arcTotalDisplay').textContent = fmt;
     document.getElementById('arcFooterTotal').textContent = fmt;
 }
+
+/* ---- Filter dropdown + Search logic ---- */
+
+var FILTERABLE_COLUMNS = [
+    { key: 'date-released',     label: 'Date Released',     type: 'date',   data: 'dateReleased' },
+    { key: 'client',            label: 'Client',             type: 'text',   data: 'client' },
+    { key: 'project',           label: 'Project',            type: 'text',   data: 'project' },
+    { key: 'agent',             label: 'Agent',               type: 'text',   data: 'agent' },
+    { key: 'net-tcp',           label: 'Net TCP',            type: 'number', data: 'netTcp' },
+    { key: 'commission-terms',  label: 'Commission Terms',   type: 'select', data: 'commissionTerms',
+        options: ['Full Payment', '2 Months Commission', '3 Months Commission'] },
+    { key: 'arc-percent',       label: 'ARC %',               type: 'number', data: 'arcPercent' },
+    { key: 'arc-commission',    label: 'ARC Commission',     type: 'number', data: 'arcCommission' }
+];
+
+var activeArcFilters = {}; // key -> current value
+
+function toggleColumnFilterMenu(e) {
+    e.stopPropagation();
+    var menu = document.getElementById('columnFilterMenu');
+    if (menu.style.display === 'block') { menu.style.display = 'none'; return; }
+    renderColumnFilterMenu();
+    menu.style.display = 'block';
+}
+
+function renderColumnFilterMenu() {
+    var menu = document.getElementById('columnFilterMenu');
+    menu.innerHTML = '';
+    FILTERABLE_COLUMNS.forEach(function (col) {
+        var item = document.createElement('div');
+        item.className = 'column-filter-menu-item' + (activeArcFilters.hasOwnProperty(col.key) ? ' is-active' : '');
+        item.innerHTML = '<span class="cfm-check">✓</span><span>' + col.label + '</span>';
+        item.onclick = function (ev) { ev.stopPropagation(); toggleArcFilterColumn(col.key); };
+        menu.appendChild(item);
+    });
+}
+
+function toggleArcFilterColumn(key) {
+    if (activeArcFilters.hasOwnProperty(key)) {
+        delete activeArcFilters[key];
+    } else {
+        activeArcFilters[key] = '';
+    }
+    renderColumnFilterMenu();
+    renderActiveFilterChips();
+    updateFilterBadge();
+    applyArcFilters();
+    document.getElementById('columnFilterMenu').style.display = 'none';
+}
+
+function removeArcFilterColumn(key) {
+    delete activeArcFilters[key];
+    renderActiveFilterChips();
+    updateFilterBadge();
+    applyArcFilters();
+}
+
+function updateFilterBadge() {
+    var badge = document.getElementById('filterCountBadge');
+    var count = Object.keys(activeArcFilters).length;
+    if (count > 0) { badge.style.display = 'inline-flex'; badge.textContent = count; }
+    else { badge.style.display = 'none'; }
+}
+
+function renderActiveFilterChips() {
+    var row = document.getElementById('activeColumnFiltersRow');
+    var keys = Object.keys(activeArcFilters);
+    row.innerHTML = '';
+    if (keys.length === 0) { row.style.display = 'none'; return; }
+    row.style.display = 'flex';
+
+    keys.forEach(function (key) {
+        var col = FILTERABLE_COLUMNS.find(function (c) { return c.key === key; });
+        if (!col) return;
+
+        var chip = document.createElement('div');
+        chip.className = 'column-filter-chip';
+
+        var label = document.createElement('label');
+        label.textContent = col.label;
+        chip.appendChild(label);
+
+        var input;
+        if (col.type === 'period-month') {
+            input = document.createElement('select');
+            var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            monthNames.forEach(function (m, i) {
+                var opt = document.createElement('option');
+                opt.value = i + 1; opt.textContent = m;
+                if (arcCurrentMonth == i + 1) opt.selected = true;
+                input.appendChild(opt);
+            });
+            input.onchange = function () { navigateArcPeriod(this.value, arcCurrentYear); };
+        } else if (col.type === 'period-year') {
+            input = document.createElement('select');
+            arcYearsList.forEach(function (y) {
+                var opt = document.createElement('option');
+                opt.value = y; opt.textContent = y;
+                if (arcCurrentYear == y) opt.selected = true;
+                input.appendChild(opt);
+            });
+            input.onchange = function () { navigateArcPeriod(arcCurrentMonth, this.value); };
+        } else if (col.type === 'select') {
+            input = document.createElement('select');
+            var optAll = document.createElement('option');
+            optAll.value = ''; optAll.textContent = 'All';
+            input.appendChild(optAll);
+            col.options.forEach(function (o) {
+                var opt = document.createElement('option');
+                opt.value = o; opt.textContent = o;
+                if (activeArcFilters[key] === o) opt.selected = true;
+                input.appendChild(opt);
+            });
+            input.oninput = input.onchange = function () {
+                activeArcFilters[key] = this.value;
+                applyArcFilters();
+            };
+        } else {
+            input = document.createElement('input');
+            input.type = col.type === 'date' ? 'date' : 'text';
+            input.placeholder = 'Search ' + col.label.toLowerCase() + '...';
+            input.value = activeArcFilters[key];
+            input.oninput = input.onchange = function () {
+                activeArcFilters[key] = this.value;
+                applyArcFilters();
+            };
+        }
+        chip.appendChild(input);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'cfm-remove';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.onclick = function () { removeArcFilterColumn(key); };
+        chip.appendChild(removeBtn);
+
+        row.appendChild(chip);
+    });
+
+    var clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'clear-column-filters-btn';
+    clearBtn.textContent = 'Clear Filters';
+    clearBtn.onclick = clearAllArcFilters;
+    row.appendChild(clearBtn);
+}
+
+function navigateArcPeriod(month, year) {
+    var url = new URL(window.location.href);
+    url.searchParams.set('month', month);
+    url.searchParams.set('year', year);
+    window.location.href = url.toString();
+}
+
+function clearAllArcFilters() {
+    activeArcFilters = {};
+    renderActiveFilterChips();
+    updateFilterBadge();
+    applyArcFilters();
+}
+
+function applyArcFilters() {
+    var globalSearch = (document.getElementById('arcSalesSearch').value || '').toLowerCase().trim();
+    var rows = document.querySelectorAll('.arc-table tbody tr');
+
+    rows.forEach(function (row) {
+        var visible = true;
+
+        for (var key in activeArcFilters) {
+            var col = FILTERABLE_COLUMNS.find(function (c) { return c.key === key; });
+            if (!col) continue;
+            if (col.type === 'period-month' || col.type === 'period-year') continue; // these reload the page instead of filtering rows
+            var val = (activeArcFilters[key] || '').toString().trim();
+            if (!val) continue;
+            var cellVal = (row.dataset[col.data] || '').toString();
+
+            if (col.type === 'date') {
+                if (cellVal !== val) { visible = false; break; }
+            } else if (col.type === 'number') {
+                var cleanCell = cellVal.replace(/[^0-9.]/g, '');
+                var cleanVal = val.replace(/[^0-9.]/g, '');
+                if (!cleanCell.includes(cleanVal)) { visible = false; break; }
+            } else if (col.type === 'select') {
+                if (cellVal !== val) { visible = false; break; }
+            } else {
+                if (!cellVal.toLowerCase().includes(val.toLowerCase())) { visible = false; break; }
+            }
+        }
+
+        if (visible && globalSearch) {
+            var haystack = Object.values(row.dataset).join(' ').toLowerCase();
+            if (!haystack.includes(globalSearch)) visible = false;
+        }
+
+        row.style.display = visible ? '' : 'none';
+    });
+}
+
+document.addEventListener('click', function (e) {
+    var dropdown = document.getElementById('columnFilterDropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+        document.getElementById('columnFilterMenu').style.display = 'none';
+    }
+});
+
+document.getElementById('arcSalesSearch').addEventListener('input', applyArcFilters);
 </script>
 @endsection
