@@ -105,6 +105,8 @@ Route::middleware(['auth', 'no.cache'])->group(function () {
     Route::post('/settings/privacy', [App\Http\Controllers\SettingsController::class, 'savePrivacyPolicy'])->name('settings.privacy');
     Route::post('/settings/deleted-records/{logId}/restore', [App\Http\Controllers\SettingsController::class, 'restoreRecord'])->name('settings.deleted.restore');
     Route::delete('/settings/deleted-records/{logId}', [App\Http\Controllers\SettingsController::class, 'permanentDeleteRecord'])->name('settings.deleted.purge');
+    Route::post('/settings/deleted-records/bulk-restore', [App\Http\Controllers\SettingsController::class, 'bulkRestoreRecords'])->name('settings.deleted.bulkRestore');
+    Route::post('/settings/deleted-records/bulk-delete', [App\Http\Controllers\SettingsController::class, 'bulkDeleteRecords'])->name('settings.deleted.bulkDelete');
     Route::post('/expenses/{id}/restore', [App\Http\Controllers\DepartmentalExpensesController::class, 'restore'])->name('expenses.restore');
     Route::delete('/expenses/{id}/purge', [App\Http\Controllers\DepartmentalExpensesController::class, 'purge'])->name('expenses.purge');
     Route::post('/settings/period-lock', [App\Http\Controllers\SettingsController::class, 'lockPeriod'])->name('settings.period-lock.store');
