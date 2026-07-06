@@ -10,14 +10,17 @@ class ArkcrestSalesController extends Controller
 {
     public function index(Request $request)
     {
-        $month = $request->get('month', date('n'));
+        $month = $request->get('month', 'all');
         $year  = $request->get('year', date('Y'));
 
-        $released = CommissionRequest::where('status', 'Released')
-            ->whereYear('date_released', $year)
-            ->whereMonth('date_released', $month)
-            ->orderBy('date_released')
-            ->get();
+        $releasedQuery = CommissionRequest::where('status', 'Released')
+            ->whereYear('date_released', $year);
+
+        if ($month !== 'all') {
+            $releasedQuery->whereMonth('date_released', $month);
+        }
+
+        $released = $releasedQuery->orderBy('date_released')->get();
 
         $rates = ArkcrestCommissionRate::whereIn('commission_request_id', $released->pluck('id'))
             ->get()->keyBy('commission_request_id');
