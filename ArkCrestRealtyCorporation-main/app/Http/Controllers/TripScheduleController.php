@@ -389,7 +389,24 @@ class TripScheduleController extends Controller
 
     public function destroy($id)
     {
-        TripSchedule::findOrFail($id)->delete();
+        $trip = TripSchedule::findOrFail($id);
+        \App\Models\ActivityLog::log('delete', 'Site Visit Form', "Deleted site visit record for client '{$trip->client_name}' (ID: {$id})", [
+            'id'                 => $trip->id,
+            'agent_name'         => $trip->agent_name,
+            'team_name'          => $trip->team_name,
+            'client_name'        => $trip->client_name,
+            'client_email'       => $trip->client_email,
+            'client_phone'       => $trip->client_phone,
+            'client_phone_code'  => $trip->client_phone_code,
+            'client_address'     => $trip->client_address,
+            'property_name'      => $trip->property_name,
+            'company_name'       => $trip->company_name,
+            'tripping_date'      => $trip->tripping_date ? (string) $trip->tripping_date : null,
+            'tripping_time'      => $trip->tripping_time,
+            'tripping_type'      => $trip->tripping_type,
+            'status'             => $trip->status,
+        ]);
+        $trip->delete();
         return back()->with('success', 'Record deleted.');
     }
 

@@ -403,23 +403,12 @@ class SalesMarketingController extends Controller
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
 
-        // Allow if admin OR has an approved permission request for this record
+        // Non-admins can edit directly. Downpayment-paid records remain locked as a business rule.
         if (!$user->isAdmin()) {
-            // Block editing if downpayment has already been paid (Paid or Spot Paid) AND amount is set
             $record = CommissionRequestSales::findOrFail($id);
             $lockedStatuses = ['Paid', 'Spot Paid'];
             if (in_array($record->downpayment_status, $lockedStatuses) && $record->downpayment_amount > 0) {
                 return response()->json(['error' => 'This record is locked. Downpayment has already been marked as paid and cannot be edited by staff.'], 403);
-            }
-
-            $hasPermission = \App\Models\PermissionRequest::where('user_id', $user->id)
-                ->where('action', 'edit')
-                ->where('record_id', $id)
-                ->where('status', 'approved')
-                ->exists();
-
-            if (!$hasPermission) {
-                return response()->json(['error' => 'Admin permission required.'], 403);
             }
         }
 
@@ -444,11 +433,6 @@ class SalesMarketingController extends Controller
 
         $commissionRequest->update($validated);
         ActivityLog::log('update', 'Sales & Marketing', "Updated sale entry for client '{$validated['client_name']}' (ID: {$id})");
-
-        // Consume the one-time permission after successful edit
-        if (!$user->isAdmin()) {
-            \App\Http\Controllers\PermissionRequestController::consume($user->id, 'edit', (int) $id);
-        }
 
         // Email admins when commission is marked as Released
         if (!empty($validated['status']) && $validated['status'] === 'Released' && $oldStatus !== 'Released') {
@@ -706,18 +690,6 @@ class SalesMarketingController extends Controller
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
 
-        if (!$user->isAdmin()) {
-            $hasPermission = \App\Models\PermissionRequest::where('user_id', $user->id)
-                ->where('action', 'delete')
-                ->where('record_id', $id)
-                ->where('status', 'approved')
-                ->exists();
-
-            if (!$hasPermission) {
-                return response()->json(['error' => 'Admin permission required.'], 403);
-            }
-        }
-
         $record = CommissionRequestSales::findOrFail($id);
         $clientName = $record->client_name ?? '';
         $projectName = $record->project_name ?? '';
@@ -748,11 +720,6 @@ class SalesMarketingController extends Controller
             'client_status'       => $record->client_status,
         ]);
         $record->delete();
-
-        // Consume the one-time permission after successful delete
-        if (!$user->isAdmin()) {
-            \App\Http\Controllers\PermissionRequestController::consume($user->id, 'edit', (int) $id);
-        }
 
         return redirect()->route('client-database')->with('success', 'Commission request deleted successfully!');
     }

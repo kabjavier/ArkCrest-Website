@@ -1381,21 +1381,6 @@ document.getElementById('addRequestForm')?.addEventListener('submit', function(e
 
 // Edit request
 function editRequest(id) {
-    @if(!auth()->user()->isAdmin())
-    // Check if already approved
-    fetch(`/api/permission-requests/check?action=edit&record_id=${id}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved) {
-                _doEditRequest(id);
-            } else {
-                const row = document.querySelector(`tr[data-id="${id}"]`);
-                const label = row ? (row.cells[0]?.textContent + ' - ' + row.getAttribute('data-department') + ' - ' + row.cells[3]?.textContent) : ('Record #' + id);
-                requestPermission('edit', 'Departmental Expenses', id, label, null);
-            }
-        });
-    return;
-    @endif
     _doEditRequest(id);
 }
 
@@ -1649,21 +1634,6 @@ document.getElementById('budgetUpdateForm').addEventListener('submit', function(
 
 // Delete request
 function deleteRequest(id) {
-    @if(!auth()->user()->isAdmin())
-    // Check if already approved
-    fetch(`/api/permission-requests/check?action=delete&record_id=${id}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved) {
-                _doDeleteRequest(id);
-            } else {
-                const row = document.querySelector(`tr[data-id="${id}"]`);
-                const label = row ? (row.cells[0]?.textContent + ' - ' + row.getAttribute('data-department') + ' - ' + row.cells[3]?.textContent) : ('Record #' + id);
-                requestPermission('delete', 'Departmental Expenses', id, label, null);
-            }
-        });
-    return;
-    @endif
     _doDeleteRequest(id);
 }
 

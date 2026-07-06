@@ -99,17 +99,6 @@ class CommissionMonitoringController extends Controller
             $user   = auth()->user();
             $record = CommissionRequest::findOrFail($id);
 
-            if (!$user->isAdmin()) {
-                $hasPermission = \App\Models\PermissionRequest::where('user_id', $user->id)
-                    ->where('action', 'edit')
-                    ->where('record_id', $id)
-                    ->where('status', 'approved')
-                    ->exists();
-                if (!$hasPermission) {
-                    return response()->json(['success' => false, 'message' => 'Admin permission required.'], 403);
-                }
-            }
-
             $validated = $request->validate([
                 'project_name'      => 'nullable|string|max:255',
                 'property_details'  => 'nullable|string|max:255',
@@ -138,10 +127,6 @@ class CommissionMonitoringController extends Controller
             $record->update($validated);
             \App\Models\ActivityLog::log('update', 'Commission Monitoring', "Updated commission request ID: {$id}");
 
-            if (!$user->isAdmin()) {
-                \App\Http\Controllers\PermissionRequestController::consume($user->id, 'edit', (int) $id);
-            }
-
             if (isset($validated['status']) && $validated['status'] === 'Released' && $oldStatus !== 'Released') {
                 \App\Services\AdminEmailNotifier::send(
                     'Commission Released — ' . ($record->client_name ?? ''),
@@ -165,17 +150,6 @@ class CommissionMonitoringController extends Controller
 
     public function destroy($id)
     {
-        $user = auth()->user();
-
-        if (!$user->isAdmin()) {
-            $hasPermission = \App\Models\PermissionRequest::where('user_id', $user->id)
-                ->where('action', 'delete')
-                ->where('record_id', $id)
-                ->where('status', 'approved')
-                ->exists();
-            if (!$hasPermission) abort(403);
-        }
-
         $record = CommissionRequest::findOrFail($id);
         $clientName = $record->client_name ?? '';
         $projectName = $record->project_name ?? '';
@@ -189,10 +163,6 @@ class CommissionMonitoringController extends Controller
             'status'       => $record->status ?? null,
         ]);
         $record->delete();
-
-        if (!$user->isAdmin()) {
-            \App\Http\Controllers\PermissionRequestController::consume($user->id, 'delete', (int) $id);
-        }
 
         return redirect()->route('commission-monitoring')->with('success', 'Commission request deleted.');
     }

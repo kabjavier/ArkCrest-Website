@@ -1111,8 +1111,8 @@
 
         foreach ($deletedLogsRaw as $log) {
             $meta = $log->meta ?? [];
-            $name = $meta['client_name'] ?? $meta['requestor_name'] ?? $meta['agent_name'] ?? null;
-            $project = $meta['project_name'] ?? null;
+            $name = $meta['client_name'] ?? $meta['requestor_name'] ?? $meta['agent_name'] ?? $meta['title'] ?? null;
+            $project = $meta['project_name'] ?? $meta['property_name'] ?? null;
             $details = !empty($meta) ? $meta : ['info' => $log->description];
             unset($details['id']);
 
