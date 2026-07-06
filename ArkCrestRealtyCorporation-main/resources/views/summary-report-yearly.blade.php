@@ -160,7 +160,7 @@
     </style>
 
     <!-- Summary Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; align-items: stretch;">
         <div class="summary-card">
             <div class="card-icon" style="background: #3b82f6;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,14 +179,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
             </div>
-            <div class="card-content" style="display: flex; flex-direction: column; gap: 15px;">
-                <div>
-                    <div class="card-label">Units</div>
-                    <div class="card-value">{{ number_format($yearlyTotals['units'], 0) }}</div>
-                </div>
-                <div>
-                    <div class="card-label">Gross Sales</div>
-                    <div class="card-value"><span style="font-size: 20px; margin-right: 4px;">₱</span>{{ number_format($yearlyTotals['gross_sales'], 2) }}</div>
+            <div class="card-content">
+                <div class="card-label">Units</div>
+                <div class="card-value">{{ number_format($yearlyTotals['units'], 0) }}</div>
+                <div style="font-size:12px;color:#64748b;margin-top:4px;">
+                    Gross Sales: <strong>₱{{ number_format($yearlyTotals['gross_sales'], 0) }}</strong>
                 </div>
             </div>
         </div>
@@ -271,11 +268,6 @@
         .chart-card { padding: 14px; }
     }
 
-    .summary-card {
-        background: white;
-        border-radius: 12px;
-
-    
     .summary-card {
         background: white;
         border-radius: 12px;
