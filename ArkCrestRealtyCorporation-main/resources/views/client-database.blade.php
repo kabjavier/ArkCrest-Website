@@ -171,7 +171,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                 </div>
                 <div class="form-group">
                     <label>RESERVATION DATE</label>
-                    <input type="date" name="reservation_date">
+                    <input type="date" name="reservation_date" required>
                 </div>
                 <div class="form-group">
                     <label>NUMBER OF UNITS</label>
@@ -179,7 +179,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
                 </div>
                 <div class="form-group">
                     <label>DATE OF DOWNPAYMENT</label>
-                    <input type="date" name="date_of_downpayment">
+                    <input type="date" name="date_of_downpayment" required>
                 </div>
                 <div class="form-group">
                     <label>AGENT'S NAME <span class="required">*</span></label>
@@ -219,7 +219,7 @@ tbody tr:hover .cd-sticky-col{background:#f8fafc}
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <h3 style="margin:0;font-size:17px;color:#111827;">Can't be submitted</h3>
             </div>
-            <p style="color:#4b5563;font-size:14px;margin:0 0 20px;">There's an existing data like this on the database.</p>
+            <p style="color:#4b5563;font-size:14px;margin:0 0 20px;">A record with the same Client's Name and Block & Lot Number already exists in the database.</p>
             <div style="display:flex;gap:10px;justify-content:flex-end;">
               <button type="button" onclick="closeDuplicateModal()" style="padding:9px 18px;border:1.5px solid #e2e8f0;background:white;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#374151;">Close</button>
               <button type="button" onclick="goToDuplicateRecord()" style="padding:9px 18px;border:none;background:#1e4575;color:white;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">Go to Same Record</button>
@@ -1180,13 +1180,11 @@ document.getElementById('commissionForm').addEventListener('submit', function (e
     window.showConfirmModal('Submit this client record?').then(function (confirmed) {
         if (!confirmed) return;
 
-        var clientName  = (form.querySelector('[name="client_name"]').value || '').trim();
-        var projectName = (form.querySelector('[name="project_name"]').value || '').trim();
-        var blockLot    = (form.querySelector('[name="block_lot_number"]').value || '').trim();
+        var clientName = (form.querySelector('[name="client_name"]').value || '').trim();
+        var blockLot   = (form.querySelector('[name="block_lot_number"]').value || '').trim();
 
         var params = new URLSearchParams({
             client_name: clientName,
-            project_name: projectName,
             block_lot_number: blockLot
         });
 

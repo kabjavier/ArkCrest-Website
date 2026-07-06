@@ -347,22 +347,16 @@ class SalesMarketingController extends Controller
 
     public function checkDuplicate(Request $request)
     {
-        $clientName  = trim($request->query('client_name', ''));
-        $projectName = trim($request->query('project_name', ''));
-        $blockLot    = trim($request->query('block_lot_number', ''));
+        $clientName = trim($request->query('client_name', ''));
+        $blockLot   = trim($request->query('block_lot_number', ''));
 
-        if ($clientName === '' || $projectName === '') {
+        if ($clientName === '' || $blockLot === '') {
             return response()->json(['duplicate' => false]);
         }
 
-        $query = CommissionRequestSales::whereRaw('LOWER(client_name) = ?', [strtolower($clientName)])
-            ->whereRaw('LOWER(project_name) = ?', [strtolower($projectName)]);
-
-        if ($blockLot !== '') {
-            $query->whereRaw('LOWER(block_lot_number) = ?', [strtolower($blockLot)]);
-        }
-
-        $existing = $query->first();
+        $existing = CommissionRequestSales::whereRaw('LOWER(client_name) = ?', [strtolower($clientName)])
+            ->whereRaw('LOWER(block_lot_number) = ?', [strtolower($blockLot)])
+            ->first();
 
         return response()->json([
             'duplicate' => (bool) $existing,
