@@ -616,6 +616,25 @@ class SettingsController extends Controller
                 return ['success' => true, 'message' => 'Record restored to Client Database.'];
             }
 
+            // Human Resource (saved HR forms: day-off, absences, voucher)
+            if ($module === 'Human Resource') {
+                $fillable = ['type', 'title', 'data', 'created_by'];
+                $data = array_filter(array_intersect_key($restoreMeta, array_flip($fillable)), fn($v) => $v !== null);
+                \App\Models\HrForm::create($data);
+                $log->delete();
+                return ['success' => true, 'message' => 'Record restored to Human Resource.'];
+            }
+
+            // Site Visit Form (tripping schedules)
+            if ($module === 'Site Visit Form') {
+                $fillable = ['agent_name','team_name','client_name','client_email','client_phone','client_phone_code',
+                    'client_address','property_name','company_name','tripping_date','tripping_time','tripping_type','status'];
+                $data = array_filter(array_intersect_key($restoreMeta, array_flip($fillable)), fn($v) => $v !== null);
+                \App\Models\TripSchedule::create($data);
+                $log->delete();
+                return ['success' => true, 'message' => 'Record restored to Site Visit Form.'];
+            }
+
             return ['success' => false, 'message' => "Restore not supported for module: {$module}"];
 
         } catch (\Exception $e) {

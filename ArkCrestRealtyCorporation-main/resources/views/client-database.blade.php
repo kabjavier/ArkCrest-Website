@@ -721,63 +721,21 @@ function editRow(id){
     });
 }
 
-// Staff edit — check permission first, if approved open edit modal, else show request modal
+// Staff edit — non-admins can edit directly
 function staffEditRow(id, label) {
-    fetch(`/api/permission-requests/check?action=edit&record_id=${id}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved) {
-                editRow(id);
-            } else {
-                _localPermAction = 'edit';
-                _localPermRecordId = id;
-                _localPermRecordLabel = label;
-                document.getElementById('localPermTitle').textContent = 'Request to Edit Record';
-                document.getElementById('localPermRecord').textContent = label;
-                document.getElementById('localPermReason').value = '';
-                document.getElementById('localPermError').style.display = 'none';
-                document.getElementById('permissionModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('localPermReason').focus(), 100);
-            }
-        })
-        .catch(() => {
-            // On error, just open edit modal — server will reject if no permission
-            editRow(id);
-        });
+    editRow(id);
 }
 
-// Staff delete — check permission first
+// Staff delete — plain confirmation, no permission gate
 function staffDeleteConfirm(e, id, label) {
     e.preventDefault();
-    fetch(`/api/permission-requests/check?action=delete&record_id=${id}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved) {
-                if (confirm('Delete this record?')) {
-                    var rows = document.querySelectorAll('tr[data-id="' + id + '"] form');
-                    for (var f of rows) {
-                        var m = f.querySelector('input[name="_method"]');
-                        if (m && m.value === 'DELETE') { f.submit(); return; }
-                    }
-                }
-            } else {
-                _localPermAction = 'delete';
-                _localPermRecordId = id;
-                _localPermRecordLabel = label;
-                document.getElementById('localPermTitle').textContent = 'Request to Delete Record';
-                document.getElementById('localPermRecord').textContent = label;
-                document.getElementById('localPermReason').value = '';
-                document.getElementById('localPermError').style.display = 'none';
-                document.getElementById('permissionModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('localPermReason').focus(), 100);
-            }
-        })
-        .catch(() => {
-            _localPermAction = 'delete';
-            _localPermRecordId = id;
-            _localPermRecordLabel = label;
-            document.getElementById('permissionModal').style.display = 'flex';
-        });
+    if (confirm('Delete this record?')) {
+        var rows = document.querySelectorAll('tr[data-id="' + id + '"] form');
+        for (var f of rows) {
+            var m = f.querySelector('input[name="_method"]');
+            if (m && m.value === 'DELETE') { f.submit(); return; }
+        }
+    }
     return false;
 }
 

@@ -2083,65 +2083,23 @@ const IS_ADMIN = {{ (auth()->check() && auth()->user()->isAdmin()) ? 'true' : 'f
 let _cmPermAction = 'edit', _cmPermRecordId = null;
 
 function requireAdmin(callback, recordId, action) {
-    if (IS_ADMIN) { callback(); return; }
-    // Check if already approved
-    fetch(`/api/permission-requests/check?action=${action || 'edit'}&record_id=${recordId}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved) {
-                if (callback) callback();
-            } else {
-                _cmPermAction = action || 'edit';
-                _cmPermRecordId = recordId || null;
-                document.getElementById('cmPermTitle').textContent = 'Request to ' + (_cmPermAction.charAt(0).toUpperCase() + _cmPermAction.slice(1)) + ' Record';
-                document.getElementById('cmPermReason').value = '';
-                document.getElementById('cmPermError').style.display = 'none';
-                document.getElementById('permissionModal').classList.add('active');
-                setTimeout(() => document.getElementById('cmPermReason').focus(), 100);
-            }
-        });
+    if (callback) callback();
 }
 
 function requireAdminSync(event, recordId) {
-    if (!IS_ADMIN) {
-        event.preventDefault();
-        requireAdmin(null, recordId, 'delete');
-        return false;
-    }
     return confirm('Are you sure you want to delete this commission request?');
 }
 
-// Staff delete — check permission first, same pattern as client-database.blade.php
+// Staff delete — plain confirmation, no permission gate
 function staffDeleteCommission(e, id) {
     e.preventDefault();
-    fetch(`/api/permission-requests/check?action=delete&record_id=${id}`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.approved) {
-                window.showConfirmModal('Delete this record?').then(function(confirmed) {
-                    if (confirmed) {
-                        var rows = document.querySelectorAll('tr[data-id="' + id + '"] form');
-                        for (var f of rows) {
-                            var m = f.querySelector('input[name="_method"]');
-                            if (m && m.value === 'DELETE') { f.submit(); return; }
-                        }
-                    }
-                });
-            } else {
-                _cmPermAction = 'delete';
-                _cmPermRecordId = id;
-                document.getElementById('cmPermTitle').textContent = 'Request to Delete Record';
-                document.getElementById('cmPermReason').value = '';
-                document.getElementById('cmPermError').style.display = 'none';
-                document.getElementById('permissionModal').classList.add('active');
-                setTimeout(() => document.getElementById('cmPermReason').focus(), 100);
-            }
-        })
-        .catch(() => {
-            _cmPermAction = 'delete';
-            _cmPermRecordId = id;
-            document.getElementById('permissionModal').classList.add('active');
-        });
+    if (confirm('Delete this record?')) {
+        var rows = document.querySelectorAll('tr[data-id="' + id + '"] form');
+        for (var f of rows) {
+            var m = f.querySelector('input[name="_method"]');
+            if (m && m.value === 'DELETE') { f.submit(); return; }
+        }
+    }
     return false;
 }
 

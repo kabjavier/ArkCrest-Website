@@ -39,8 +39,15 @@ class HrFormController extends Controller
 
     public function destroy($id)
     {
-        if (!auth()->user()->isAdmin()) abort(403);
-        HrForm::findOrFail($id)->delete();
+        $form = HrForm::findOrFail($id);
+        \App\Models\ActivityLog::log('delete', 'Human Resource', "Deleted saved form '{$form->title}' (Type: {$form->type})", [
+            'id'         => $form->id,
+            'type'       => $form->type,
+            'title'      => $form->title,
+            'data'       => $form->data,
+            'created_by' => $form->created_by,
+        ]);
+        $form->delete();
         return response()->json(['success' => true]);
     }
 

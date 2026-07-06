@@ -396,12 +396,10 @@ document.getElementById('hrFormContent').addEventListener('input', function(e){
     {{-- Folder Content --}}
     @foreach(['dayoff','absences','voucher'] as $ftype)
     <div id="folder-{{ $ftype }}" style="{{ $ftype === 'dayoff' ? '' : 'display:none;' }}background:white;border-radius:0 8px 8px 8px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:16px;">
-        @if(auth()->user()->isAdmin())
         <div id="bulk-actions-{{ $ftype }}" style="display:none;align-items:center;justify-content:space-between;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
             <span style="font-size:13px;color:#991b1b;font-weight:600;"><span id="bulk-count-{{ $ftype }}">0</span> selected</span>
             <button onclick="deleteSelectedForms('{{ $ftype }}')" style="padding:6px 14px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Delete Selected</button>
         </div>
-        @endif
         <div id="saved-list-{{ $ftype }}" style="font-size:13px;color:#94a3b8;text-align:center;padding:20px;">Loading...</div>
     </div>
     @endforeach
@@ -445,21 +443,21 @@ function loadSavedForms(type) {
         container.innerHTML = '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'+
             '<table style="width:100%;min-width:680px;border-collapse:collapse;font-size:13px;">'+
             '<thead><tr style="background:#f8fafc;">'+
-            '@if(auth()->user()->isAdmin())<th style="padding:8px 12px;border-bottom:1px solid #e2e8f0;width:32px;"><input type="checkbox" id="selectAll-'+type+'" onclick="toggleSelectAll(\''+type+'\')"></th>@endif'+
+            '<th style="padding:8px 12px;border-bottom:1px solid #e2e8f0;width:32px;"><input type="checkbox" id="selectAll-'+type+'" onclick="toggleSelectAll(\''+type+'\')"></th>'+
             '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;white-space:nowrap;">Title</th>'+
             '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;white-space:nowrap;">Saved By</th>'+
             '<th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;border-bottom:1px solid #e2e8f0;white-space:nowrap;">Date</th>'+
             '<th style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"></th></tr></thead><tbody>'+
             list.map(function(f, idx){
                 return '<tr style="border-bottom:1px solid #f1f5f9;">'+
-                    '@if(auth()->user()->isAdmin())<td style="padding:10px 12px;"><input type="checkbox" class="row-checkbox-'+type+'" value="'+f.id+'" onclick="updateBulkDeleteBar(\''+type+'\')"></td>@endif'+
+                    '<td style="padding:10px 12px;"><input type="checkbox" class="row-checkbox-'+type+'" value="'+f.id+'" onclick="updateBulkDeleteBar(\''+type+'\')"></td>'+
                     '<td style="padding:10px 12px;font-weight:600;color:#0f172a;word-break:break-word;">'+f.title+'</td>'+
                     '<td style="padding:10px 12px;color:#64748b;white-space:nowrap;">'+f.created_by+'</td>'+
                     '<td style="padding:10px 12px;color:#94a3b8;font-size:12px;white-space:nowrap;">'+f.created_at+'</td>'+
                     '<td style="padding:10px 12px;text-align:right;white-space:nowrap;">'+
                     '<button onclick="viewSavedForm(\''+type+'\','+idx+')" style="padding:4px 10px;background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;">View</button>'+
                     '<button onclick="editSavedForm(\''+type+'\','+idx+')" style="padding:4px 10px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;">Edit</button>'+
-                    '@if(auth()->user()->isAdmin())<button onclick="deleteSavedForm('+f.id+',\''+type+'\')" style="padding:4px 10px;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Delete</button>@endif'+
+                    '<button onclick="deleteSavedForm('+f.id+',\''+type+'\')" style="padding:4px 10px;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Delete</button>'+
                     '</td></tr>';
             }).join('')+'</tbody></table></div>';
     });
