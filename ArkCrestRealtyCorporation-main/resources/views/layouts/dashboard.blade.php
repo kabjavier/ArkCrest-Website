@@ -47,6 +47,16 @@
     .table-wrapper::-webkit-scrollbar-thumb:hover,
     .table-container::-webkit-scrollbar-thumb:hover,
     .tbl-scroll::-webkit-scrollbar-thumb:hover { background:#475569; }
+    @media (max-width: 480px) {
+        #searchBar, #notesPanel, .notification-panel {
+            position: fixed !important;
+            top: 64px !important;
+            left: 10px !important;
+            right: 10px !important;
+            width: auto !important;
+            max-width: calc(100vw - 20px) !important;
+        }
+    }
     </style>
 </head>
 <body>
@@ -622,7 +632,7 @@
 
             <!-- Logout Button -->
             <div class="logout-section">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" data-confirm="Are you sure you want to log out?">
                     @csrf
                     <button type="submit" class="nav-item logout-btn">
                         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

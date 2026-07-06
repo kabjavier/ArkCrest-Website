@@ -184,7 +184,12 @@
     </tr>
     <tr>
     <td class="lbl">Amount Requested: &#8369;</td>
-    <td><input type="number" id="f_amount" placeholder="0.00" step="0.01" min="0"></td>
+    <td><input
+    type="text"
+    id="f_amount"
+    placeholder="0.00"
+    inputmode="decimal"
+    oninput="formatAmountInput(this)"></td>
     <td class="lbl">Target Date Released:</td>
     <td>
     <span class="friendly-date-wrap">
@@ -305,8 +310,7 @@
 
     <!-- Buttons (screen only) -->
     <div class="frm-btns dept-sel">
-    <button class="btn-clear-f" onclick="clearForm()">Clear</button>
-    <button class="btn-print-f" onclick="openPreview('frmCard','Budget Request Form')">
+    <button class="btn-clear-f" onclick="openClearConfirm('budget')">Clear</button>    <button class="btn-print-f" onclick="openPreview('frmCard','Budget Request Form')">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
     Print Budget Request Form
     </button>
@@ -473,8 +477,7 @@
 
     <!-- Buttons (screen only) -->
     <div class="frm-btns dept-sel">
-    <button class="btn-clear-f" type="button" onclick="clearSVForm()">Clear</button>
-    <button class="btn-submit-f" type="button" id="svSubmitBtn" onclick="submitSiteVisit()">Submit Site Visit</button>
+    <button class="btn-clear-f" type="button" onclick="openClearConfirm('sitevisit')">Clear</button>    <button class="btn-submit-f" type="button" id="svSubmitBtn" onclick="submitSiteVisit()">Submit Site Visit</button>
     <button class="btn-print-f" type="button" onclick="openPreview('frmCardSV','Site Visit Form')">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
     Print Site Visit Form
@@ -510,7 +513,69 @@
     </div>
     </div>
 
+    {{-- ============================= --}}
+    {{-- Site Visit Confirmation Modal --}}
+    {{-- ============================= --}}
+    <div id="svConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:white;border-radius:12px;max-width:380px;width:100%;padding:28px 24px;box-shadow:0 10px 40px rgba(0,0,0,.3);text-align:center;font-family:Arial,sans-serif;">
+    <div style="width:52px;height:52px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+    <svg fill="none" stroke="#2563eb" viewBox="0 0 24 24" style="width:26px;height:26px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div style="font-size:17px;font-weight:700;color:#111827;margin-bottom:6px;">Submit this site visit?</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:22px;line-height:1.5;">Please make sure the client and property details are correct before submitting.</div>
+    <div style="display:flex;gap:10px;">
+    <button onclick="closeSVConfirm()" style="flex:1;padding:11px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">No, go back</button>
+    <button onclick="confirmSVSubmit()" style="flex:1;padding:11px;background:#2563eb;color:white;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Yes, submit</button>
+    </div>
+    </div>
+    </div>
+
+{{-- ============================= --}}
+{{-- Clear Form Confirmation Modal --}}
+{{-- ============================= --}}
+<div id="clearConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:white;border-radius:12px;max-width:380px;width:100%;padding:28px 24px;box-shadow:0 10px 40px rgba(0,0,0,.3);text-align:center;font-family:Arial,sans-serif;">
+    <div style="width:52px;height:52px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+    <svg fill="none" stroke="#dc2626" viewBox="0 0 24 24" style="width:26px;height:26px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </div>
+    <div style="font-size:17px;font-weight:700;color:#111827;margin-bottom:6px;">Clear this form?</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:22px;line-height:1.5;">This will erase everything you've entered. This can't be undone.</div>
+    <div style="display:flex;gap:10px;">
+    <button onclick="closeClearConfirm()" style="flex:1;padding:11px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
+    <button onclick="confirmClear()" style="flex:1;padding:11px;background:#dc2626;color:white;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Yes, clear</button>
+    </div>
+    </div>
+</div>
+
+
+
+
 <script>
+    /* ============================================================
+   CLEAR FORM CONFIRMATION (shared by both forms)
+   ============================================================ */
+var _clearTarget = null;
+function openClearConfirm(target){
+    _clearTarget = target;
+    document.getElementById('clearConfirmModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeClearConfirm(){
+    document.getElementById('clearConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+    _clearTarget = null;
+}
+function confirmClear(){
+    if(_clearTarget === 'budget'){
+    clearForm();
+    } else if(_clearTarget === 'sitevisit'){
+    clearSVForm();
+    }
+    closeClearConfirm();
+}
+document.getElementById('clearConfirmModal').addEventListener('click', function(e){
+  if(e.target === this) closeClearConfirm();
+});
 /* ============================================================
    FRIENDLY DATE PICKER HELPERS
    Pairs a hidden native <input type="date"> with a visible
@@ -888,6 +953,9 @@ function clearSVForm(){
     btn.textContent = 'Submit Site Visit';
 }
 
+/* ------------------------------------------------------------
+   Step 1: validate + open confirmation modal (no network call yet)
+   ------------------------------------------------------------ */
 function submitSiteVisit(){
     var data = collectSVData();
     var errors = [];
@@ -901,6 +969,22 @@ function submitSiteVisit(){
     return;
     }
 
+    document.getElementById('svConfirmModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSVConfirm(){
+    document.getElementById('svConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+/* ------------------------------------------------------------
+   Step 2: user confirmed "Yes, submit" — actually send the request
+   ------------------------------------------------------------ */
+function confirmSVSubmit(){
+    closeSVConfirm();
+
+    var data = collectSVData();
     var btn = document.getElementById('svSubmitBtn');
     btn.disabled = true;
     btn.textContent = 'Submitting...';
@@ -918,9 +1002,6 @@ function submitSiteVisit(){
     .then(function(r){ return r.json().then(function(j){ return {status:r.status, body:j}; }); })
     .then(function(res){
     if(res.status === 200 && res.body.success){
-    svBanner('&#10003; Site visit scheduled successfully! You can now print or download the form below.', 'success');
-    btn.textContent = 'Submitted';
-
     var teamSelect = document.getElementById('sv_team_select');
     if(teamSelect && teamSelect.value){
     fetch('{{ route("tripping.save-team") }}', {
@@ -929,6 +1010,9 @@ function submitSiteVisit(){
     body: JSON.stringify({team_name: teamSelect.value})
     });
     }
+
+    clearSVForm();
+    svBanner('&#10003; Site visit scheduled successfully!', 'success');
     } else {
     var msgs = res.body.errors ? Object.values(res.body.errors).flat() : [res.body.message || 'Something went wrong. Please try again.'];
     svBanner(msgs.map(function(m){return '&#9888; '+m;}).join('<br>'), 'error');
@@ -943,13 +1027,84 @@ function submitSiteVisit(){
     });
 }
 
+document.getElementById('svConfirmModal').addEventListener('click', function(e){
+  if(e.target === this) closeSVConfirm();
+});
+
 /* ============================================================
    SHARED PREVIEW / PRINT / PDF MODAL
    ============================================================ */
+function formatFriendlyTime(timeStr){
+    if(!timeStr) return '';
+    var parts = timeStr.split(':');
+    if(parts.length < 2) return '';
+    var h = parseInt(parts[0],10), m = parts[1];
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12; if(h12 === 0) h12 = 12;
+    return h12 + ':' + m + ' ' + ampm;
+}
+
 function openPreview(cardId, label){
     document.body.appendChild(document.getElementById('frmPreviewModal'));
     var clone = document.getElementById(cardId).cloneNode(true);
     clone.querySelectorAll('.frm-btns,.dept-sel,.no-print-sv').forEach(function(el){ el.remove(); });
+
+    // Strip placeholder text from every field so empty inputs show blank
+    // in the print preview and actual print/PDF output, instead of
+    // displaying hint text like "0.00" or "Select date".
+    clone.querySelectorAll('input,textarea').forEach(function(field){
+    if(field.hasAttribute('placeholder')) field.removeAttribute('placeholder');
+    });
+
+    // Native <input type="date"> fields always render "mm/dd/yyyy" plus a
+    // calendar icon when empty, regardless of the placeholder attribute.
+    // Replace them with plain text showing the formatted date, or blank.
+    clone.querySelectorAll('input[type="date"]').forEach(function(field){
+    if(field.classList.contains('friendly-date-hidden')) return;
+    var span = document.createElement('span');
+    span.textContent = field.value ? formatFriendlyDate(field.value) : '';
+    var cs = getComputedStyle(field);
+    span.style.font = cs.font;
+    span.style.display = 'inline-block';
+    span.style.width = '100%';
+    field.parentNode.replaceChild(span, field);
+    });
+
+    // Native <input type="time"> fields render "--:-- --" plus a clock
+    // icon when empty. Replace with plain text, formatted 12-hour, or blank.
+    clone.querySelectorAll('input[type="time"]').forEach(function(field){
+    var span = document.createElement('span');
+    span.textContent = field.value ? formatFriendlyTime(field.value) : '';
+    var cs = getComputedStyle(field);
+    span.style.font = cs.font;
+    span.style.display = 'inline-block';
+    span.style.width = '100%';
+    field.parentNode.replaceChild(span, field);
+    });
+
+    // <select> fields (e.g. Team) show their first/default option text
+    // when nothing meaningful is selected. Replace with plain text of the
+    // selected option, or blank if the selected value is empty.
+    clone.querySelectorAll('select').forEach(function(field){
+    var opt = field.options[field.selectedIndex];
+    var span = document.createElement('span');
+    span.textContent = (opt && opt.value) ? opt.text : '';
+    var cs = getComputedStyle(field);
+    span.style.font = cs.font;
+    span.style.display = 'inline-block';
+    span.style.width = '100%';
+    field.parentNode.replaceChild(span, field);
+    });
+
+    // Client Phone: the "+63" code prefix is a real value (not a
+    // placeholder), so it still shows even when no phone number was
+    // entered. Blank it out too in that case.
+    var phoneCode = clone.querySelector('#sv_client_phone_code');
+    var phoneNum = clone.querySelector('#sv_client_phone');
+    if(phoneCode && phoneNum && !phoneNum.value.trim()){
+    phoneCode.value = '';
+    }
+
     clone.style.transform = 'none';
     clone.removeAttribute('id');
     document.getElementById('frmPreviewBody').innerHTML = '';
@@ -991,10 +1146,18 @@ function generatePDF(cardId, filename, incrementCtrl){
     if(wrap) wrap.style.height='auto';
     el.querySelectorAll('.frm-btns,.dept-sel,.no-print-sv').forEach(e=>e.style.display='none');
     var replacements=[];
+
     el.querySelectorAll('input,textarea,select').forEach(function(field){
     if(field.classList.contains('friendly-date-hidden')) return;
     var span=document.createElement('span');
-    var value=field.tagName==='SELECT'?(field.options[field.selectedIndex]?.text||''):(field.value||'');
+    var value;
+    if(field.tagName==='SELECT'){
+    value = field.options[field.selectedIndex]?.text || '';
+    } else if(field.type === 'date'){
+    value = field.value ? formatFriendlyDate(field.value) : '';
+    } else {
+    value = field.value || '';
+    }
     span.textContent=value;
     var cs=getComputedStyle(field);
     span.style.cssText='display:inline-block;white-space:pre-wrap;vertical-align:middle;';
@@ -1007,7 +1170,7 @@ function generatePDF(cardId, filename, incrementCtrl){
     field.style.display='none';
     field.parentNode.insertBefore(span,field);
     replacements.push({field:field,span:span});
-    });
+});
     function cleanup(){
     replacements.forEach(r=>{r.span.remove();r.field.style.display='';});
     el.querySelectorAll('.frm-btns,.dept-sel,.no-print-sv').forEach(e=>e.style.display='');
