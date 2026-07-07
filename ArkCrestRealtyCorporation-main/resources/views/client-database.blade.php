@@ -1183,13 +1183,15 @@ document.getElementById('commissionForm').addEventListener('submit', function (e
     window.showConfirmModal('Submit this client record?').then(function (confirmed) {
         if (!confirmed) return;
 
-        var clientName  = (form.querySelector('[name="client_name"]').value || '').trim();
-        var projectName = (form.querySelector('[name="project_name"]').value || '').trim();
-        var blockLot    = (form.querySelector('[name="block_lot_number"]').value || '').trim();
+        var clientName    = (form.querySelector('[name="client_name"]').value || '').trim();
+        var projectName   = (form.querySelector('[name="project_name"]').value || '').trim();
+        var developerName = (form.querySelector('[name="developer_name"]').value || '').trim();
+        var blockLot      = (form.querySelector('[name="block_lot_number"]').value || '').trim();
 
         var params = new URLSearchParams({
             client_name: clientName,
             project_name: projectName,
+            developer_name: developerName,
             block_lot_number: blockLot
         });
 
