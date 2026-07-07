@@ -55,6 +55,14 @@ Route::middleware(['auth', 'no.cache'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('page.visible');
 
+    // Daily Log & Weekly Report
+    Route::get('/daily-log', [App\Http\Controllers\DailyLogController::class, 'index'])->name('daily-log');
+    Route::post('/daily-log', [App\Http\Controllers\DailyLogController::class, 'store'])->name('daily-log.store');
+    Route::delete('/daily-log/{id}', [App\Http\Controllers\DailyLogController::class, 'destroy'])->name('daily-log.destroy');
+    Route::get('/daily-log/weekly-report', [App\Http\Controllers\DailyLogController::class, 'weeklyReport'])->name('daily-log.weekly-report');
+    Route::get('/daily-log/weekly-report/pdf', [App\Http\Controllers\DailyLogController::class, 'weeklyReportPdf'])->name('daily-log.weekly-report.pdf');
+    Route::get('/daily-log/weekly-report/excel', [App\Http\Controllers\DailyLogController::class, 'weeklyReportExcel'])->name('daily-log.weekly-report.excel');
+
     // Summary Report
     Route::get('/summary-report', [App\Http\Controllers\SummaryReportController::class, 'index'])->name('summary-report')->middleware('page.visible');
     Route::get('/summary-report-yearly', [App\Http\Controllers\SummaryReportController::class, 'yearly'])->name('summary-report.yearly')->middleware('page.visible');
@@ -94,6 +102,15 @@ Route::middleware(['auth', 'no.cache'])->group(function () {
 
     // Settings
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings');
+
+    // Backup & Restore
+    Route::get('/settings/backup', [App\Http\Controllers\BackupController::class, 'index'])->name('backup.index');
+    Route::post('/settings/backup/create-excel', [App\Http\Controllers\BackupController::class, 'createExcel'])->name('backup.create-excel');
+    Route::post('/settings/backup/create-pdf', [App\Http\Controllers\BackupController::class, 'createPdf'])->name('backup.create-pdf');
+    Route::post('/settings/backup/upload-restore', [App\Http\Controllers\BackupController::class, 'uploadAndRestore'])->name('backup.upload-restore');
+    Route::get('/settings/backup/{filename}/download', [App\Http\Controllers\BackupController::class, 'download'])->name('backup.download');
+    Route::post('/settings/backup/{filename}/restore', [App\Http\Controllers\BackupController::class, 'restore'])->name('backup.restore');
+    Route::delete('/settings/backup/{filename}', [App\Http\Controllers\BackupController::class, 'destroy'])->name('backup.destroy');
     Route::post('/settings/notifications', [App\Http\Controllers\SettingsController::class, 'saveNotifications'])->name('settings.notifications');
     Route::post('/settings/smtp', [App\Http\Controllers\SettingsController::class, 'saveSmtp'])->name('settings.smtp');
     Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile');
@@ -105,8 +122,6 @@ Route::middleware(['auth', 'no.cache'])->group(function () {
     Route::post('/settings/privacy', [App\Http\Controllers\SettingsController::class, 'savePrivacyPolicy'])->name('settings.privacy');
     Route::post('/settings/deleted-records/{logId}/restore', [App\Http\Controllers\SettingsController::class, 'restoreRecord'])->name('settings.deleted.restore');
     Route::delete('/settings/deleted-records/{logId}', [App\Http\Controllers\SettingsController::class, 'permanentDeleteRecord'])->name('settings.deleted.purge');
-    Route::post('/settings/deleted-records/bulk-restore', [App\Http\Controllers\SettingsController::class, 'bulkRestoreRecords'])->name('settings.deleted.bulkRestore');
-    Route::post('/settings/deleted-records/bulk-delete', [App\Http\Controllers\SettingsController::class, 'bulkDeleteRecords'])->name('settings.deleted.bulkDelete');
     Route::post('/expenses/{id}/restore', [App\Http\Controllers\DepartmentalExpensesController::class, 'restore'])->name('expenses.restore');
     Route::delete('/expenses/{id}/purge', [App\Http\Controllers\DepartmentalExpensesController::class, 'purge'])->name('expenses.purge');
     Route::post('/settings/period-lock', [App\Http\Controllers\SettingsController::class, 'lockPeriod'])->name('settings.period-lock.store');
