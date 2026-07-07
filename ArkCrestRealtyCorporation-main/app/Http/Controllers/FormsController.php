@@ -91,39 +91,19 @@ class FormsController extends Controller
     {
         try {
             $validated = $request->validate([
-                'requestor_name'          => 'required|string',
-                'department'              => 'required|string',
-                'category'                => 'required|string',
-                'date_requested'          => 'nullable|date',
-                'requested_amount'        => 'nullable|numeric|min:0',
-                'date_released'           => 'nullable|date',
-                'total_expenses'          => 'nullable|numeric|min:0',
-                'amount_returned'         => 'nullable|numeric',
-                'date_of_amount_returned' => 'nullable|date',
+                'requestor_name'   => 'required|string',
+                'department'       => 'required|string',
+                'category'         => 'required|string',
+                'date_requested'   => 'nullable|date',
+                'requested_amount' => 'nullable|numeric|min:0',
+                'form_snapshot'    => 'nullable|array',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['success' => false, 'message' => $e->validator->errors()->first()], 422);
         }
 
-        foreach (['date_requested', 'date_released', 'date_of_amount_returned'] as $f) {
-            if (empty($validated[$f])) {
-                $validated[$f] = null;
-            }
-        }
-        foreach (['total_expenses', 'amount_returned'] as $f) {
-            if (empty($validated[$f])) {
-                $validated[$f] = null;
-            }
-        }
-
-        // Liquidated as soon as a total-expenses figure has been filled in
-        // on the liquidation report portion of the form.
-        $validated['status'] = (!empty($validated['total_expenses']) && $validated['total_expenses'] > 0)
-            ? 'LIQUIDATED'
-            : 'NOT YET LIQUIDATED';
-
-        if (!empty($validated['total_expenses']) && $validated['total_expenses'] > 0 && !empty($validated['requested_amount'])) {
-            $validated['amount_returned'] = $validated['requested_amount'] - $validated['total_expenses'];
+        if (empty($validated['date_requested'])) {
+            $validated['date_requested'] = null;
         }
 
         $month = now()->format('m');
@@ -132,11 +112,34 @@ class FormsController extends Controller
         $departmentalExpense = null;
         $controlNumber = null;
 
-        \DB::transaction(function () use (&$departmentalExpense, &$controlNumber, $validated, $month, $year) {
+        \DB::transaction(function () use (&$departmentalExpense, &$controlNumber, $validated, $request, $month, $year) {
             $controlNumber = $this->nextAvailableControlNumber($month, $year);
-            $data = $validated;
-            $data['control_number'] = $controlNumber;
-            $departmentalExpense = DepartmentalExpense::create($data);
+
+            $departmentalExpense = DepartmentalExpense::create([
+                'control_number'   => $controlNumber,
+                'requestor_name'   => $validated['requestor_name'],
+                'department'       => $validated['department'],
+                'category'         => $validated['category'],
+                'date_requested'   => $validated['date_requested'],
+                'requested_amount' => $validated['requested_amount'] ?? null,
+
+                // A freshly submitted Budget Request Form always lands in
+                // the All Expenses table as "FOR REQUEST". The release /
+                // liquidation fields stay blank here — Finance fills them
+                // in later (via Edit) once the request is actually
+                // released and liquidated.
+                'status'                  => 'FOR REQUEST',
+                'date_released'           => null,
+                'total_expenses'          => null,
+                'amount_returned'         => null,
+                'date_of_amount_returned' => null,
+
+                // Full snapshot of everything printed on the form (target
+                // date, liquidation line items, signatures, remarks, etc.)
+                // so the exact form can be viewed and printed again later,
+                // independent of the summary columns above.
+                'form_data' => $request->input('form_snapshot'),
+            ]);
         });
 
         ActivityLog::log(

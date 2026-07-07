@@ -838,16 +838,54 @@ function collectBudgetRequestData(){
     var deptSel = document.getElementById('f_dept');
     var deptOpt = deptSel.options[deptSel.selectedIndex];
     var deptName = deptOpt ? (deptOpt.getAttribute('data-name') || deptSel.value) : deptSel.value;
+
+    // Full snapshot of every field on the printed form (including the
+    // liquidation report section, if any of it has been filled in), so the
+    // exact form can be viewed / printed again later from All Expenses —
+    // independent of the summary fields below, which always start blank.
+    var liquidationItems = [];
+    document.querySelectorAll('.liq-tbl tbody tr').forEach(function(tr){
+    var date = tr.querySelector('.liq-date-input');
+    var receipt = tr.querySelector('.liq-receipt-input');
+    var particulars = tr.querySelector('.liq-particulars-input');
+    var amount = tr.querySelector('.liq-amount-input');
+    date = date ? date.value : '';
+    receipt = receipt ? receipt.value : '';
+    particulars = particulars ? particulars.value : '';
+    amount = amount ? amount.value : '';
+    if(date || receipt || particulars || amount){
+    liquidationItems.push({date: date, receipt: receipt, particulars: particulars, amount: amount});
+    }
+    });
+
+    var formSnapshot = {
+    department_display: document.getElementById('disp_dept') ? document.getElementById('disp_dept').textContent.trim() : '',
+    department: deptName,
+    requestor_name: document.getElementById('f_name').value.trim(),
+    category: document.getElementById('f_cat').value.trim(),
+    date_requested: document.getElementById('f_date_req').value || null,
+    target_date_released: document.getElementById('f_target').value || null,
+    actual_date_released: document.getElementById('f_actual_released').value || null,
+    remarks: document.getElementById('f_remarks').value,
+    liquidation_items: liquidationItems,
+    total_expenses: document.getElementById('f_total_expenses').value,
+    less_cash_advance: document.getElementById('f_less_cash_advance').value,
+    amount_returned: document.getElementById('f_amount_returned').value,
+    approved_by: document.getElementById('f_approved_by').value,
+    released_by: document.getElementById('f_released_by').value,
+    received_by: document.getElementById('f_received_by').value,
+    date_checked: document.getElementById('f_date_checked').value || null,
+    date_released_sig: document.getElementById('f_date_released').value || null,
+    date_received_sig: document.getElementById('f_date_received').value || null
+    };
+
     return {
     requestor_name: document.getElementById('f_name').value.trim(),
     department: deptName,
     category: document.getElementById('f_cat').value.trim(),
     date_requested: document.getElementById('f_date_req').value || null,
     requested_amount: readAmount('f_amount'),
-    date_released: document.getElementById('f_actual_released').value || null,
-    total_expenses: readAmount('f_total_expenses'),
-    amount_returned: readAmount('f_amount_returned'),
-    date_of_amount_returned: document.getElementById('f_date_received').value || null
+    form_snapshot: formSnapshot
     };
 }
 
