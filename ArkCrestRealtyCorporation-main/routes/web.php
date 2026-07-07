@@ -133,6 +133,7 @@ Route::middleware(['auth', 'no.cache'])->group(function () {
     Route::get('/forms/site-visit', [App\Http\Controllers\FormsController::class, 'siteVisit'])->name('forms.site-visit');
     Route::get('/api/forms/control-number', [App\Http\Controllers\FormsController::class, 'nextControlNumber']);
     Route::post('/api/forms/control-number/increment', [App\Http\Controllers\FormsController::class, 'incrementControlNumber']);
+    Route::post('/api/forms/budget-request/submit', [App\Http\Controllers\FormsController::class, 'submitBudgetRequest']);
 
     // Sales & Marketing
     Route::get('/sales-marketing', [App\Http\Controllers\SalesMarketingController::class, 'index'])->name('sales-marketing')->middleware('page.visible');
