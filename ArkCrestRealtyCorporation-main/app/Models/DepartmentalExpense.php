@@ -25,4 +25,7 @@ class DepartmentalExpense extends Model
         'total_expenses'          => 'decimal:2',
         'amount_returned'         => 'decimal:2',
     ];
+
+    /** The allowed statuses for a departmental expense / budget request record. */
+    public const STATUSES = ['FOR REQUEST', 'NOT LIQUIDATED', 'LIQUIDATED', 'REJECTED'];
 }

@@ -238,8 +238,10 @@
                     <div class="form-group">
                         <label>Status <span class="required">*</span></label>
                         <select id="status" name="status" class="form-control" required>
-                            <option value="NOT YET LIQUIDATED">NOT YET LIQUIDATED</option>
+                            <option value="FOR REQUEST">FOR REQUEST</option>
+                            <option value="NOT LIQUIDATED">NOT LIQUIDATED</option>
                             <option value="LIQUIDATED">LIQUIDATED</option>
+                            <option value="REJECTED">REJECTED</option>
                         </select>
                     </div>
 
@@ -362,6 +364,7 @@
                         <td>
                             <div class="action-buttons">
                                 <button onclick="viewRequest({{ $req->id }})" class="btn-action btn-view">View</button>
+                                <a href="{{ route('departmental-expenses.view-form', $req->id) }}" target="_blank" class="btn-action btn-view" style="text-decoration:none;display:inline-flex;align-items:center;" title="View & print the original Budget Request Form">Form</a>
                                 <button onclick="editRequest({{ $req->id }})" class="btn-action btn-edit">Edit</button>
                                 <button onclick="deleteRequest({{ $req->id }})" class="btn-action btn-delete">Delete</button>
                             </div>
@@ -710,8 +713,10 @@
                 <div class="form-group">
                     <label>Status <span class="required">*</span></label>
                     <select id="edit_status" name="status" class="form-control form-control-sm" required>
-                        <option value="NOT YET LIQUIDATED">NOT YET LIQUIDATED</option>
+                        <option value="FOR REQUEST">FOR REQUEST</option>
+                        <option value="NOT LIQUIDATED">NOT LIQUIDATED</option>
                         <option value="LIQUIDATED">LIQUIDATED</option>
+                        <option value="REJECTED">REJECTED</option>
                     </select>
                 </div>
 
@@ -1710,7 +1715,7 @@ const FILTERABLE_FIELDS = [
     { key: 'department',               label: 'Department',               dataAttr: 'data-department',       type: 'text'  },
     { key: 'category',                 label: 'Category',                 dataAttr: 'data-category',         type: 'text'  },
     { key: 'requested_amount',         label: 'Requested Amount',         dataAttr: 'data-requested-amount', type: 'text'  },
-    { key: 'status',                   label: 'Status',                   dataAttr: 'data-status',           type: 'select', options: ['NOT YET LIQUIDATED', 'LIQUIDATED'] },
+    { key: 'status',                   label: 'Status',                   dataAttr: 'data-status',           type: 'select', options: ['FOR REQUEST', 'NOT LIQUIDATED', 'LIQUIDATED', 'REJECTED'] },
     { key: 'total_expenses',           label: 'Total Expenses',           dataAttr: 'data-total-expenses',   type: 'text'  },
     { key: 'amount_returned',          label: 'Amount Returned',          dataAttr: 'data-amount-returned',  type: 'text'  },
     { key: 'date_of_amount_returned',  label: 'Date of Amount Returned',  dataAttr: 'data-date-returned',    type: 'date'  },
