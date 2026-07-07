@@ -402,7 +402,7 @@
 
 <div class="st-page-wrap">
   @php
-    $sHidden = $hiddenSections ?? []; $isAdmin = auth()->user()->isAdmin(); $canSeeS = fn($k) => $isAdmin || !in_array($k, $sHidden);
+    $isAdmin = auth()->user()->isAdmin(); $sHidden = $isAdmin ? [] : (auth()->user()->hidden_pages ?? []); $canSeeS = fn($k) => $isAdmin || !in_array($k, $sHidden);
     $activePanel = request('panel') ?: session('open_section', 'profile');
     $panelClass = fn($key) => 'st-panel' . ($activePanel === $key ? ' active' : '');
   @endphp
@@ -2260,8 +2260,14 @@
 function showPanel(name) {
     document.querySelectorAll('.st-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.st-nav-btn').forEach(b => b.classList.remove('active'));
-    const panel = document.getElementById('panel-' + name);
-    const btn   = document.getElementById('nav-' + name);
+    let panel = document.getElementById('panel-' + name);
+    let btn   = document.getElementById('nav-' + name);
+    if (!panel) {
+        // Requested panel doesn't exist (bad/stale ?panel= value, or hidden by
+        // permissions) — fall back to Profile instead of leaving everything blank.
+        panel = document.getElementById('panel-profile');
+        btn   = document.getElementById('nav-profile');
+    }
     if (panel) panel.classList.add('active');
     if (btn)   btn.classList.add('active');
 }
